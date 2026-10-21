@@ -1,0 +1,16 @@
+{
+  "name": "SanyStock - Gestió de l'Estoc Vacunal",
+  "short_name": "SanyStock",
+  "description": "Aplicació per a la gestió d'inventari i estoc de vacunes",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "Logo_App.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
