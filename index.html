@@ -51,21 +51,16 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
       <div class="flex flex-wrap items-center justify-between gap-4">
         
-        <!-- Identitat Corporativa amb Logotip Vectorial SanyStock -->
+        <!-- Identitat Corporativa amb Logotip Oficial SanyStock -->
         <div class="flex items-center space-x-3.5">
           <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-sky-600 via-teal-500 to-cyan-400 p-0.5 shadow-md">
-            <div class="w-full h-full bg-white rounded-full flex items-center justify-center p-1.5">
-              <!-- Logotip vectorial precís: xeringa en angle sobre anell turquesa -->
-              <svg viewBox="0 0 100 100" class="w-full h-full text-teal-600">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="#0284c7" stroke-width="4.5" stroke-dasharray="290" />
-                <circle cx="50" cy="50" r="41" fill="none" stroke="#0d9488" stroke-width="3" />
-                <!-- Xeringa Clínica estilitzada -->
-                <path d="M68 25 L75 32 L71 36 L68 33 L45 56 L41 52 L64 29 L61 26 Z" fill="#0284c7" />
-                <path d="M42 55 L38 51 L31 58 L27 54 L24 57 L31 64 L27 68 L32 73 L36 69 L43 76 L46 73 L42 69 L49 62 Z" fill="#0d9488" />
-                <line x1="28" y1="72" x2="19" y2="81" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" />
-                <line x1="56" y1="37" x2="52" y2="41" stroke="#ffffff" stroke-width="2" />
-                <line x1="50" y1="43" x2="46" y2="47" stroke="#ffffff" stroke-width="2" />
-              </svg>
+            <div class="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden">
+              <!-- Logotip Oficial SanyStock -->
+              <img 
+                src="Logo_App.png" 
+                alt="Logotip Oficial SanyStock" 
+                class="w-full h-full object-contain rounded-full"
+              >
             </div>
           </div>
           <div>
@@ -133,7 +128,7 @@
   </header>
 
   <!-- ========================================== -->
-  <!-- CONTENIDOR PRINCIPAL DE LES SECCIONS       -->
+  <!-- CONTENIDOR PRINCIPAL DE LES SECCIONS        -->
   <!-- ========================================== -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
 
@@ -2037,7 +2032,7 @@
       }, 3500);
     }
   </script>
-<!-- Registre del Service Worker per a funcionament PWA a Android/iOS -->
+  <!-- Registre del Service Worker per a funcionament PWA a Android/iOS -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
