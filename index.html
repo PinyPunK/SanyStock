@@ -1,0 +1,2039 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SanyStock - Gestió de l'Estoc Vacunal</title>
+  <!-- Tailwind CSS per al disseny net i adaptable -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0c4a6e',
+              deep: '#0369a1',
+              primary: '#0284c7',
+              teal: '#0d9488',
+              cyan: '#06b6d4',
+              surface: '#f0f9ff',
+              light: '#f8fafc',
+              border: '#e2e8f0'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white !important; font-size: 11pt; color: #000; }
+      .shadow-md, .shadow-sm, .shadow-xl { box-shadow: none !important; border: 1px solid #ccc !important; }
+    }
+    /* Estils de scroll suau per a taules amples en tauletes o pantalles petites */
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- ========================================== -->
+  <!-- BARRA DE CAPÇALERA SANITÀRIA INSTITUCIONAL -->
+  <!-- ========================================== -->
+  <header class="bg-white border-b border-sky-100 shadow-sm sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Identitat Corporativa amb Logotip Vectorial SanyStock -->
+        <div class="flex items-center space-x-3.5">
+          <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-sky-600 via-teal-500 to-cyan-400 p-0.5 shadow-md">
+            <div class="w-full h-full bg-white rounded-full flex items-center justify-center p-1.5">
+              <!-- Logotip vectorial precís: xeringa en angle sobre anell turquesa -->
+              <svg viewBox="0 0 100 100" class="w-full h-full text-teal-600">
+                <circle cx="50" cy="50" r="46" fill="none" stroke="#0284c7" stroke-width="4.5" stroke-dasharray="290" />
+                <circle cx="50" cy="50" r="41" fill="none" stroke="#0d9488" stroke-width="3" />
+                <!-- Xeringa Clínica estilitzada -->
+                <path d="M68 25 L75 32 L71 36 L68 33 L45 56 L41 52 L64 29 L61 26 Z" fill="#0284c7" />
+                <path d="M42 55 L38 51 L31 58 L27 54 L24 57 L31 64 L27 68 L32 73 L36 69 L43 76 L46 73 L42 69 L49 62 Z" fill="#0d9488" />
+                <line x1="28" y1="72" x2="19" y2="81" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" />
+                <line x1="56" y1="37" x2="52" y2="41" stroke="#ffffff" stroke-width="2" />
+                <line x1="50" y1="43" x2="46" y2="47" stroke="#ffffff" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-2xl font-black tracking-tight text-sky-900 leading-tight">Sany<span class="text-teal-600">Stock</span></span>
+              <span class="bg-teal-50 text-teal-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-teal-200 uppercase tracking-wider">Sanitari</span>
+            </div>
+            <p class="text-xs font-semibold text-slate-500 tracking-wider uppercase">Gestió de l'Estoc Vacunal</p>
+          </div>
+        </div>
+
+        <!-- Indicador dinàmic: Data d'avui i estat de seguretat -->
+        <div class="flex items-center gap-3">
+          <div class="bg-sky-50 border border-sky-200 rounded-xl px-4 py-2 flex items-center space-x-2.5">
+            <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <div class="text-right sm:text-left">
+              <div class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">Data d'Avui</div>
+              <div id="currentDateBadge" class="text-xs font-bold text-slate-700">Carregant...</div>
+            </div>
+          </div>
+
+          <button onclick="resetDataPrompt()" title="Reiniciar dades de prova" class="no-print p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition border border-transparent hover:border-red-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Menú de pestanyes principal -->
+      <nav class="flex space-x-1 sm:space-x-2 mt-3 overflow-x-auto pb-1 no-print border-t border-slate-100 pt-2 text-sm font-medium">
+        <button onclick="switchTab('cataleg')" id="tab-cataleg" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-sky-800 hover:bg-sky-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          Catàleg
+        </button>
+        <button onclick="switchTab('magatzems')" id="tab-magatzems" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          Magatzems
+        </button>
+        <button onclick="switchTab('proveidors')" id="tab-proveidors" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Proveïdors
+        </button>
+        <button onclick="switchTab('moviments')" id="tab-moviments" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+          Moviments
+        </button>
+        <button onclick="switchTab('comandes')" id="tab-comandes" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+          Comandes
+        </button>
+        <button onclick="switchTab('devolucions')" id="tab-devolucions" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
+          Devolucions
+        </button>
+        <button onclick="switchTab('inventari')" id="tab-inventari" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap font-bold text-teal-700 bg-teal-50 border border-teal-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          Inventari General
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- CONTENIDOR PRINCIPAL DE LES SECCIONS       -->
+  <!-- ========================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- PESTANYA 1: CATÀLEG -->
+    <section id="section-cataleg" class="tab-content">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Catàleg General de Vacunes</h2>
+            <p class="text-xs text-slate-500">Manteniment de fitxes tècniques, proveïdors assignats i estocs globals.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openModal('modal-cataleg')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Nou registre
+            </button>
+            <button onclick="exportTableToCSV('cataleg', 'SanyStock_Cataleg.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-cataleg">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Codi</th>
+                <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Proveïdor</th>
+                <th class="p-3.5">Codi Prov.</th>
+                <th class="p-3.5 text-center">Estoc Mínim Total</th>
+                <th class="p-3.5 text-center">Estoc Disponible Real</th>
+                <th class="p-3.5 text-right no-print">Opcions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-cataleg" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTANYA 2: MAGATZEMS -->
+    <section id="section-magatzems" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Configuració de Magatzems i Neveres</h2>
+            <p class="text-xs text-slate-500">Gestió de punts d'emmagatzematge, neveres de farmàcia i zones de refrigeració.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openModal('modal-magatzems')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Nou registre
+            </button>
+            <button onclick="exportTableToCSV('magatzems', 'SanyStock_Magatzems.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-magatzems">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Codi Magatzem</th>
+                <th class="p-3.5">Nom Magatzem</th>
+                <th class="p-3.5">Ubicació Tècnica</th>
+                <th class="p-3.5 text-right no-print">Opcions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-magatzems" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTANYA 3: PROVEÏDORS -->
+    <section id="section-proveidors" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Directori de Proveïdors i Laboratoris</h2>
+            <p class="text-xs text-slate-500">Dades de contacte ràpid, laboratoris farmacèutics i subministradors homologats.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openModal('modal-proveidors')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Nou registre
+            </button>
+            <button onclick="exportTableToCSV('proveidors', 'SanyStock_Proveidors.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-proveidors">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Codi</th>
+                <th class="p-3.5">Proveïdor</th>
+                <th class="p-3.5">Data Alta</th>
+                <th class="p-3.5">Telèfon</th>
+                <th class="p-3.5">Persona de Contacte</th>
+                <th class="p-3.5">Ubicació</th>
+                <th class="p-3.5 text-right no-print">Opcions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-proveidors" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTANYA 4: MOVIMENTS -->
+    <section id="section-moviments" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Registre de Moviments Interns i Consum</h2>
+            <p class="text-xs text-slate-500">Traspàs entre magatzems i registre de consums clínics per codi SUM (PAC).</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openModal('modal-moviments')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Nou registre
+            </button>
+            <button onclick="exportTableToCSV('moviments', 'SanyStock_Moviments.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-moviments">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Data</th>
+                <th class="p-3.5">Codi</th>
+                <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Tipus</th>
+                <th class="p-3.5">Origen</th>
+                <th class="p-3.5">Destinació / Pacients</th>
+                <th class="p-3.5">Lot</th>
+                <th class="p-3.5">Caducitat</th>
+                <th class="p-3.5 text-center">Unitats</th>
+                <th class="p-3.5 text-right no-print">Opcions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-moviments" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTANYA 5: COMANDES -->
+    <section id="section-comandes" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Gestió de Comandes i Recepcions</h2>
+            <p class="text-xs text-slate-500">Emissió de compres a proveïdors i entrada d'albarans directament a l'inventari.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openModal('modal-comandes')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Nova comanda
+            </button>
+            <button onclick="openModal('modal-recepcio')" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Recepció d'albarà
+            </button>
+            <button onclick="exportTableToCSV('comandes', 'SanyStock_Comandes.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-comandes">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Data</th>
+                <th class="p-3.5">Comanda</th>
+                <th class="p-3.5">Proveïdor</th>
+                <th class="p-3.5">Codi</th>
+                <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Codi Prov.</th>
+                <th class="p-3.5 text-center">Unitats</th>
+                <th class="p-3.5 text-center">Estat</th>
+                <th class="p-3.5 text-right no-print">Opcions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-comandes" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTANYA 6: DEVOLUCIONS -->
+    <section id="section-devolucions" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Registre de Devolucions i Baixes Sanitàries</h2>
+            <p class="text-xs text-slate-500">Incidències per caducitat, trencaments de cadena de fred o retorns de sobrants.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openModal('modal-devolucions')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Nou registre
+            </button>
+            <button onclick="exportTableToCSV('devolucions', 'SanyStock_Devolucions.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-devolucions">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Data</th>
+                <th class="p-3.5">Núm. Baixa</th>
+                <th class="p-3.5">Magatzem</th>
+                <th class="p-3.5">Codi</th>
+                <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Lot</th>
+                <th class="p-3.5">Motiu Baixa</th>
+                <th class="p-3.5 text-center">Unitats</th>
+                <th class="p-3.5">Proveïdor Destí</th>
+                <th class="p-3.5 text-right no-print">Opcions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-devolucions" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTANYA 7: INVENTARI EN TEMPS REAL -->
+    <section id="section-inventari" class="tab-content hidden">
+      
+      <!-- Indicadors Resum (KPIs Sanitaris) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-2xl border border-sky-100 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Dosis Totals Disponibles</div>
+            <div id="kpi-total-unitats" class="text-2xl font-black text-sky-900 mt-1">0</div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Alertes d'Estoc Baix</div>
+            <div id="kpi-alerta-estoc" class="text-2xl font-black text-amber-600 mt-1">0</div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Caducitat Pròxima (&lt; 90 dies)</div>
+            <div id="kpi-caducitat-propera" class="text-2xl font-black text-red-600 mt-1">0</div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-bold text-sky-900">Control d'Inventari per Magatzem</h2>
+            <p class="text-xs text-slate-500">Visualització per nevera i magatzem, seguiment estricte de lots i dates de caducitat.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+              <label for="filterMagatzemSelect" class="text-xs font-semibold text-slate-600 pl-2">Filtrar per:</label>
+              <select id="filterMagatzemSelect" onchange="renderInventari()" class="bg-white border-0 text-xs font-semibold text-sky-900 rounded-lg p-1.5 focus:ring-2 focus:ring-sky-500">
+                <!-- Opcions dinàmiques -->
+              </select>
+            </div>
+            <button onclick="exportTableToCSV('inventari', 'SanyStock_Inventari.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Exportar CSV
+            </button>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Imprimir
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse" id="table-inventari">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Magatzem</th>
+                <th class="p-3.5">Codi</th>
+                <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Codi Prov.</th>
+                <th class="p-3.5">Lot</th>
+                <th class="p-3.5">Caducitat</th>
+                <th class="p-3.5 text-center">Estoc Mínim</th>
+                <th class="p-3.5 text-center">Estoc Disponible</th>
+                <th class="p-3.5 text-center">Estat Sanitari</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-inventari" class="divide-y divide-slate-100 bg-white">
+              <!-- Renderitzat amb JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODALS D'ENREGISTRAMENT I EDICIÓ           -->
+  <!-- ========================================== -->
+
+  <!-- MODAL 1: CATÀLEG -->
+  <div id="modal-cataleg" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+      <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 id="modal-cataleg-title" class="font-bold text-base flex items-center gap-2">
+          <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Nou Registre de Vacuna
+        </h3>
+        <button onclick="closeModal('modal-cataleg')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-cataleg" onsubmit="saveCataleg(event)" class="p-6 space-y-4">
+        <input type="hidden" id="cat-id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
+            <input type="text" id="cat-codi" required placeholder="Ex. VAC001" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor</label>
+            <input type="text" id="cat-codiprov" placeholder="Ex. P-GSK-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nom Comercial / Vacuna *</label>
+          <input type="text" id="cat-nom" required placeholder="Ex. Hexavalent (Infanrix Hexa)" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
+          <select id="cat-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <!-- Desplegable automàtic amb els proveïdors -->
+          </select>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Estoc Mínim Recomanat</label>
+            <input type="number" id="cat-minim" min="0" value="10" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Estoc Inicial Referencial</label>
+            <input type="number" id="cat-inicial" min="0" value="0" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-cataleg')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar fitxa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: MAGATZEMS -->
+  <div id="modal-magatzems" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+      <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 id="modal-magatzems-title" class="font-bold text-base">Nou Magatzem o Nevera</h3>
+        <button onclick="closeModal('modal-magatzems')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-magatzems" onsubmit="saveMagatzem(event)" class="p-6 space-y-4">
+        <input type="hidden" id="mag-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Magatzem *</label>
+          <input type="text" id="mag-codi" required placeholder="Ex. MAG-01 o NEV-PRINC" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nom del Magatzem *</label>
+          <input type="text" id="mag-nom" required placeholder="Ex. Magatzem 1 - Nevera Principal Farmàcia" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Ubicació Tècnica</label>
+          <input type="text" id="mag-ubicacio" placeholder="Ex. Planta Baixa - Mòdul Pediatria" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-magatzems')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar Magatzem</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: PROVEÏDORS -->
+  <div id="modal-proveidors" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+      <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 id="modal-proveidors-title" class="font-bold text-base">Nou Registre de Proveïdor</h3>
+        <button onclick="closeModal('modal-proveidors')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-proveidors" onsubmit="saveProveidor(event)" class="p-6 space-y-4">
+        <input type="hidden" id="prov-id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor *</label>
+            <input type="text" id="prov-codi" required placeholder="Ex. PROV01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data d'Alta *</label>
+            <input type="date" id="prov-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nom Comercial / Laboratori *</label>
+          <input type="text" id="prov-nom" required placeholder="Ex. Sanofi Pasteur / GSK" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Telèfon de Contacte</label>
+            <input type="tel" id="prov-telefon" placeholder="+34 930 000 000" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Persona de Contacte</label>
+            <input type="text" id="prov-contacte" placeholder="Ex. Laura Martí (Delegada)" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Ubicació / Seu</label>
+          <input type="text" id="prov-ubicacio" placeholder="Ex. Sant Cugat del Vallès, Barcelona" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-proveidors')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar Proveïdor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: MOVIMENTS -->
+  <div id="modal-moviments" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+      <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 class="font-bold text-base">Nou Moviment de Vacunes</h3>
+        <button onclick="closeModal('modal-moviments')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-moviments" onsubmit="saveMoviment(event)" class="p-6 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
+            <input type="date" id="mov-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tipus de Moviment *</label>
+            <select id="mov-tipus" required onchange="toggleMovimentFields()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-semibold text-sky-900">
+              <option value="Traspàs">Traspàs entre magatzems</option>
+              <option value="Consum">Consum Clínic / Administració</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Seleccionar Lot disponible en Inventari *</label>
+          <select id="mov-lot-select" required onchange="onMovimentLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-sky-50/50">
+            <!-- Omplert dinàmicament -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
+          <div>
+            <span class="text-slate-500 block">Codi:</span>
+            <span id="mov-prev-codi" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div class="col-span-2">
+            <span class="text-slate-500 block">Vacuna:</span>
+            <span id="mov-prev-nom" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Caducitat:</span>
+            <span id="mov-prev-caducitat" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Magatzem Origen:</span>
+            <span id="mov-prev-origen" class="font-semibold text-sky-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Estoc actual:</span>
+            <span id="mov-prev-disponible" class="font-bold text-emerald-700">0</span>
+          </div>
+        </div>
+
+        <!-- Si és Traspàs -->
+        <div id="field-mov-traspas">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem de Destinació *</label>
+          <select id="mov-destinacio" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <!-- Llista de magatzems -->
+          </select>
+        </div>
+
+        <!-- Si és Consum -->
+        <div id="field-mov-consum" class="hidden space-y-2">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Codi SUM / Pacient (ex. PAC1234 o diversos separats per comes)</label>
+          <input type="text" id="mov-sum" oninput="updateConsumUnitsFromSUM()" placeholder="PAC1001, PAC1002" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <p class="text-[11px] text-slate-500">Si registres diversos codis de pacient separats per comes, es comptabilitzaran automàticament com a múltiples unitats consumides.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats a moure / consumir *</label>
+          <input type="number" id="mov-unitats" min="1" value="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-moviments')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Executar Moviment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 5: COMANDES (NOVA COMANDA) -->
+  <div id="modal-comandes" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+      <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 id="modal-comandes-title" class="font-bold text-base">Nova Comanda a Proveïdor</h3>
+        <button onclick="closeModal('modal-comandes')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-comandes" onsubmit="saveComanda(event)" class="p-6 space-y-4">
+        <input type="hidden" id="cmd-id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data Comanda *</label>
+            <input type="date" id="cmd-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Número Comanda *</label>
+            <input type="text" id="cmd-num" required placeholder="Ex. COM-2026-089" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
+          <select id="cmd-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            <!-- Desplegable automàtic -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Selecciona Vacuna del Catàleg *</label>
+          <select id="cmd-vacuna-select" required onchange="onComandaVacunaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            <!-- Vacunes del catàleg -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna</label>
+            <input type="text" id="cmd-codivac" readonly class="w-full rounded-xl bg-slate-100 border-slate-300 border p-2.5 text-sm text-slate-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor</label>
+            <input type="text" id="cmd-codiprov" readonly class="w-full rounded-xl bg-slate-100 border-slate-300 border p-2.5 text-sm text-slate-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats *</label>
+            <input type="number" id="cmd-unitats" min="1" value="50" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Estat de la Comanda</label>
+          <select id="cmd-estat" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold">
+            <option value="Pendent">Pendent</option>
+            <option value="Recepció parcial">Recepció parcial</option>
+            <option value="Recepcionat">Recepcionat</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-comandes')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar Comanda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 6: RECEPCIÓ DE COMANDA (ENTRADA DIRECTA A INVENTARI) -->
+  <div id="modal-recepcio" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-teal-100 overflow-hidden transform transition-all">
+      <div class="bg-teal-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <svg class="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Recepció d'Albarà i Entrada d'Estoc
+        </h3>
+        <button onclick="closeModal('modal-recepcio')" class="text-white hover:text-teal-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-recepcio" onsubmit="saveRecepcio(event)" class="p-6 space-y-4">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data Recepció *</label>
+            <input type="date" id="rec-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Núm. Albarà *</label>
+            <input type="text" id="rec-albara" required placeholder="ALB-98442" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Comanda Associada</label>
+            <select id="rec-comanda-select" onchange="onRecepcioComandaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <!-- Comandes pendents -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
+            <input type="text" id="rec-proveidor" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm text-slate-700">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
+            <input type="text" id="rec-codi" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Vacuna *</label>
+            <input type="text" id="rec-vacuna" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Lot *</label>
+            <input type="text" id="rec-lot" required placeholder="LOT-A4389" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data de Caducitat *</label>
+            <input type="date" id="rec-caducitat" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem / Nevera de destí *</label>
+            <select id="rec-magatzem" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <!-- Llista de magatzems -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats Rebudes *</label>
+            <input type="number" id="rec-unitats" min="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-bold text-teal-700">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-recepcio')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-sm transition">Confirmar Entrada d'Estoc</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 7: DEVOLUCIONS I BAIXES -->
+  <div id="modal-devolucions" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+      <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
+        <h3 class="font-bold text-base">Registrar Baixa o Devolució de Vacunes</h3>
+        <button onclick="closeModal('modal-devolucions')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-devolucions" onsubmit="saveDevolucio(event)" class="p-6 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
+            <input type="date" id="dev-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Núm. Baixa / Incidència *</label>
+            <input type="text" id="dev-num" required placeholder="BAI-2026-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Selecciona Lot a Donar de Baixa *</label>
+          <select id="dev-lot-select" required onchange="onDevolucioLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            <!-- Lots disponibles a inventari -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl text-xs">
+          <div>
+            <span class="text-slate-500 block">Vacuna:</span>
+            <span id="dev-prev-nom" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Magatzem:</span>
+            <span id="dev-prev-magatzem" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Caducitat:</span>
+            <span id="dev-prev-caducitat" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Disponible Actualment:</span>
+            <span id="dev-prev-disponible" class="font-bold text-red-600">0</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Motiu de la Baixa *</label>
+          <select id="dev-motiu" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold">
+            <option value="Baixa per caducitat">Baixa per caducitat</option>
+            <option value="Baixa per trencament">Baixa per trencament / trencament cadena de fred</option>
+            <option value="Devolució a proveïdor sobrants">Devolució a proveïdor sobrants</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor Destinatari</label>
+            <select id="dev-proveidor" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <!-- Proveïdors -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats a restar *</label>
+            <input type="number" id="dev-unitats" min="1" value="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-bold text-red-700">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('modal-devolucions')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm transition">Descomptar i Guardar Baixa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CAIXA DE MISSATGES / TOAST NOTIFICACIÓ PERSONALITZADA (Sense alert()) -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 flex items-center p-4 max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl transform translate-y-24 opacity-0 transition-all duration-300">
+    <div id="toastIcon" class="w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-teal-600">✓</div>
+    <div>
+      <div id="toastTitle" class="text-xs font-bold uppercase tracking-wider text-slate-400">Notificació</div>
+      <div id="toastMessage" class="text-sm font-medium text-slate-800">Operació completada correctament.</div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT: LÒGICA I PERSISTÈNCIA          -->
+  <!-- ========================================== -->
+  <script>
+    // ----------------------------------------------------
+    // DADES INICIALS D'EXEMPLE SANITARI HOMOLOGADES
+    // ----------------------------------------------------
+    const defaultData = {
+      magatzems: [
+        { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
+        { id: 'MAG2', codi: 'MAG02', nom: 'Magatzem 2 - Nevera Pediatria Urgències', ubicacio: 'Àrea Pediatria - Planta 1' }
+      ],
+      proveidors: [
+        { id: 'PRV1', codi: 'GSK-01', nom: 'GlaxoSmithKline (GSK)', dataAlta: '2025-01-15', telefon: '934 000 111', contacte: 'Marta Soler', ubicacio: 'Parc Tecnològic, Tres Cantos' },
+        { id: 'PRV2', codi: 'SNF-02', nom: 'Sanofi Pasteur', dataAlta: '2025-02-10', telefon: '938 222 333', contacte: 'Jordi Riera', ubicacio: 'Carrer Josep Pla, Barcelona' },
+        { id: 'PRV3', codi: 'PFZ-03', nom: 'Pfizer Salut', dataAlta: '2025-03-01', telefon: '915 900 800', contacte: 'Clara Pons', ubicacio: 'Alcobendas, Madrid' }
+      ],
+      cataleg: [
+        { id: 'CAT1', codi: 'VAC001', nom: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', proveidor: 'GlaxoSmithKline (GSK)', minim: 30, inicial: 100 },
+        { id: 'CAT2', codi: 'VAC002', nom: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 },
+        { id: 'CAT3', codi: 'VAC003', nom: 'Priorix (Triple Vírica)', codiProv: 'GSK-PRI', proveidor: 'GlaxoSmithKline (GSK)', minim: 20, inicial: 60 },
+        { id: 'CAT4', codi: 'VAC004', nom: 'Vaxigrip Tetra (Grip estacional)', codiProv: 'SNF-VAX4', proveidor: 'Sanofi Pasteur', minim: 50, inicial: 150 }
+      ],
+      inventari: [
+        { id: 'INV1', magatzemId: 'MAG1', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 20, disponible: 45 },
+        { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 },
+        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 }, // Alerta baix estoc
+        { id: 'INV4', magatzemId: 'MAG2', codi: 'VAC003', vacuna: 'Priorix (Triple Vírica)', codiProv: 'GSK-PRI', lot: 'PRX441', caducitat: '2026-11-20', minim: 10, disponible: 22 },
+        { id: 'INV5', magatzemId: 'MAG1', codi: 'VAC004', vacuna: 'Vaxigrip Tetra (Grip estacional)', codiProv: 'SNF-VAX4', lot: 'VG2026X', caducitat: '2027-01-10', minim: 35, disponible: 60 }
+      ],
+      moviments: [
+        { id: 'MOV1', data: '2026-10-18', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', tipus: 'Traspàs', origen: 'Magatzem 1 - Nevera Principal Farmàcia', destinacio: 'Magatzem 2 - Nevera Pediatria Urgències', lot: '23K88B', caducitat: '2027-04-30', unitats: 10, detall: 'Reposició rutinària Pediatria' },
+        { id: 'MOV2', data: '2026-10-19', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', tipus: 'Consum', origen: 'Magatzem 2 - Nevera Pediatria Urgències', destinacio: 'PAC2034, PAC2035', lot: '23K88B', caducitat: '2027-04-30', unitats: 2, detall: 'Administració 2 infants' }
+      ],
+      comandes: [
+        { id: 'CMD1', data: '2026-10-10', comanda: 'COM-2026-044', proveidor: 'GlaxoSmithKline (GSK)', codiVac: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', unitats: 50, estat: 'Recepcionat' },
+        { id: 'CMD2', data: '2026-10-15', comanda: 'COM-2026-045', proveidor: 'Pfizer Salut', codiVac: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', unitats: 40, estat: 'Pendent' }
+      ],
+      devolucions: [
+        { id: 'DEV1', data: '2026-10-12', numBaixa: 'BAI-2026-01', magatzem: 'Magatzem 1 - Nevera Principal Farmàcia', codi: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', lot: 'PF9021', motiu: 'Baixa per trencament', unitats: 2, proveidor: 'Pfizer Salut' }
+      ]
+    };
+
+    // Estructures a LocalStorage
+    let AppState = {
+      magatzems: [],
+      proveidors: [],
+      cataleg: [],
+      inventari: [],
+      moviments: [],
+      comandes: [],
+      devolucions: []
+    };
+
+    function loadState() {
+      try {
+        const stored = localStorage.getItem('SANYS_DATA_v1');
+        if (stored) {
+          AppState = JSON.parse(stored);
+        } else {
+          AppState = JSON.parse(JSON.stringify(defaultData));
+          saveState();
+        }
+      } catch (e) {
+        console.error('Error recuperant localStorage:', e);
+        AppState = JSON.parse(JSON.stringify(defaultData));
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
+    }
+
+    function resetDataPrompt() {
+      showToast('Restablint dades...', 'S\'han carregat les dades sanitàries inicials.', 'info');
+      AppState = JSON.parse(JSON.stringify(defaultData));
+      saveState();
+      renderAll();
+    }
+
+    // ----------------------------------------------------
+    // INICIALITZACIÓ I DATA ACTUAL EN CATALÀ
+    // ----------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      initDateBadge();
+      populateDropdowns();
+      renderAll();
+
+      // Posar dates per defecte als inputs tipus date
+      const todayISO = new Date().toISOString().split('T')[0];
+      ['prov-data', 'mov-data', 'cmd-data', 'rec-data', 'dev-data'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = todayISO;
+      });
+    });
+
+    function initDateBadge() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateStr = now.toLocaleDateString('ca-ES', options);
+      // Capitalitzar la primera lletra
+      const formatted = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+      document.getElementById('currentDateBadge').textContent = formatted;
+    }
+
+    // ----------------------------------------------------
+    // CONTROL DE NAVEGACIÓ ENTRE PESTANYES
+    // ----------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(section => section.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-sky-100', 'text-sky-900', 'font-bold', 'border-sky-300');
+        btn.classList.add('text-slate-600');
+      });
+
+      const activeSection = document.getElementById(`section-${tabId}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-600');
+        activeBtn.classList.add('bg-sky-100', 'text-sky-900', 'font-bold');
+      }
+
+      if (tabId === 'inventari') {
+        renderInventari();
+      }
+    }
+
+    // ----------------------------------------------------
+    // RENDERITZACIÓ DE TOTES LES TAULES
+    // ----------------------------------------------------
+    function renderAll() {
+      renderCataleg();
+      renderMagatzems();
+      renderProveidors();
+      renderMoviments();
+      renderComandes();
+      renderDevolucions();
+      renderInventari();
+      populateDropdowns();
+    }
+
+    // 1. CATÀLEG
+    function renderCataleg() {
+      const tbody = document.getElementById('tbody-cataleg');
+      tbody.innerHTML = '';
+
+      if (AppState.cataleg.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">No hi ha vacunes registrades al catàleg.</td></tr>`;
+        return;
+      }
+
+      AppState.cataleg.forEach(item => {
+        // Càlcul de l'estoc real disponible sumant tots els lots d'aquesta vacuna a tots els magatzems
+        const totalDisponible = AppState.inventari
+          .filter(inv => inv.codi === item.codi)
+          .reduce((sum, inv) => sum + Number(inv.disponible), 0);
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold text-sky-900">${escapeHtml(item.codi)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(item.nom)}</td>
+          <td class="p-3.5 text-slate-600">${escapeHtml(item.proveidor)}</td>
+          <td class="p-3.5 text-slate-500 font-mono text-xs">${escapeHtml(item.codiProv || '-')}</td>
+          <td class="p-3.5 text-center font-semibold text-slate-700">${item.minim} uts.</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${totalDisponible < item.minim ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
+              ${totalDisponible} uts.
+            </span>
+          </td>
+          <td class="p-3.5 text-right no-print space-x-2">
+            <button onclick="editCataleg('${item.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 2. MAGATZEMS
+    function renderMagatzems() {
+      const tbody = document.getElementById('tbody-magatzems');
+      tbody.innerHTML = '';
+
+      if (AppState.magatzems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">No hi ha magatzems configurats.</td></tr>`;
+        return;
+      }
+
+      AppState.magatzems.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold text-sky-900 font-mono">${escapeHtml(m.codi)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(m.nom)}</td>
+          <td class="p-3.5 text-slate-600">${escapeHtml(m.ubicacio || '-')}</td>
+          <td class="p-3.5 text-right no-print space-x-2">
+            <button onclick="editMagatzem('${m.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 3. PROVEÏDORS
+    function renderProveidors() {
+      const tbody = document.getElementById('tbody-proveidors');
+      tbody.innerHTML = '';
+
+      if (AppState.proveidors.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">No hi ha proveïdors registrats.</td></tr>`;
+        return;
+      }
+
+      AppState.proveidors.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold text-sky-900 font-mono">${escapeHtml(p.codi)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(p.nom)}</td>
+          <td class="p-3.5 text-slate-600 text-xs">${formatDateDMY(p.dataAlta)}</td>
+          <td class="p-3.5 text-slate-600 font-mono text-xs">${escapeHtml(p.telefon || '-')}</td>
+          <td class="p-3.5 text-slate-700">${escapeHtml(p.contacte || '-')}</td>
+          <td class="p-3.5 text-slate-500 text-xs">${escapeHtml(p.ubicacio || '-')}</td>
+          <td class="p-3.5 text-right no-print space-x-2">
+            <button onclick="editProveidor('${p.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 4. MOVIMENTS
+    function renderMoviments() {
+      const tbody = document.getElementById('tbody-moviments');
+      tbody.innerHTML = '';
+
+      if (AppState.moviments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No s'ha registrat cap moviment de vacunes.</td></tr>`;
+        return;
+      }
+
+      AppState.moviments.slice().reverse().forEach(mov => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        const isTraspas = mov.tipus === 'Traspàs';
+        tr.innerHTML = `
+          <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(mov.data)}</td>
+          <td class="p-3.5 font-mono text-xs font-bold text-sky-900">${escapeHtml(mov.codi)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(mov.vacuna)}</td>
+          <td class="p-3.5">
+            <span class="px-2 py-0.5 rounded-md text-xs font-semibold ${isTraspas ? 'bg-sky-100 text-sky-800' : 'bg-purple-100 text-purple-800'}">
+              ${escapeHtml(mov.tipus)}
+            </span>
+          </td>
+          <td class="p-3.5 text-xs text-slate-600">${escapeHtml(mov.origen)}</td>
+          <td class="p-3.5 text-xs font-medium text-slate-700">${escapeHtml(mov.destinacio || mov.detall || '-')}</td>
+          <td class="p-3.5 font-mono text-xs text-teal-800 font-semibold">${escapeHtml(mov.lot)}</td>
+          <td class="p-3.5 text-xs text-slate-500">${formatDateDMY(mov.caducitat)}</td>
+          <td class="p-3.5 text-center font-bold text-slate-800">${mov.unitats}</td>
+          <td class="p-3.5 text-right no-print">
+            <button onclick="deleteItem('moviments', '${mov.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 5. COMANDES
+    function renderComandes() {
+      const tbody = document.getElementById('tbody-comandes');
+      tbody.innerHTML = '';
+
+      if (AppState.comandes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha comandes en curs ni històriques.</td></tr>`;
+        return;
+      }
+
+      AppState.comandes.slice().reverse().forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        let badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
+        if (c.estat === 'Recepcionat') badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        if (c.estat === 'Recepció parcial') badgeColor = 'bg-blue-100 text-blue-800 border-blue-300';
+
+        tr.innerHTML = `
+          <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(c.data)}</td>
+          <td class="p-3.5 font-bold text-sky-900 font-mono text-xs">${escapeHtml(c.comanda)}</td>
+          <td class="p-3.5 text-slate-700">${escapeHtml(c.proveidor)}</td>
+          <td class="p-3.5 text-xs font-mono text-slate-500">${escapeHtml(c.codiVac)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(c.vacuna)}</td>
+          <td class="p-3.5 text-xs text-slate-500">${escapeHtml(c.codiProv || '-')}</td>
+          <td class="p-3.5 text-center font-bold text-slate-800">${c.unitats}</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}">
+              ${escapeHtml(c.estat)}
+            </span>
+          </td>
+          <td class="p-3.5 text-right no-print space-x-2">
+            <button onclick="editComanda('${c.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 6. DEVOLUCIONS
+    function renderDevolucions() {
+      const tbody = document.getElementById('tbody-devolucions');
+      tbody.innerHTML = '';
+
+      if (AppState.devolucions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No hi ha registres de devolucions o baixes.</td></tr>`;
+        return;
+      }
+
+      AppState.devolucions.slice().reverse().forEach(d => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        tr.innerHTML = `
+          <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(d.data)}</td>
+          <td class="p-3.5 font-mono text-xs font-bold text-red-900">${escapeHtml(d.numBaixa)}</td>
+          <td class="p-3.5 text-xs text-slate-700">${escapeHtml(d.magatzem)}</td>
+          <td class="p-3.5 font-mono text-xs text-slate-600">${escapeHtml(d.codi)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(d.vacuna)}</td>
+          <td class="p-3.5 font-mono text-xs text-teal-800">${escapeHtml(d.lot)}</td>
+          <td class="p-3.5 text-xs font-medium text-red-700 bg-red-50 rounded px-2 py-0.5">${escapeHtml(d.motiu)}</td>
+          <td class="p-3.5 text-center font-bold text-red-600">-${d.unitats}</td>
+          <td class="p-3.5 text-xs text-slate-600">${escapeHtml(d.proveidor || '-')}</td>
+          <td class="p-3.5 text-right no-print">
+            <button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 7. INVENTARI EN TEMPS REAL
+    function renderInventari() {
+      const tbody = document.getElementById('tbody-inventari');
+      tbody.innerHTML = '';
+
+      const filterSelect = document.getElementById('filterMagatzemSelect');
+      const selectedFilter = filterSelect ? filterSelect.value : 'TOTS';
+
+      let items = AppState.inventari;
+      if (selectedFilter && selectedFilter !== 'TOTS') {
+        items = items.filter(inv => inv.magatzemId === selectedFilter);
+      }
+
+      let totalDosis = 0;
+      let alertesEstoc = 0;
+      let caducitatsProperes = 0;
+
+      const today = new Date();
+      const in90Days = new Date();
+      in90Days.setDate(today.getDate() + 90);
+
+      AppState.inventari.forEach(i => {
+        totalDosis += Number(i.disponible);
+        if (Number(i.disponible) <= Number(i.minim)) {
+          alertesEstoc++;
+        }
+        if (i.caducitat) {
+          const cDate = new Date(i.caducitat);
+          if (cDate <= in90Days) {
+            caducitatsProperes++;
+          }
+        }
+      });
+
+      document.getElementById('kpi-total-unitats').textContent = totalDosis;
+      document.getElementById('kpi-alerta-estoc').textContent = alertesEstoc;
+      document.getElementById('kpi-caducitat-propera').textContent = caducitatsProperes;
+
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha estoc registrat per al filtre seleccionat.</td></tr>`;
+        return;
+      }
+
+      items.forEach(inv => {
+        const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+        const nomMagatzem = mag ? mag.nom : inv.magatzemId;
+
+        // Càlcul d'estat sanitari
+        let estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Correcte</span>`;
+        if (Number(inv.disponible) <= 0) {
+          estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">Esgotat (0)</span>`;
+        } else if (Number(inv.disponible) <= Number(inv.minim)) {
+          estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">Baix Estoc</span>`;
+        }
+
+        // Alerta visual de data de caducitat
+        let caducitatText = formatDateDMY(inv.caducitat);
+        if (inv.caducitat) {
+          const dCad = new Date(inv.caducitat);
+          if (dCad <= in90Days) {
+            caducitatText += ` <span class="text-[10px] bg-red-100 text-red-700 px-1 py-0.5 rounded font-bold ml-1">&lt; 90d</span>`;
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-sky-50/40 transition";
+        tr.innerHTML = `
+          <td class="p-3.5 text-xs font-semibold text-sky-950">${escapeHtml(nomMagatzem)}</td>
+          <td class="p-3.5 font-mono text-xs font-bold text-sky-900">${escapeHtml(inv.codi)}</td>
+          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(inv.vacuna)}</td>
+          <td class="p-3.5 text-xs text-slate-500">${escapeHtml(inv.codiProv || '-')}</td>
+          <td class="p-3.5 font-mono text-xs font-bold text-teal-800 bg-teal-50 px-2 rounded inline-block my-2.5">${escapeHtml(inv.lot)}</td>
+          <td class="p-3.5 text-xs text-slate-600">${caducitatText}</td>
+          <td class="p-3.5 text-center text-xs text-slate-600">${inv.minim} uts.</td>
+          <td class="p-3.5 text-center font-black text-sm ${Number(inv.disponible) <= Number(inv.minim) ? 'text-amber-600' : 'text-slate-800'}">${inv.disponible}</td>
+          <td class="p-3.5 text-center">${estatBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ----------------------------------------------------
+    // ACTUALITZACIÓ DINÀMICA DE SELECTORS I DESPLEGABLES
+    // ----------------------------------------------------
+    function populateDropdowns() {
+      // 1. Desplegables de proveïdors
+      const provSelects = ['cat-proveidor', 'cmd-proveidor', 'dev-proveidor'];
+      provSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Selecciona Proveïdor --</option>';
+        AppState.proveidors.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.nom;
+          opt.textContent = `${p.nom} (${p.codi})`;
+          select.appendChild(opt);
+        });
+        if (currentVal) select.value = currentVal;
+      });
+
+      // 2. Desplegables de magatzems
+      const magSelects = ['mov-destinacio', 'rec-magatzem'];
+      magSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Selecciona Magatzem --</option>';
+        AppState.magatzems.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.nom;
+          select.appendChild(opt);
+        });
+        if (currentVal) select.value = currentVal;
+      });
+
+      // 3. Filtre per magatzem a la pantalla d'Inventari
+      const filterSelect = document.getElementById('filterMagatzemSelect');
+      if (filterSelect) {
+        const currentFilter = filterSelect.value || 'TOTS';
+        filterSelect.innerHTML = '<option value="TOTS">Tots els Magatzems i Neveres</option>';
+        AppState.magatzems.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.nom;
+          filterSelect.appendChild(opt);
+        });
+        filterSelect.value = currentFilter;
+      }
+
+      // 4. Desplegable de vacunes per a Nova Comanda
+      const cmdVacSelect = document.getElementById('cmd-vacuna-select');
+      if (cmdVacSelect) {
+        cmdVacSelect.innerHTML = '<option value="">-- Selecciona Vacuna del Catàleg --</option>';
+        AppState.cataleg.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.nom} (${c.codi})`;
+          cmdVacSelect.appendChild(opt);
+        });
+      }
+
+      // 5. Desplegables de Lots per a Moviments i Devolucions
+      populateLotsDropdowns();
+
+      // 6. Desplegable de comandes per a la Recepció
+      const recCmdSelect = document.getElementById('rec-comanda-select');
+      if (recCmdSelect) {
+        recCmdSelect.innerHTML = '<option value="">-- Comanda lliure (sense associar) --</option>';
+        AppState.comandes.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.comanda} - ${c.vacuna} (${c.unitats} uts.) [${c.estat}]`;
+          recCmdSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function populateLotsDropdowns() {
+      const movLot = document.getElementById('mov-lot-select');
+      const devLot = document.getElementById('dev-lot-select');
+
+      const buildOptions = (target) => {
+        if (!target) return;
+        target.innerHTML = '<option value="">-- Selecciona un Lot existent --</option>';
+        AppState.inventari.forEach(inv => {
+          const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+          const nomMag = mag ? mag.nom : inv.magatzemId;
+          const opt = document.createElement('option');
+          opt.value = inv.id;
+          opt.textContent = `Lot: ${inv.lot} | ${inv.vacuna} | Magatzem: ${nomMag} (Disp: ${inv.disponible})`;
+          target.appendChild(opt);
+        });
+      };
+
+      buildOptions(movLot);
+      buildOptions(devLot);
+    }
+
+    // ----------------------------------------------------
+    // ACCIONS I MODALS: GUARDAR I EDITAR
+    // ----------------------------------------------------
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+      populateDropdowns();
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+      // Neteja formularis si existeixen
+      const form = document.querySelector(`#${modalId} form`);
+      if (form) form.reset();
+      const idInput = form ? form.querySelector('input[type="hidden"]') : null;
+      if (idInput) idInput.value = '';
+    }
+
+    // CATÀLEG: Guardar / Editar
+    function saveCataleg(e) {
+      e.preventDefault();
+      const id = document.getElementById('cat-id').value;
+      const codi = document.getElementById('cat-codi').value.trim();
+      const nom = document.getElementById('cat-nom').value.trim();
+      const codiProv = document.getElementById('cat-codiprov').value.trim();
+      const proveidor = document.getElementById('cat-proveidor').value;
+      const minim = Number(document.getElementById('cat-minim').value) || 0;
+      const inicial = Number(document.getElementById('cat-inicial').value) || 0;
+
+      if (id) {
+        const item = AppState.cataleg.find(c => c.id === id);
+        if (item) {
+          item.codi = codi;
+          item.nom = nom;
+          item.codiProv = codiProv;
+          item.proveidor = proveidor;
+          item.minim = minim;
+          item.inicial = inicial;
+          showToast('Catàleg actualitzat', 'Fitxa de vacuna modificada correctament.');
+        }
+      } else {
+        AppState.cataleg.push({
+          id: 'CAT_' + Date.now(),
+          codi, nom, codiProv, proveidor, minim, inicial
+        });
+        showToast('Nou registre', 'Vacuna afegida correctament al catàleg.');
+      }
+
+      saveState();
+      closeModal('modal-cataleg');
+      renderCataleg();
+      renderInventari();
+    }
+
+    function editCataleg(id) {
+      const item = AppState.cataleg.find(c => c.id === id);
+      if (!item) return;
+      document.getElementById('cat-id').value = item.id;
+      document.getElementById('cat-codi').value = item.codi;
+      document.getElementById('cat-nom').value = item.nom;
+      document.getElementById('cat-codiprov').value = item.codiProv || '';
+      document.getElementById('cat-proveidor').value = item.proveidor;
+      document.getElementById('cat-minim').value = item.minim;
+      document.getElementById('cat-inicial').value = item.inicial;
+      document.getElementById('modal-cataleg-title').textContent = 'Editar Fitxa de Vacuna';
+      openModal('modal-cataleg');
+    }
+
+    // MAGATZEMS: Guardar / Editar
+    function saveMagatzem(e) {
+      e.preventDefault();
+      const id = document.getElementById('mag-id').value;
+      const codi = document.getElementById('mag-codi').value.trim();
+      const nom = document.getElementById('mag-nom').value.trim();
+      const ubicacio = document.getElementById('mag-ubicacio').value.trim();
+
+      if (id) {
+        const m = AppState.magatzems.find(x => x.id === id);
+        if (m) {
+          m.codi = codi;
+          m.nom = nom;
+          m.ubicacio = ubicacio;
+          showToast('Magatzem modificat', 'Dades del magatzem actualitzades.');
+        }
+      } else {
+        AppState.magatzems.push({
+          id: 'MAG_' + Date.now(),
+          codi, nom, ubicacio
+        });
+        showToast('Magatzem creat', 'Nou magatzem afegit al sistema.');
+      }
+
+      saveState();
+      closeModal('modal-magatzems');
+      renderMagatzems();
+      populateDropdowns();
+    }
+
+    function editMagatzem(id) {
+      const m = AppState.magatzems.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('mag-id').value = m.id;
+      document.getElementById('mag-codi').value = m.codi;
+      document.getElementById('mag-nom').value = m.nom;
+      document.getElementById('mag-ubicacio').value = m.ubicacio || '';
+      document.getElementById('modal-magatzems-title').textContent = 'Editar Magatzem';
+      openModal('modal-magatzems');
+    }
+
+    // PROVEÏDORS: Guardar / Editar
+    function saveProveidor(e) {
+      e.preventDefault();
+      const id = document.getElementById('prov-id').value;
+      const codi = document.getElementById('prov-codi').value.trim();
+      const dataAlta = document.getElementById('prov-data').value;
+      const nom = document.getElementById('prov-nom').value.trim();
+      const telefon = document.getElementById('prov-telefon').value.trim();
+      const contacte = document.getElementById('prov-contacte').value.trim();
+      const ubicacio = document.getElementById('prov-ubicacio').value.trim();
+
+      if (id) {
+        const p = AppState.proveidors.find(x => x.id === id);
+        if (p) {
+          p.codi = codi;
+          p.dataAlta = dataAlta;
+          p.nom = nom;
+          p.telefon = telefon;
+          p.contacte = contacte;
+          p.ubicacio = ubicacio;
+          showToast('Proveïdor actualitzat', 'Les dades del proveïdor s\'han desat.');
+        }
+      } else {
+        AppState.proveidors.push({
+          id: 'PRV_' + Date.now(),
+          codi, dataAlta, nom, telefon, contacte, ubicacio
+        });
+        showToast('Proveïdor desat', 'Nou proveïdor afegit satisfactòriament.');
+      }
+
+      saveState();
+      closeModal('modal-proveidors');
+      renderProveidors();
+      populateDropdowns();
+    }
+
+    function editProveidor(id) {
+      const p = AppState.proveidors.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('prov-id').value = p.id;
+      document.getElementById('prov-codi').value = p.codi;
+      document.getElementById('prov-data').value = p.dataAlta;
+      document.getElementById('prov-nom').value = p.nom;
+      document.getElementById('prov-telefon').value = p.telefon || '';
+      document.getElementById('prov-contacte').value = p.contacte || '';
+      document.getElementById('prov-ubicacio').value = p.ubicacio || '';
+      document.getElementById('modal-proveidors-title').textContent = 'Editar Proveïdor';
+      openModal('modal-proveidors');
+    }
+
+    // MOVIMENTS: Lògica de canvi de formulari segons Traspàs / Consum
+    function toggleMovimentFields() {
+      const tipus = document.getElementById('mov-tipus').value;
+      const fieldTraspas = document.getElementById('field-mov-traspas');
+      const fieldConsum = document.getElementById('field-mov-consum');
+
+      if (tipus === 'Consum') {
+        fieldTraspas.classList.add('hidden');
+        fieldConsum.classList.remove('hidden');
+      } else {
+        fieldTraspas.classList.remove('hidden');
+        fieldConsum.classList.add('hidden');
+      }
+    }
+
+    function onMovimentLotChange() {
+      const invId = document.getElementById('mov-lot-select').value;
+      const inv = AppState.inventari.find(i => i.id === invId);
+
+      if (inv) {
+        const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+        document.getElementById('mov-prev-codi').textContent = inv.codi;
+        document.getElementById('mov-prev-nom').textContent = inv.vacuna;
+        document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
+        document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
+        document.getElementById('mov-prev-disponible').textContent = inv.disponible;
+      } else {
+        document.getElementById('mov-prev-codi').textContent = '-';
+        document.getElementById('mov-prev-nom').textContent = '-';
+        document.getElementById('mov-prev-caducitat').textContent = '-';
+        document.getElementById('mov-prev-origen').textContent = '-';
+        document.getElementById('mov-prev-disponible').textContent = '0';
+      }
+    }
+
+    // Calcula unitats a partir de la separació per comes de PACs (Codi SUM)
+    function updateConsumUnitsFromSUM() {
+      const sumVal = document.getElementById('mov-sum').value.trim();
+      if (!sumVal) return;
+      const pacs = sumVal.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      if (pacs.length > 0) {
+        document.getElementById('mov-unitats').value = pacs.length;
+      }
+    }
+
+    // REGLA CLAU: Execució i actualització en temps real d'Inventari per Traspàs / Consum
+    function saveMoviment(e) {
+      e.preventDefault();
+      const data = document.getElementById('mov-data').value;
+      const tipus = document.getElementById('mov-tipus').value;
+      const invId = document.getElementById('mov-lot-select').value;
+      const unitats = Number(document.getElementById('mov-unitats').value);
+
+      const invOrigen = AppState.inventari.find(i => i.id === invId);
+      if (!invOrigen) {
+        showToast('Error', 'Cal seleccionar un lot vàlid de l\'inventari.', 'error');
+        return;
+      }
+
+      if (unitats > Number(invOrigen.disponible)) {
+        showToast('Estoc Insuficient', `Només hi ha ${invOrigen.disponible} unitats disponibles en aquest lot.`, 'error');
+        return;
+      }
+
+      const magOrigen = AppState.magatzems.find(m => m.id === invOrigen.magatzemId);
+      const nomOrigen = magOrigen ? magOrigen.nom : invOrigen.magatzemId;
+
+      if (tipus === 'Traspàs') {
+        const destMagId = document.getElementById('mov-destinacio').value;
+        if (!destMagId) {
+          showToast('Avís', 'Selecciona un magatzem de destinació.', 'error');
+          return;
+        }
+        if (destMagId === invOrigen.magatzemId) {
+          showToast('Avís', 'El magatzem de destinació ha de ser diferent a l\'origen.', 'error');
+          return;
+        }
+
+        const magDest = AppState.magatzems.find(m => m.id === destMagId);
+        const nomDest = magDest ? magDest.nom : destMagId;
+
+        // 1. Restem de l'origen
+        invOrigen.disponible = Number(invOrigen.disponible) - unitats;
+
+        // 2. Sumem al destí (si ja existeix el mateix lot en aquest magatzem, sumem, sinó creem la línia)
+        const invDest = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === invOrigen.lot && i.codi === invOrigen.codi);
+        if (invDest) {
+          invDest.disponible = Number(invDest.disponible) + unitats;
+        } else {
+          AppState.inventari.push({
+            id: 'INV_' + Date.now(),
+            magatzemId: destMagId,
+            codi: invOrigen.codi,
+            vacuna: invOrigen.vacuna,
+            codiProv: invOrigen.codiProv,
+            lot: invOrigen.lot,
+            caducitat: invOrigen.caducitat,
+            minim: invOrigen.minim,
+            disponible: unitats
+          });
+        }
+
+        // 3. Registrem el moviment
+        AppState.moviments.push({
+          id: 'MOV_' + Date.now(),
+          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna,
+          tipus: 'Traspàs', origen: nomOrigen, destinacio: nomDest,
+          lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats, detall: 'Traspàs entre magatzems'
+        });
+
+        showToast('Traspàs Realitzat', `${unitats} unitats traspassades cap a ${nomDest}.`);
+
+      } else {
+        // Consum
+        const codiSUM = document.getElementById('mov-sum').value.trim() || 'Consum clínic';
+        // Restem de l'origen
+        invOrigen.disponible = Number(invOrigen.disponible) - unitats;
+
+        AppState.moviments.push({
+          id: 'MOV_' + Date.now(),
+          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna,
+          tipus: 'Consum', origen: nomOrigen, destinacio: codiSUM,
+          lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats, detall: `Administrat: ${codiSUM}`
+        });
+
+        showToast('Consum Enregistrat', `${unitats} dosis descomptades de l'inventari.`);
+      }
+
+      saveState();
+      closeModal('modal-moviments');
+      renderAll();
+    }
+
+    // COMANDES: Autocompletar vacuna
+    function onComandaVacunaChange() {
+      const catId = document.getElementById('cmd-vacuna-select').value;
+      const cat = AppState.cataleg.find(c => c.id === catId);
+      if (cat) {
+        document.getElementById('cmd-codivac').value = cat.codi;
+        document.getElementById('cmd-codiprov').value = cat.codiProv || '';
+        document.getElementById('cmd-proveidor').value = cat.proveidor || '';
+      } else {
+        document.getElementById('cmd-codivac').value = '';
+        document.getElementById('cmd-codiprov').value = '';
+      }
+    }
+
+    function saveComanda(e) {
+      e.preventDefault();
+      const id = document.getElementById('cmd-id').value;
+      const data = document.getElementById('cmd-data').value;
+      const comanda = document.getElementById('cmd-num').value.trim();
+      const proveidor = document.getElementById('cmd-proveidor').value;
+      const catId = document.getElementById('cmd-vacuna-select').value;
+      const cat = AppState.cataleg.find(c => c.id === catId);
+      const vacuna = cat ? cat.nom : 'Vacuna';
+      const codiVac = document.getElementById('cmd-codivac').value;
+      const codiProv = document.getElementById('cmd-codiprov').value;
+      const unitats = Number(document.getElementById('cmd-unitats').value);
+      const estat = document.getElementById('cmd-estat').value;
+
+      if (id) {
+        const c = AppState.comandes.find(x => x.id === id);
+        if (c) {
+          c.data = data;
+          c.comanda = comanda;
+          c.proveidor = proveidor;
+          c.codiVac = codiVac;
+          c.vacuna = vacuna;
+          c.codiProv = codiProv;
+          c.unitats = unitats;
+          c.estat = estat;
+          showToast('Comanda Actualitzada', 'Les dades de la comanda s\'han guardat.');
+        }
+      } else {
+        AppState.comandes.push({
+          id: 'CMD_' + Date.now(),
+          data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat
+        });
+        showToast('Comanda Creada', `S'ha registrat la comanda ${comanda}.`);
+      }
+
+      saveState();
+      closeModal('modal-comandes');
+      renderComandes();
+      populateDropdowns();
+    }
+
+    function editComanda(id) {
+      const c = AppState.comandes.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('cmd-id').value = c.id;
+      document.getElementById('cmd-data').value = c.data;
+      document.getElementById('cmd-num').value = c.comanda;
+      document.getElementById('cmd-proveidor').value = c.proveidor;
+      const cat = AppState.cataleg.find(x => x.codi === c.codiVac);
+      if (cat) document.getElementById('cmd-vacuna-select').value = cat.id;
+      document.getElementById('cmd-codivac').value = c.codiVac;
+      document.getElementById('cmd-codiprov').value = c.codiProv || '';
+      document.getElementById('cmd-unitats').value = c.unitats;
+      document.getElementById('cmd-estat').value = c.estat;
+      document.getElementById('modal-comandes-title').textContent = 'Editar Comanda';
+      openModal('modal-comandes');
+    }
+
+    // RECEPCIÓ D'ALBARÀ: Entrada automàtica a l'inventari
+    function onRecepcioComandaChange() {
+      const cmdId = document.getElementById('rec-comanda-select').value;
+      const cmd = AppState.comandes.find(c => c.id === cmdId);
+      if (cmd) {
+        document.getElementById('rec-proveidor').value = cmd.proveidor;
+        document.getElementById('rec-codi').value = cmd.codiVac;
+        document.getElementById('rec-vacuna').value = cmd.vacuna;
+        document.getElementById('rec-unitats').value = cmd.unitats;
+      }
+    }
+
+    function saveRecepcio(e) {
+      e.preventDefault();
+      const data = document.getElementById('rec-data').value;
+      const albara = document.getElementById('rec-albara').value.trim();
+      const cmdId = document.getElementById('rec-comanda-select').value;
+      const proveidor = document.getElementById('rec-proveidor').value.trim();
+      const codi = document.getElementById('rec-codi').value.trim();
+      const vacuna = document.getElementById('rec-vacuna').value.trim();
+      const lot = document.getElementById('rec-lot').value.trim().toUpperCase();
+      const caducitat = document.getElementById('rec-caducitat').value;
+      const magatzemId = document.getElementById('rec-magatzem').value;
+      const unitats = Number(document.getElementById('rec-unitats').value);
+
+      if (!magatzemId) {
+        showToast('Error', 'Selecciona el magatzem o nevera de destinació.', 'error');
+        return;
+      }
+
+      // Si ve d'una comanda prèvia, actualitzem el seu estat a Recepcionat
+      if (cmdId) {
+        const cmd = AppState.comandes.find(c => c.id === cmdId);
+        if (cmd) cmd.estat = 'Recepcionat';
+      }
+
+      // Entrada automàtica d'estoc a l'inventari del magatzem seleccionat
+      const existent = AppState.inventari.find(i => i.magatzemId === magatzemId && i.lot === lot && i.codi === codi);
+      if (existent) {
+        existent.disponible = Number(existent.disponible) + unitats;
+      } else {
+        // Busquem dades de catàleg per saber l'estoc mínim recomanat
+        const cat = AppState.cataleg.find(c => c.codi === codi);
+        AppState.inventari.push({
+          id: 'INV_' + Date.now(),
+          magatzemId,
+          codi,
+          vacuna,
+          codiProv: cat ? cat.codiProv : '',
+          lot,
+          caducitat,
+          minim: cat ? Math.round(cat.minim / 2) : 10,
+          disponible: unitats
+        });
+      }
+
+      showToast('Recepció Confirmada', `S'han afegit ${unitats} unitats a l'inventari sota l'albarà ${albara}.`);
+      saveState();
+      closeModal('modal-recepcio');
+      renderAll();
+    }
+
+    // DEVOLUCIONS I BAIXES: Resta automàtica d'inventari
+    function onDevolucioLotChange() {
+      const invId = document.getElementById('dev-lot-select').value;
+      const inv = AppState.inventari.find(i => i.id === invId);
+
+      if (inv) {
+        const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+        document.getElementById('dev-prev-nom').textContent = inv.vacuna;
+        document.getElementById('dev-prev-magatzem').textContent = mag ? mag.nom : inv.magatzemId;
+        document.getElementById('dev-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
+        document.getElementById('dev-prev-disponible').textContent = inv.disponible;
+      } else {
+        document.getElementById('dev-prev-nom').textContent = '-';
+        document.getElementById('dev-prev-magatzem').textContent = '-';
+        document.getElementById('dev-prev-caducitat').textContent = '-';
+        document.getElementById('dev-prev-disponible').textContent = '0';
+      }
+    }
+
+    function saveDevolucio(e) {
+      e.preventDefault();
+      const data = document.getElementById('dev-data').value;
+      const numBaixa = document.getElementById('dev-num').value.trim();
+      const invId = document.getElementById('dev-lot-select').value;
+      const motiu = document.getElementById('dev-motiu').value;
+      const proveidor = document.getElementById('dev-proveidor').value;
+      const unitats = Number(document.getElementById('dev-unitats').value);
+
+      const inv = AppState.inventari.find(i => i.id === invId);
+      if (!inv) {
+        showToast('Error', 'Selecciona un lot vàlid de l\'inventari.', 'error');
+        return;
+      }
+
+      if (unitats > Number(inv.disponible)) {
+        showToast('Estoc Insuficient', `Només hi ha ${inv.disponible} unitats disponibles en aquest lot.`, 'error');
+        return;
+      }
+
+      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+      const nomMagatzem = mag ? mag.nom : inv.magatzemId;
+
+      // Restem automàticament de l'estoc
+      inv.disponible = Number(inv.disponible) - unitats;
+
+      // Registrem la devolució
+      AppState.devolucions.push({
+        id: 'DEV_' + Date.now(),
+        data, numBaixa, magatzem: nomMagatzem,
+        codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot,
+        motiu, unitats, proveidor
+      });
+
+      showToast('Baixa Tramitada', `${unitats} unitats retirades correctament de l'inventari.`);
+      saveState();
+      closeModal('modal-devolucions');
+      renderAll();
+    }
+
+    // ELIMINACIÓ UNIVERSAL D'ELEMENTS
+    function deleteItem(collectionName, id) {
+      if (!AppState[collectionName]) return;
+      AppState[collectionName] = AppState[collectionName].filter(item => item.id !== id);
+      saveState();
+      showToast('Registre eliminat', 'L\'element ha estat esborrat correctament.');
+      renderAll();
+    }
+
+    // ----------------------------------------------------
+    // UTILITATS D'EXPORTACIÓ A CSV (EXCEL)
+    // ----------------------------------------------------
+    function exportTableToCSV(tableKey, filename) {
+      let rows = [];
+      const table = document.getElementById(`table-${tableKey}`);
+      if (!table) return;
+
+      const trs = table.querySelectorAll('tr');
+      trs.forEach(tr => {
+        const cols = tr.querySelectorAll('th, td');
+        let rowData = [];
+        cols.forEach((col, index) => {
+          // Ignorem la columna d'opcions en la impressió/exportació
+          if (col.classList.contains('no-print')) return;
+          let text = col.innerText.replace(/"/g, '""').trim();
+          rowData.push(`"${text}"`);
+        });
+        if (rowData.length > 0) rows.push(rowData.join(';'));
+      });
+
+      const csvContent = "\uFEFF" + rows.join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exportació Completada', `El fitxer ${filename} s'ha descarregat.`, 'info');
+    }
+
+    // ----------------------------------------------------
+    // FORMATS I HELPERS
+    // ----------------------------------------------------
+    function formatDateDMY(isoDate) {
+      if (!isoDate) return '-';
+      const parts = isoDate.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return isoDate;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Sistema de notificacions personalitzat (mai fem servir alert())
+    function showToast(title, message, type = 'success') {
+      const toast = document.getElementById('toastNotification');
+      const tTitle = document.getElementById('toastTitle');
+      const tMsg = document.getElementById('toastMessage');
+      const tIcon = document.getElementById('toastIcon');
+
+      tTitle.textContent = title;
+      tMsg.textContent = message;
+
+      if (type === 'error') {
+        tIcon.className = "w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-red-600";
+        tIcon.textContent = '✕';
+      } else if (type === 'info') {
+        tIcon.className = "w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-sky-600";
+        tIcon.textContent = 'ℹ';
+      } else {
+        tIcon.className = "w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-teal-600";
+        tIcon.textContent = '✓';
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
