@@ -672,6 +672,38 @@
         </div>
     </section>
 
+    <!-- Targeta 4: Gestió d'Instal·lació i Desinstal·lació de l'App -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 space-y-4">
+          <div class="border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-sky-900">📱 Instal·lació i Gestió de l'Aplicació (APK / PWA)</h3>
+            <p class="text-xs text-slate-500">Instal·la SanyStock al teu dispositiu o desinstal·la-la quan ho necessitis.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <!-- Botó d'Instal·lació -->
+            <div class="bg-sky-50/60 border border-sky-200 p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <div class="text-sm font-bold text-sky-950">Instal·lar SanyStock</div>
+                <div class="text-xs text-sky-700">Disponible per a Android, iPhone i Windows.</div>
+              </div>
+              <button type="button" onclick="installPWAApp()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition whitespace-nowrap">
+                📥 Instal·lar App
+              </button>
+            </div>
+
+            <!-- Botó de Desinstal·lació -->
+            <div class="bg-rose-50/60 border border-rose-200 p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <div class="text-sm font-bold text-rose-950">Desinstal·lar App</div>
+                <div class="text-xs text-rose-700">Neteja la memòria cau i desvincula l'aplicació.</div>
+              </div>
+              <button type="button" onclick="uninstallPWAApp()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition whitespace-nowrap">
+                🗑️ Desinstal·lar
+              </button>
+            </div>
+          </div>
+        </div>
+
     <!-- ========================================== -->
     <!-- NOVA PESTANYA 10: CONTACTE I SUPORT        -->
     <!-- ========================================== -->
