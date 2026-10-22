@@ -631,13 +631,17 @@
         </div>
 
         <!-- Targeta 3: Sincronització en Temps Real entre Dispositius Mòbils (APK / PWA) -->
+        <!-- Targeta 3: Sincronització en Temps Real entre Dispositius Mòbils (APK / PWA) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 space-y-4">
           <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 class="text-lg font-bold text-sky-900">☁️ Sincronització en Temps Real Multi-Dispositiu (Núvol)</h3>
               <p class="text-xs text-slate-500">Connecta les APK instal·lades en diferents mòbils perquè totes les dades s'actualitzin a l'instant.</p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="createNewCloudBin()" class="bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3.5 py-2 rounded-xl text-xs transition border border-purple-300">
+                ✨ Crear Contenidor Automàtic
+              </button>
               <button type="button" onclick="pullFromCloud(true)" class="bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3.5 py-2 rounded-xl text-xs transition">
                 🔄 Descarregar del Núvol Ara
               </button>
@@ -649,23 +653,23 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="sm:col-span-2">
-              <label class="block text-xs font-bold text-slate-700 mb-1">URL del Servidor Cloud / Endpoint JSON (Back4App, Firebase o JSONBin)</label>
-              <input type="url" id="cloud-url" placeholder="Ex. https://api.jsonbin.io/v3/b/EL_TEU_ID o URL Back4App" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <label class="block text-xs font-bold text-slate-700 mb-1">URL del Servidor Cloud o Bin ID (JSONBin)</label>
+              <input type="text" id="cloud-url" placeholder="Ex. https://api.jsonbin.io/v3/b/6718... o només el teu Bin ID" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Clau d'Accés / API Key (Opcional)</label>
-              <input type="password" id="cloud-key" placeholder="Clau o Token de seguretat" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Clau d'Accés / X-Master-Key *</label>
+              <input type="password" id="cloud-key" placeholder="Ex. $2a$10$..." class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
             </div>
           </div>
-          <div class="flex items-center justify-between pt-2">
-            <p class="text-xs text-slate-500">Quan actives la connexió, l'aplicació comprova i envia actualitzacions automàticament cada 15 segons a tots els mòbils.</p>
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <p class="text-xs text-slate-500">
+              <strong>Truc ràpid:</strong> Si només poses la teva <em>X-Master-Key</em> i prems <strong>"✨ Crear Contenidor Automàtic"</strong>, l'app generarà la URL per tu!
+            </p>
             <button type="button" onclick="saveCloudConfig()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-sm transition">
               Guardar Connexió Cloud
             </button>
           </div>
         </div>
-
-      </div>
     </section>
 
     <!-- ========================================== -->
