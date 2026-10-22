@@ -6,12 +6,13 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0284c7">
   <title>SanyStock - Gestió de l'Estoc Vacunal</title>
-  <!-- Tailwind CSS per al disseny net i adaptable -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Llibreria Html5-QRCode per a lectura òptica de QR i codis de barres amb la càmera -->
+  <!-- Llibreria Html5-QRCode per a lectura òptica de QR i codis de barres -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -20,10 +21,7 @@
               deep: '#0369a1',
               primary: '#0284c7',
               teal: '#0d9488',
-              cyan: '#06b6d4',
-              surface: '#f0f9ff',
-              light: '#f8fafc',
-              border: '#e2e8f0'
+              cyan: '#06b6d4'
             }
           }
         }
@@ -50,14 +48,51 @@
       border-radius: 0.75rem;
       object-fit: cover;
     }
+    /* Estils per al Mode Fosc (Dark Mode) */
+    body.dark-mode {
+      background-color: #0f172a !important;
+      color: #f1f5f9 !important;
+    }
+    body.dark-mode header,
+    body.dark-mode .bg-white {
+      background-color: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode .bg-slate-50,
+    body.dark-mode .bg-sky-50 {
+      background-color: #0f172a !important;
+      color: #e2e8f0 !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode .text-sky-900,
+    body.dark-mode .text-sky-950,
+    body.dark-mode .text-slate-800,
+    body.dark-mode .text-slate-700 {
+      color: #f8fafc !important;
+    }
+    body.dark-mode .text-slate-600,
+    body.dark-mode .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #475569 !important;
+    }
+    body.dark-mode tbody.divide-y > tr {
+      border-color: #334155 !important;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200">
 
   <!-- ========================================== -->
   <!-- BARRA DE CAPÇALERA SANITÀRIA INSTITUCIONAL -->
   <!-- ========================================== -->
-  <header class="bg-white border-b border-sky-100 shadow-sm sticky top-0 z-30">
+  <header class="bg-white border-b border-sky-100 shadow-sm sticky top-0 z-30 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
       <div class="flex flex-wrap items-center justify-between gap-4">
         
@@ -75,20 +110,25 @@
           <div>
             <div class="flex items-center space-x-2">
               <span class="text-2xl font-black tracking-tight text-sky-900 leading-tight">Sany<span class="text-teal-600">Stock</span></span>
-              <span class="bg-teal-50 text-teal-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-teal-200 uppercase tracking-wider">Sanitari</span>
+              <span data-i18n="badge_sanitari" class="bg-teal-50 text-teal-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-teal-200 uppercase tracking-wider">Sanitari</span>
             </div>
-            <p class="text-xs font-semibold text-slate-500 tracking-wider uppercase">Gestió de l'Estoc Vacunal</p>
+            <p data-i18n="app_subtitle" class="text-xs font-semibold text-slate-500 tracking-wider uppercase">Gestió de l'Estoc Vacunal</p>
           </div>
         </div>
 
-        <!-- Indicador dinàmic: Data d'avui -->
+        <!-- Indicador dinàmic: Estat de Sincronització i Data d'avui -->
         <div class="flex items-center gap-3">
+          <div id="cloudStatusBadge" onclick="switchTab('ajustes')" class="cursor-pointer bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-semibold text-slate-600 hover:bg-sky-50 transition" title="Estat de sincronització en temps real">
+            <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            <span id="cloudStatusText" data-i18n="status_local">Mode Local</span>
+          </div>
+
           <div class="bg-sky-50 border border-sky-200 rounded-xl px-4 py-2 flex items-center space-x-2.5">
             <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             <div class="text-right sm:text-left">
-              <div class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">Data d'Avui</div>
+              <div data-i18n="today_date" class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">Data d'Avui</div>
               <div id="currentDateBadge" class="text-xs font-bold text-slate-700">Carregant...</div>
             </div>
           </div>
@@ -96,35 +136,41 @@
 
       </div>
 
-      <!-- Menú de pestanyes principal -->
-      <nav class="flex space-x-1 sm:space-x-2 mt-3 overflow-x-auto pb-1 no-print border-t border-slate-100 pt-2 text-sm font-medium">
-        <button onclick="switchTab('cataleg')" id="tab-cataleg" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-sky-800 hover:bg-sky-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-          Catàleg
+      <!-- Menú de pestanyes principal (10 pestanyes) -->
+      <nav class="flex space-x-1 sm:space-x-1.5 mt-3 overflow-x-auto pb-1 no-print border-t border-slate-100 pt-2 text-xs sm:text-sm font-medium">
+        <button onclick="switchTab('cataleg')" id="tab-cataleg" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap bg-sky-100 text-sky-900 font-bold">
+          <span data-i18n="nav_cataleg">Catàleg</span>
         </button>
         <button onclick="switchTab('magatzems')" id="tab-magatzems" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-          Magatzems
+          <span data-i18n="nav_magatzems">Magatzems</span>
         </button>
         <button onclick="switchTab('proveidors')" id="tab-proveidors" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          Proveïdors
+          <span data-i18n="nav_proveidors">Proveïdors</span>
         </button>
         <button onclick="switchTab('moviments')" id="tab-moviments" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-          Moviments
+          <span data-i18n="nav_moviments">Moviments</span>
         </button>
         <button onclick="switchTab('comandes')" id="tab-comandes" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-          Comandes
+          <span data-i18n="nav_comandes">Comandes</span>
         </button>
         <button onclick="switchTab('devolucions')" id="tab-devolucions" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
-          Devolucions
+          <span data-i18n="nav_devolucions">Devolucions</span>
         </button>
         <button onclick="switchTab('inventari')" id="tab-inventari" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap font-bold text-teal-700 bg-teal-50 border border-teal-200">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-          Inventari General
+          <span data-i18n="nav_inventari">Inventari General</span>
+        </button>
+        <!-- NOVES PESTANYES SOL·LICITADES -->
+        <button onclick="switchTab('documents')" id="tab-documents" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          <span data-i18n="nav_documents">Documents PDF</span>
+        </button>
+        <button onclick="switchTab('ajustes')" id="tab-ajustes" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span data-i18n="nav_ajustes">Ajustes</span>
+        </button>
+        <button onclick="switchTab('contacte')" id="tab-contacte" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
+          <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          <span data-i18n="nav_contacte">Contacte</span>
         </button>
       </nav>
     </div>
@@ -140,21 +186,18 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Catàleg General de Vacunes</h2>
+            <h2 data-i18n="title_cataleg" class="text-xl font-bold text-sky-900">Catàleg General de Vacunes</h2>
             <p class="text-xs text-slate-500">Manteniment de fitxes tècniques, marques comercials, proveïdors i estocs globals.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-cataleg')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Nou registre
+              + <span data-i18n="btn_new">Nou registre</span>
             </button>
             <button onclick="exportTableToCSV('cataleg', 'SanyStock_Cataleg.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -185,21 +228,18 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Configuració de Magatzems i Neveres</h2>
+            <h2 data-i18n="title_magatzems" class="text-xl font-bold text-sky-900">Configuració de Magatzems i Neveres</h2>
             <p class="text-xs text-slate-500">Gestió de punts d'emmagatzematge, neveres de farmàcia i zones de refrigeració.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-magatzems')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Nou registre
+              + <span data-i18n="btn_new">Nou registre</span>
             </button>
             <button onclick="exportTableToCSV('magatzems', 'SanyStock_Magatzems.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -225,21 +265,18 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Directori de Proveïdors i Laboratoris</h2>
+            <h2 data-i18n="title_proveidors" class="text-xl font-bold text-sky-900">Directori de Proveïdors i Laboratoris</h2>
             <p class="text-xs text-slate-500">Dades de contacte ràpid, laboratoris farmacèutics i subministradors homologats.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-proveidors')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Nou registre
+              + <span data-i18n="btn_new">Nou registre</span>
             </button>
             <button onclick="exportTableToCSV('proveidors', 'SanyStock_Proveidors.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -268,21 +305,18 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Registre de Moviments, Estoc Inicial i Consum</h2>
+            <h2 data-i18n="title_moviments" class="text-xl font-bold text-sky-900">Registre de Moviments, Estoc Inicial i Consum</h2>
             <p class="text-xs text-slate-500">Càrrega d'estoc inicial, traspàs entre magatzems i registre de consums clínics per codi SUM (PAC).</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-moviments')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Nou registre
+              + <span data-i18n="btn_new">Nou registre</span>
             </button>
             <button onclick="exportTableToCSV('moviments', 'SanyStock_Moviments.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -315,25 +349,21 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Gestió de Comandes i Recepcions</h2>
+            <h2 data-i18n="title_comandes" class="text-xl font-bold text-sky-900">Gestió de Comandes i Recepcions</h2>
             <p class="text-xs text-slate-500">Emissió de compres a proveïdors i entrada d'albarans directament a l'inventari.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-comandes')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Nova comanda
+              + Nova comanda
             </button>
             <button onclick="openModal('modal-recepcio')" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               Recepció d'albarà
             </button>
             <button onclick="exportTableToCSV('comandes', 'SanyStock_Comandes.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -364,21 +394,18 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Registre de Devolucions i Baixes Sanitàries</h2>
+            <h2 data-i18n="title_devolucions" class="text-xl font-bold text-sky-900">Registre de Devolucions i Baixes Sanitàries</h2>
             <p class="text-xs text-slate-500">Incidències per caducitat, trencaments de cadena de fred o retorns de sobrants.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-devolucions')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Nou registre
+              + <span data-i18n="btn_new">Nou registre</span>
             </button>
             <button onclick="exportTableToCSV('devolucions', 'SanyStock_Devolucions.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -407,65 +434,53 @@
 
     <!-- PESTANYA 7: INVENTARI EN TEMPS REAL -->
     <section id="section-inventari" class="tab-content hidden">
-      
-      <!-- Indicadors Resum (KPIs Sanitaris) -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="bg-white p-4 rounded-2xl border border-sky-100 shadow-sm flex items-center justify-between">
           <div>
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Dosis Totals Disponibles</div>
             <div id="kpi-total-unitats" class="text-2xl font-black text-sky-900 mt-1">0</div>
           </div>
-          <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-          </div>
+          <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">💉</div>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex items-center justify-between">
           <div>
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Alertes d'Estoc Baix</div>
             <div id="kpi-alerta-estoc" class="text-2xl font-black text-amber-600 mt-1">0</div>
           </div>
-          <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          </div>
+          <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">⚠️</div>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm flex items-center justify-between">
           <div>
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Caducitat Pròxima (&lt; 90 dies)</div>
             <div id="kpi-caducitat-propera" class="text-2xl font-black text-red-600 mt-1">0</div>
           </div>
-          <div class="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
+          <div class="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold">⏳</div>
         </div>
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Control d'Inventari per Magatzem</h2>
+            <h2 data-i18n="title_inventari" class="text-xl font-bold text-sky-900">Control d'Inventari per Magatzem</h2>
             <p class="text-xs text-slate-500">Visualització per nevera i magatzem, seguiment estricte de lots i cerca per QR.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
               <input type="text" id="invSearchInput" oninput="renderInventari()" placeholder="Cerca codi, vacuna, marca o lot..." class="bg-transparent border-0 text-xs px-2.5 py-1 focus:outline-none text-slate-700 w-36 sm:w-48">
-              <button type="button" onclick="startQRScanner('inventari-search')" title="Escanejar QR per filtrar inventari" class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                QR
+              <button type="button" onclick="startQRScanner('inventari-search')" class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                📷 QR
               </button>
             </div>
 
             <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
-              <label for="filterMagatzemSelect" class="text-xs font-semibold text-slate-600 pl-2">Magatzem:</label>
               <select id="filterMagatzemSelect" onchange="renderInventari()" class="bg-white border-0 text-xs font-semibold text-sky-900 rounded-lg p-1.5 focus:ring-2 focus:ring-sky-500">
               </select>
             </div>
             <button onclick="exportTableToCSV('inventari', 'SanyStock_Inventari.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Exportar CSV
+              <span data-i18n="btn_export">Exportar CSV</span>
             </button>
             <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Imprimir
+              <span data-i18n="btn_print">Imprimir</span>
             </button>
           </div>
         </div>
@@ -492,20 +507,253 @@
       </div>
     </section>
 
+    <!-- ========================================== -->
+    <!-- NOVA PESTANYA 8: DOCUMENTS PDF             -->
+    <!-- ========================================== -->
+    <section id="section-documents" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 data-i18n="title_documents" class="text-xl font-bold text-sky-900">Arxiu Digital de Documents PDF</h2>
+            <p class="text-xs text-slate-500">Emmagatzematge i consulta de manuals d'usuari, informes estadístics, comandes i albarans.</p>
+          </div>
+        </div>
+
+        <!-- Formulari de pujada de PDF -->
+        <form onsubmit="uploadPdfDocument(event)" class="bg-sky-50/60 border border-sky-100 rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Títol del Document *</label>
+            <input type="text" id="pdf-titol" required placeholder="Ex. Manual SanyStock v1 / Albarà GSK" class="w-full rounded-xl border-slate-300 border p-2 text-sm bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Categoria *</label>
+            <select id="pdf-categoria" required class="w-full rounded-xl border-slate-300 border p-2 text-sm bg-white font-semibold text-sky-900">
+              <option value="Manual d'usuari">📘 Manual d'usuari</option>
+              <option value="Informe estadístic">📊 Informe estadístic</option>
+              <option value="Comanda">🛒 Comanda</option>
+              <option value="Albarà">📦 Albarà</option>
+              <option value="Altres">📄 Altres documents</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar fitxer PDF *</label>
+            <input type="file" id="pdf-file" accept="application/pdf" required class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-700">
+          </div>
+          <div>
+            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm shadow-sm transition">
+              ⬆️ Pujar i Guardar PDF
+            </button>
+          </div>
+        </form>
+
+        <!-- Llistat de PDFs guardats -->
+        <div class="table-container rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs sm:text-sm border-collapse">
+            <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3.5">Data Pujada</th>
+                <th class="p-3.5">Categoria</th>
+                <th class="p-3.5">Títol del Document</th>
+                <th class="p-3.5">Nom de l'Arxiu</th>
+                <th class="p-3.5 text-center">Mida</th>
+                <th class="p-3.5 text-right">Accions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-documents" class="divide-y divide-slate-100 bg-white"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- NOVA PESTANYA 9: AJUSTES / CONFIGURACIÓ    -->
+    <!-- ========================================== -->
+    <section id="section-ajustes" class="tab-content hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+        <!-- Targeta 1: Idioma i Aparença (Clar / Fosc) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+          <div class="border-b border-slate-100 pb-3">
+            <h3 data-i18n="settings_appearance" class="text-lg font-bold text-sky-900">Idioma i Aparença Visual</h3>
+            <p class="text-xs text-slate-500">Personalitza l'idioma de treball i el mode d'il·luminació de la pantalla.</p>
+          </div>
+
+          <div>
+            <label data-i18n="settings_lang_label" class="block text-xs font-bold uppercase text-slate-600 mb-2">Seleccionar Idioma de l'Aplicació</label>
+            <div class="grid grid-cols-3 gap-2.5">
+              <button type="button" onclick="changeLanguage('ca')" id="lang-btn-ca" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-sky-600 text-white border-sky-600">
+                🏴 Català
+              </button>
+              <button type="button" onclick="changeLanguage('es')" id="lang-btn-es" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300">
+                🇪🇸 Español
+              </button>
+              <button type="button" onclick="changeLanguage('en')" id="lang-btn-en" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300">
+                🇬🇧 English
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <label data-i18n="settings_theme_label" class="block text-xs font-bold uppercase text-slate-600 mb-2">Mode de Pantalla (Clar / Fosc)</label>
+            <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <span class="text-sm font-semibold text-slate-700">Activar Mode Fosc Sanitari (Dark Mode)</span>
+              <button type="button" onclick="toggleDarkMode()" id="darkModeBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 transition">
+                🌙 Canviar Tema
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Targeta 2: Còpia de Seguretat i Restauració -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+          <div class="border-b border-slate-100 pb-3">
+            <h3 data-i18n="settings_backup" class="text-lg font-bold text-sky-900">Còpia de Seguretat (Backup)</h3>
+            <p class="text-xs text-slate-500">Exporta totes les dades a un fitxer segur o restaura una còpia guardada anteriorment.</p>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bg-teal-50/60 border border-teal-200 p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <div class="text-sm font-bold text-teal-950">Crear Còpia de Seguretat</div>
+                <div class="text-xs text-teal-700">Descarrega un fitxer .JSON amb tot el catàleg, lots i moviments.</div>
+              </div>
+              <button type="button" onclick="downloadBackupJSON()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition whitespace-nowrap">
+                ⬇️ Descarregar Còpia
+              </button>
+            </div>
+
+            <div class="bg-amber-50/60 border border-amber-200 p-4 rounded-xl space-y-2.5">
+              <div class="text-sm font-bold text-amber-950">Restablir Còpia Guardada</div>
+              <div class="text-xs text-amber-800">Selecciona un fitxer de còpia (.json) del teu dispositiu per restaurar les dades:</div>
+              <input type="file" id="restoreBackupInput" accept=".json" onchange="restoreBackupJSON(event)" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700">
+            </div>
+          </div>
+        </div>
+
+        <!-- Targeta 3: Sincronització en Temps Real entre Dispositius Mòbils (APK / PWA) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 space-y-4">
+          <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-lg font-bold text-sky-900">☁️ Sincronització en Temps Real Multi-Dispositiu (Núvol)</h3>
+              <p class="text-xs text-slate-500">Connecta les APK instal·lades en diferents mòbils perquè totes les dades s'actualitzin a l'instant.</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" onclick="pullFromCloud(true)" class="bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3.5 py-2 rounded-xl text-xs transition">
+                🔄 Descarregar del Núvol Ara
+              </button>
+              <button type="button" onclick="pushToCloud(true)" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
+                ☁️ Pujar Canvis al Núvol
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">URL del Servidor Cloud / Endpoint JSON (Back4App, Firebase o JSONBin)</label>
+              <input type="url" id="cloud-url" placeholder="Ex. https://api.jsonbin.io/v3/b/EL_TEU_ID o URL Back4App" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Clau d'Accés / API Key (Opcional)</label>
+              <input type="password" id="cloud-key" placeholder="Clau o Token de seguretat" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2">
+            <p class="text-xs text-slate-500">Quan actives la connexió, l'aplicació comprova i envia actualitzacions automàticament cada 15 segons a tots els mòbils.</p>
+            <button type="button" onclick="saveCloudConfig()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-sm transition">
+              Guardar Connexió Cloud
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- NOVA PESTANYA 10: CONTACTE I SUPORT        -->
+    <!-- ========================================== -->
+    <section id="section-contacte" class="tab-content hidden">
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+        <div class="bg-gradient-to-r from-sky-800 via-sky-700 to-teal-600 p-6 text-white">
+          <span class="bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">Suport Tècnic Oficial</span>
+          <h2 data-i18n="title_contacte" class="text-2xl font-black mt-2">Atenció de Dubtes i Incidències</h2>
+          <p class="text-sky-100 text-xs mt-1">Contacte directe amb el desenvolupament i manteniment del sistema SanyStock.</p>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3.5">
+              <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-lg flex-shrink-0">👩‍💻</div>
+              <div>
+                <div class="text-xs font-bold uppercase text-slate-400">Desenvolupadora del Projecte</div>
+                <div class="text-base font-black text-slate-800">Lorena Borrell</div>
+                <div class="text-xs text-teal-600 font-semibold">Arquitectura i Desenvolupament SanyStock</div>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3.5">
+              <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-lg flex-shrink-0">✉️</div>
+              <div>
+                <div class="text-xs font-bold uppercase text-slate-400">Correu Electrònic</div>
+                <a href="mailto:Lorena.borrell@outlook.es?subject=Incidència%20o%20Consulta%20-%20SanyStock" class="text-sm font-bold text-sky-700 hover:underline break-all">
+                  Lorena.borrell@outlook.es
+                </a>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg flex-shrink-0">📞</div>
+              <div>
+                <div class="text-xs font-bold uppercase text-slate-400">Telèfon d'Atenció Directa</div>
+                <a href="tel:+34634485244" class="text-base font-black text-slate-800 hover:text-teal-600">
+                  634 485 244
+                </a>
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-wrap gap-2.5">
+              <a href="mailto:Lorena.borrell@outlook.es?subject=Suport%20SanyStock" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition inline-flex items-center gap-1.5">
+                ✉️ Enviar Correu
+              </a>
+              <a href="tel:+34634485244" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition inline-flex items-center gap-1.5">
+                📲 Trucar Ara
+              </a>
+            </div>
+          </div>
+
+          <!-- Formulari ràpid per enviar incidència per correu -->
+          <form onsubmit="sendSupportEmail(event)" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-sky-900">Enviar tiquet ràpid d'incidència</h4>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tipus de consulta</label>
+              <select id="sup-tipus" class="w-full rounded-xl border-slate-300 border p-2 text-xs bg-white">
+                <option value="Incidència Tècnica">🔧 Incidència Tècnica</option>
+                <option value="Dubte d'Ús">❓ Dubte sobre el funcionament</option>
+                <option value="Suggeriment de Millora">💡 Suggeriment de Millora</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Descripció del missatge *</label>
+              <textarea id="sup-missatge" rows="3" required placeholder="Escriu aquí el teu dubte o incidència..." class="w-full rounded-xl border-slate-300 border p-2 text-xs bg-white"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl text-xs transition">
+              Generar i Enviar Missatge a Lorena Borrell
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ========================================== -->
   <!-- MODALS D'ENREGISTRAMENT I EDICIÓ           -->
   <!-- ========================================== -->
 
-  <!-- MODAL 1: CATÀLEG (Amb camp Vacuna i camp Nom comercial/Marca separats) -->
+  <!-- MODAL 1: CATÀLEG -->
   <div id="modal-cataleg" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
-        <h3 id="modal-cataleg-title" class="font-bold text-base flex items-center gap-2">
-          <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          Nou Registre de Vacuna
-        </h3>
+        <h3 id="modal-cataleg-title" class="font-bold text-base">Nou Registre de Vacuna</h3>
         <button onclick="closeModal('modal-cataleg')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
       </div>
       <form id="form-cataleg" onsubmit="saveCataleg(event)" class="p-6 space-y-4">
@@ -514,48 +762,42 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
             <div class="flex gap-1.5">
-              <input type="text" id="cat-codi" required placeholder="Ex. VAC001" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-              <button type="button" onclick="startQRScanner('cat-codi')" title="Escanejar Codi amb Càmera" class="bg-sky-100 hover:bg-sky-200 text-sky-800 px-3 rounded-xl border border-sky-300 flex items-center justify-center transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-              </button>
+              <input type="text" id="cat-codi" required placeholder="Ex. VAC001" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <button type="button" onclick="startQRScanner('cat-codi')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 px-3 rounded-xl border border-sky-300 flex items-center justify-center">📷</button>
             </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor</label>
-            <input type="text" id="cat-codiprov" placeholder="Ex. P-GSK-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="text" id="cat-codiprov" placeholder="Ex. P-GSK-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
-        <!-- NOUS CAMPS SEPARATS: Vacuna i Nom comercial/Marca -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Vacuna *</label>
-            <input type="text" id="cat-nom" required placeholder="Ex. Hexavalent" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="text" id="cat-nom" required placeholder="Ex. Hexavalent" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Nom comercial / Marca *</label>
-            <input type="text" id="cat-marca" required placeholder="Ex. Infanrix Hexa" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="text" id="cat-marca" required placeholder="Ex. Infanrix Hexa" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
-          <select id="cat-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-          </select>
+          <select id="cat-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Estoc Mínim Recomanat</label>
-            <input type="number" id="cat-minim" min="0" value="10" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="number" id="cat-minim" min="0" value="10" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Estoc Inicial Referencial</label>
-            <input type="number" id="cat-inicial" min="0" value="0" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="number" id="cat-inicial" min="0" value="0" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-cataleg')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar fitxa</button>
+          <button type="button" onclick="closeModal('modal-cataleg')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Guardar fitxa</button>
         </div>
       </form>
     </div>
@@ -563,7 +805,7 @@
 
   <!-- MODAL 2: MAGATZEMS -->
   <div id="modal-magatzems" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
         <h3 id="modal-magatzems-title" class="font-bold text-base">Nou Magatzem o Nevera</h3>
         <button onclick="closeModal('modal-magatzems')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
@@ -572,19 +814,19 @@
         <input type="hidden" id="mag-id">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Magatzem *</label>
-          <input type="text" id="mag-codi" required placeholder="Ex. MAG-01 o NEV-PRINC" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <input type="text" id="mag-codi" required placeholder="Ex. MAG-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Nom del Magatzem *</label>
-          <input type="text" id="mag-nom" required placeholder="Ex. Magatzem 1 - Nevera Principal Farmàcia" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <input type="text" id="mag-nom" required placeholder="Ex. Magatzem 1 - Nevera Principal" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Ubicació Tècnica</label>
-          <input type="text" id="mag-ubicacio" placeholder="Ex. Planta Baixa - Mòdul Pediatria" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <input type="text" id="mag-ubicacio" placeholder="Ex. Planta Baixa" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-magatzems')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar Magatzem</button>
+          <button type="button" onclick="closeModal('modal-magatzems')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Guardar Magatzem</button>
         </div>
       </form>
     </div>
@@ -592,7 +834,7 @@
 
   <!-- MODAL 3: PROVEÏDORS -->
   <div id="modal-proveidors" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
         <h3 id="modal-proveidors-title" class="font-bold text-base">Nou Registre de Proveïdor</h3>
         <button onclick="closeModal('modal-proveidors')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
@@ -602,42 +844,42 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor *</label>
-            <input type="text" id="prov-codi" required placeholder="Ex. PROV01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="text" id="prov-codi" required placeholder="Ex. PROV01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Data d'Alta *</label>
-            <input type="date" id="prov-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="date" id="prov-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Nom Comercial / Laboratori *</label>
-          <input type="text" id="prov-nom" required placeholder="Ex. Sanofi Pasteur / GSK" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <input type="text" id="prov-nom" required placeholder="Ex. Sanofi Pasteur / GSK" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Telèfon de Contacte</label>
-            <input type="tel" id="prov-telefon" placeholder="+34 930 000 000" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="tel" id="prov-telefon" placeholder="+34 930 000 000" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Persona de Contacte</label>
-            <input type="text" id="prov-contacte" placeholder="Ex. Laura Martí (Delegada)" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="text" id="prov-contacte" placeholder="Ex. Laura Martí" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Ubicació / Seu</label>
-          <input type="text" id="prov-ubicacio" placeholder="Ex. Sant Cugat del Vallès, Barcelona" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <input type="text" id="prov-ubicacio" placeholder="Ex. Barcelona" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-proveidors')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar Proveïdor</button>
+          <button type="button" onclick="closeModal('modal-proveidors')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Guardar Proveïdor</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 4: MOVIMENTS (Amb opció d'Estoc Inicial, Traspàs i Consum) -->
+  <!-- MODAL 4: MOVIMENTS -->
   <div id="modal-moviments" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
         <h3 class="font-bold text-base">Nou Moviment de Vacunes</h3>
         <button onclick="closeModal('modal-moviments')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
@@ -646,11 +888,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
-            <input type="date" id="mov-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <input type="date" id="mov-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Tipus de Moviment *</label>
-            <select id="mov-tipus" required onchange="toggleMovimentFields()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-semibold text-sky-900">
+            <select id="mov-tipus" required onchange="toggleMovimentFields()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold text-sky-900">
               <option value="Traspàs">Traspàs entre magatzems</option>
               <option value="Consum">Consum Clínic / Administració</option>
               <option value="Estoc Inicial">Estoc Inicial</option>
@@ -658,69 +900,39 @@
           </div>
         </div>
 
-        <!-- BLOC A: Selecció de Lot ja existent (per a Traspàs i Consum) -->
         <div id="block-mov-existent" class="space-y-4">
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-semibold text-slate-700">Seleccionar Lot disponible en Inventari *</label>
-              <button type="button" onclick="startQRScanner('mov-lot')" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300 flex items-center gap-1 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                Escanejar QR Vacuna/Lot
-              </button>
+              <button type="button" onclick="startQRScanner('mov-lot')" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300">📷 Escanejar QR</button>
             </div>
-            <select id="mov-lot-select" onchange="onMovimentLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-sky-50/50">
-            </select>
+            <select id="mov-lot-select" onchange="onMovimentLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-sky-50/50"></select>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
-            <div>
-              <span class="text-slate-500 block">Codi:</span>
-              <span id="mov-prev-codi" class="font-semibold text-slate-800">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500 block">Vacuna:</span>
-              <span id="mov-prev-nom" class="font-semibold text-slate-800">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500 block">Marca:</span>
-              <span id="mov-prev-marca" class="font-semibold text-teal-700">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500 block">Caducitat:</span>
-              <span id="mov-prev-caducitat" class="font-semibold text-slate-800">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500 block">Magatzem Origen:</span>
-              <span id="mov-prev-origen" class="font-semibold text-sky-800">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500 block">Estoc actual:</span>
-              <span id="mov-prev-disponible" class="font-bold text-emerald-700">0</span>
-            </div>
+            <div><span class="text-slate-500 block">Codi:</span><span id="mov-prev-codi" class="font-semibold">-</span></div>
+            <div><span class="text-slate-500 block">Vacuna:</span><span id="mov-prev-nom" class="font-semibold">-</span></div>
+            <div><span class="text-slate-500 block">Marca:</span><span id="mov-prev-marca" class="font-semibold text-teal-700">-</span></div>
+            <div><span class="text-slate-500 block">Caducitat:</span><span id="mov-prev-caducitat" class="font-semibold">-</span></div>
+            <div><span class="text-slate-500 block">Origen:</span><span id="mov-prev-origen" class="font-semibold text-sky-800">-</span></div>
+            <div><span class="text-slate-500 block">Estoc actual:</span><span id="mov-prev-disponible" class="font-bold text-emerald-700">0</span></div>
           </div>
         </div>
 
-        <!-- BLOC B: Camps per registrar un Estoc Inicial nou -->
         <div id="block-mov-inicial" class="hidden space-y-4 bg-teal-50/40 p-3.5 rounded-xl border border-teal-100">
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-semibold text-slate-700">Selecciona Vacuna del Catàleg *</label>
-              <button type="button" onclick="startQRScanner('mov-ini-vacuna')" class="text-xs bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold px-2.5 py-1 rounded-lg border border-teal-300 flex items-center gap-1 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                Escanejar QR
-              </button>
+              <button type="button" onclick="startQRScanner('mov-ini-vacuna')" class="text-xs bg-teal-100 text-teal-800 font-bold px-2.5 py-1 rounded-lg border border-teal-300">📷 QR</button>
             </div>
-            <select id="mov-ini-vacuna" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-white">
-            </select>
+            <select id="mov-ini-vacuna" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-white"></select>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Lot Inicial *</label>
               <div class="flex gap-1.5">
-                <input type="text" id="mov-ini-lot" placeholder="Ex. LOT-2026A" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase bg-white">
-                <button type="button" onclick="startQRScanner('mov-ini-lot')" title="Escanejar QR del Lot" class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 rounded-xl border border-teal-300 flex items-center justify-center transition">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                </button>
+                <input type="text" id="mov-ini-lot" placeholder="LOT-2026A" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase bg-white">
+                <button type="button" onclick="startQRScanner('mov-ini-lot')" class="bg-teal-100 text-teal-800 px-3 rounded-xl border border-teal-300">📷</button>
               </div>
             </div>
             <div>
@@ -730,36 +942,32 @@
           </div>
         </div>
 
-        <!-- Si és Traspàs o Estoc Inicial: Magatzem de Destinació -->
         <div id="field-mov-traspas">
           <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem de Destinació *</label>
-          <select id="mov-destinacio" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-          </select>
+          <select id="mov-destinacio" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
         </div>
 
-        <!-- Si és Consum: Codi SUM / Pacients -->
         <div id="field-mov-consum" class="hidden space-y-2">
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Codi SUM / Pacient (ex. PAC1234 o diversos separats per comes)</label>
-          <input type="text" id="mov-sum" oninput="updateConsumUnitsFromSUM()" placeholder="PAC1001, PAC1002" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-          <p class="text-[11px] text-slate-500">Si registres diversos codis de pacient separats per comes, es comptabilitzaran automàticament com a múltiples unitats consumides.</p>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Codi SUM / Pacient (separats per comes)</label>
+          <input type="text" id="mov-sum" oninput="updateConsumUnitsFromSUM()" placeholder="PAC1001, PAC1002" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
 
         <div>
-          <label id="label-mov-unitats" class="block text-xs font-semibold text-slate-700 mb-1">Unitats a moure / consumir *</label>
-          <input type="number" id="mov-unitats" min="1" value="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          <label id="label-mov-unitats" class="block text-xs font-semibold text-slate-700 mb-1">Unitats *</label>
+          <input type="number" id="mov-unitats" min="1" value="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
         </div>
 
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-moviments')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Executar Moviment</button>
+          <button type="button" onclick="closeModal('modal-moviments')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Executar Moviment</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 5: COMANDES (NOVA COMANDA) -->
+  <!-- MODAL 5: COMANDES -->
   <div id="modal-comandes" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
         <h3 id="modal-comandes-title" class="font-bold text-base">Nova Comanda a Proveïdor</h3>
         <button onclick="closeModal('modal-comandes')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
@@ -776,40 +984,31 @@
             <input type="text" id="cmd-num" required placeholder="Ex. COM-2026-089" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
-          <select id="cmd-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-          </select>
+          <select id="cmd-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
         </div>
-
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="block text-xs font-semibold text-slate-700">Selecciona Vacuna del Catàleg *</label>
-            <button type="button" onclick="startQRScanner('cmd-vacuna')" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300 flex items-center gap-1 transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-              Escanejar QR Vacuna
-            </button>
+            <button type="button" onclick="startQRScanner('cmd-vacuna')" class="text-xs bg-sky-100 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300">📷 QR</button>
           </div>
-          <select id="cmd-vacuna-select" required onchange="onComandaVacunaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-          </select>
+          <select id="cmd-vacuna-select" required onchange="onComandaVacunaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna</label>
-            <input type="text" id="cmd-codivac" readonly class="w-full rounded-xl bg-slate-100 border-slate-300 border p-2.5 text-sm text-slate-600">
+            <input type="text" id="cmd-codivac" readonly class="w-full rounded-xl bg-slate-100 border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor</label>
-            <input type="text" id="cmd-codiprov" readonly class="w-full rounded-xl bg-slate-100 border-slate-300 border p-2.5 text-sm text-slate-600">
+            <input type="text" id="cmd-codiprov" readonly class="w-full rounded-xl bg-slate-100 border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats *</label>
             <input type="number" id="cmd-unitats" min="1" value="50" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Estat de la Comanda</label>
           <select id="cmd-estat" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold">
@@ -818,27 +1017,22 @@
             <option value="Recepcionat">Recepcionat</option>
           </select>
         </div>
-
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-comandes')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm transition">Guardar Comanda</button>
+          <button type="button" onclick="closeModal('modal-comandes')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Guardar Comanda</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 6: RECEPCIÓ DE COMANDA (ENTRADA DIRECTA A INVENTARI) -->
+  <!-- MODAL 6: RECEPCIÓ -->
   <div id="modal-recepcio" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-teal-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-teal-100 overflow-hidden">
       <div class="bg-teal-700 px-6 py-4 flex items-center justify-between text-white">
-        <h3 class="font-bold text-base flex items-center gap-2">
-          <svg class="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          Recepció d'Albarà i Entrada d'Estoc
-        </h3>
+        <h3 class="font-bold text-base">Recepció d'Albarà i Entrada d'Estoc</h3>
         <button onclick="closeModal('modal-recepcio')" class="text-white hover:text-teal-200 text-lg font-bold">&times;</button>
       </div>
       <form id="form-recepcio" onsubmit="saveRecepcio(event)" class="p-6 space-y-4">
-        
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Data Recepció *</label>
@@ -849,27 +1043,22 @@
             <input type="text" id="rec-albara" required placeholder="ALB-98442" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Comanda Associada</label>
-            <select id="rec-comanda-select" onchange="onRecepcioComandaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-            </select>
+            <select id="rec-comanda-select" onchange="onRecepcioComandaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
-            <input type="text" id="rec-proveidor" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm text-slate-700">
+            <input type="text" id="rec-proveidor" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
             <div class="flex gap-1.5">
               <input type="text" id="rec-codi" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
-              <button type="button" onclick="startQRScanner('rec-codi')" title="Escanejar QR Codi Vacuna" class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 rounded-xl border border-teal-300 flex items-center justify-center transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-              </button>
+              <button type="button" onclick="startQRScanner('rec-codi')" class="bg-teal-100 text-teal-800 px-3 rounded-xl border border-teal-300">📷</button>
             </div>
           </div>
           <div>
@@ -877,15 +1066,12 @@
             <input type="text" id="rec-vacuna" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Lot *</label>
             <div class="flex gap-1.5">
               <input type="text" id="rec-lot" required placeholder="LOT-A4389" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase">
-              <button type="button" onclick="startQRScanner('rec-lot')" title="Escanejar QR del Lot" class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 rounded-xl border border-teal-300 flex items-center justify-center transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-              </button>
+              <button type="button" onclick="startQRScanner('rec-lot')" class="bg-teal-100 text-teal-800 px-3 rounded-xl border border-teal-300">📷</button>
             </div>
           </div>
           <div>
@@ -893,30 +1079,27 @@
             <input type="date" id="rec-caducitat" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem / Nevera de destí *</label>
-            <select id="rec-magatzem" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-            </select>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem de destí *</label>
+            <select id="rec-magatzem" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats Rebudes *</label>
             <input type="number" id="rec-unitats" min="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-bold text-teal-700">
           </div>
         </div>
-
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-recepcio')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-sm transition">Confirmar Entrada d'Estoc</button>
+          <button type="button" onclick="closeModal('modal-recepcio')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-xl">Confirmar Entrada</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 7: DEVOLUCIONS I BAIXES -->
+  <!-- MODAL 7: DEVOLUCIONS -->
   <div id="modal-devolucions" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
         <h3 class="font-bold text-base">Registrar Baixa o Devolució de Vacunes</h3>
         <button onclick="closeModal('modal-devolucions')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
@@ -928,108 +1111,226 @@
             <input type="date" id="dev-data" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Núm. Baixa / Incidència *</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Núm. Baixa *</label>
             <input type="text" id="dev-num" required placeholder="BAI-2026-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
-
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="block text-xs font-semibold text-slate-700">Selecciona Lot a Donar de Baixa *</label>
-            <button type="button" onclick="startQRScanner('dev-lot')" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-2.5 py-1 rounded-lg border border-red-300 flex items-center gap-1 transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-              Escanejar QR Vacuna/Lot
-            </button>
+            <button type="button" onclick="startQRScanner('dev-lot')" class="text-xs bg-red-100 text-red-800 font-bold px-2.5 py-1 rounded-lg border border-red-300">📷 QR</button>
           </div>
-          <select id="dev-lot-select" required onchange="onDevolucioLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-          </select>
+          <select id="dev-lot-select" required onchange="onDevolucioLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl text-xs">
-          <div>
-            <span class="text-slate-500 block">Vacuna:</span>
-            <span id="dev-prev-nom" class="font-semibold text-slate-800">-</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Magatzem:</span>
-            <span id="dev-prev-magatzem" class="font-semibold text-slate-800">-</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Caducitat:</span>
-            <span id="dev-prev-caducitat" class="font-semibold text-slate-800">-</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Disponible Actualment:</span>
-            <span id="dev-prev-disponible" class="font-bold text-red-600">0</span>
-          </div>
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
+          <div><span class="text-slate-500 block">Vacuna:</span><span id="dev-prev-nom" class="font-semibold">-</span></div>
+          <div><span class="text-slate-500 block">Magatzem:</span><span id="dev-prev-magatzem" class="font-semibold">-</span></div>
+          <div><span class="text-slate-500 block">Caducitat:</span><span id="dev-prev-caducitat" class="font-semibold">-</span></div>
+          <div><span class="text-slate-500 block">Disponible:</span><span id="dev-prev-disponible" class="font-bold text-red-600">0</span></div>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Motiu de la Baixa *</label>
           <select id="dev-motiu" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold">
             <option value="Baixa per caducitat">Baixa per caducitat</option>
-            <option value="Baixa per trencament">Baixa per trencament / trencament cadena de fred</option>
+            <option value="Baixa per trencament">Baixa per trencament / cadena de fred</option>
             <option value="Devolució a proveïdor sobrants">Devolució a proveïdor sobrants</option>
           </select>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor Destinatari</label>
-            <select id="dev-proveidor" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-            </select>
+            <select id="dev-proveidor" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm"></select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats a restar *</label>
             <input type="number" id="dev-unitats" min="1" value="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-bold text-red-700">
           </div>
         </div>
-
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-devolucions')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm transition">Descomptar i Guardar Baixa</button>
+          <button type="button" onclick="closeModal('modal-devolucions')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl">Descomptar i Guardar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL 8: ESCÀNER DE CODI QR / BARRES       -->
-  <!-- ========================================== -->
+  <!-- MODAL 8: ESCÀNER DE CODI QR / BARRES -->
   <div id="modal-qr-scanner" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-sky-200 overflow-hidden">
       <div class="bg-sky-800 px-5 py-3.5 flex items-center justify-between text-white">
-        <h3 class="font-bold text-sm flex items-center gap-2">
-          <svg class="w-5 h-5 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-          Lector Òptic QR / Codi de Barres
-        </h3>
+        <h3 class="font-bold text-sm">📷 Lector Òptic QR / Codi de Barres</h3>
         <button type="button" onclick="stopQRScanner()" class="text-white hover:text-sky-200 text-xl font-bold">&times;</button>
       </div>
       <div class="p-5">
         <div id="qr-reader" class="w-full bg-slate-900 min-h-[240px] flex items-center justify-center"></div>
-        <p class="text-xs text-center text-slate-500 mt-3">Enfoca el codi QR o codi de barres de la caixa de la vacuna amb la càmera.</p>
+        <p class="text-xs text-center text-slate-500 mt-3">Enfoca el codi QR o codi de barres de la caixa de la vacuna.</p>
         <div class="mt-4 flex justify-center">
-          <button type="button" onclick="stopQRScanner()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition">
-            Tancar Càmera
-          </button>
+          <button type="button" onclick="stopQRScanner()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Tancar Càmera</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CAIXA DE MISSATGES / TOAST NOTIFICACIÓ PERSONALITZADA -->
+  <!-- TOAST NOTIFICACIÓ -->
   <div id="toastNotification" class="fixed bottom-5 right-5 z-50 flex items-center p-4 max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl transform translate-y-24 opacity-0 transition-all duration-300">
     <div id="toastIcon" class="w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-teal-600">✓</div>
     <div>
       <div id="toastTitle" class="text-xs font-bold uppercase tracking-wider text-slate-400">Notificació</div>
-      <div id="toastMessage" class="text-sm font-medium text-slate-800">Operació completada correctament.</div>
+      <div id="toastMessage" class="text-sm font-medium text-slate-800">Operació completada.</div>
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- JAVASCRIPT: LÒGICA, QR I PERSISTÈNCIA      -->
+  <!-- JAVASCRIPT: LÒGICA, CLOUD, PDF, I18N       -->
   <!-- ========================================== -->
   <script>
+    // ----------------------------------------------------
+    // 1. DICCIONARI MULTILINGÜE (CATALÀ, ESPAÑOL, ENGLISH)
+    // ----------------------------------------------------
+    const translations = {
+      ca: {
+        badge_sanitari: "Sanitari",
+        app_subtitle: "Gestió de l'Estoc Vacunal",
+        today_date: "Data d'Avui",
+        status_local: "Mode Local",
+        status_cloud: "Núvol Actiu",
+        nav_cataleg: "Catàleg",
+        nav_magatzems: "Magatzems",
+        nav_proveidors: "Proveïdors",
+        nav_moviments: "Moviments",
+        nav_comandes: "Comandes",
+        nav_devolucions: "Devolucions",
+        nav_inventari: "Inventari General",
+        nav_documents: "Documents PDF",
+        nav_ajustes: "Ajustes",
+        nav_contacte: "Contacte",
+        title_cataleg: "Catàleg General de Vacunes",
+        title_magatzems: "Configuració de Magatzems i Neveres",
+        title_proveidors: "Directori de Proveïdors i Laboratoris",
+        title_moviments: "Registre de Moviments, Estoc Inicial i Consum",
+        title_comandes: "Gestió de Comandes i Recepcions",
+        title_devolucions: "Registre de Devolucions i Baixes Sanitàries",
+        title_inventari: "Control d'Inventari per Magatzem",
+        title_documents: "Arxiu Digital de Documents PDF",
+        title_contacte: "Atenció de Dubtes i Incidències",
+        btn_new: "Nou registre",
+        btn_export: "Exportar CSV",
+        btn_print: "Imprimir",
+        settings_appearance: "Idioma i Aparença Visual",
+        settings_lang_label: "Seleccionar Idioma de l'Aplicació",
+        settings_theme_label: "Mode de Pantalla (Clar / Fosc)",
+        settings_backup: "Còpia de Seguretat (Backup)"
+      },
+      es: {
+        badge_sanitari: "Sanitario",
+        app_subtitle: "Gestión del Stock Vacunal",
+        today_date: "Fecha de Hoy",
+        status_local: "Modo Local",
+        status_cloud: "Nube Activa",
+        nav_cataleg: "Catálogo",
+        nav_magatzems: "Almacenes",
+        nav_proveidors: "Proveedores",
+        nav_moviments: "Movimientos",
+        nav_comandes: "Pedidos",
+        nav_devolucions: "Devoluciones",
+        nav_inventari: "Inventario General",
+        nav_documents: "Documentos PDF",
+        nav_ajustes: "Ajustes",
+        nav_contacte: "Contacto",
+        title_cataleg: "Catálogo General de Vacunas",
+        title_magatzems: "Configuración de Almacenes y Neveras",
+        title_proveidors: "Directorio de Proveedores y Laboratorios",
+        title_moviments: "Registro de Movimientos, Stock Inicial y Consumo",
+        title_comandes: "Gestión de Pedidos y Recepciones",
+        title_devolucions: "Registro de Devoluciones y Bajas Sanitarias",
+        title_inventari: "Control de Inventario por Almacén",
+        title_documents: "Archivo Digital de Documentos PDF",
+        title_contacte: "Atención de Dudas e Incidencias",
+        btn_new: "Nuevo registro",
+        btn_export: "Exportar CSV",
+        btn_print: "Imprimir",
+        settings_appearance: "Idioma y Apariencia Visual",
+        settings_lang_label: "Seleccionar Idioma de la Aplicación",
+        settings_theme_label: "Modo de Pantalla (Claro / Oscuro)",
+        settings_backup: "Copia de Seguridad (Backup)"
+      },
+      en: {
+        badge_sanitari: "Healthcare",
+        app_subtitle: "Vaccine Stock Management",
+        today_date: "Today's Date",
+        status_local: "Local Mode",
+        status_cloud: "Cloud Active",
+        nav_cataleg: "Catalog",
+        nav_magatzems: "Warehouses",
+        nav_proveidors: "Suppliers",
+        nav_moviments: "Movements",
+        nav_comandes: "Orders",
+        nav_devolucions: "Returns",
+        nav_inventari: "General Inventory",
+        nav_documents: "PDF Documents",
+        nav_ajustes: "Settings",
+        nav_contacte: "Contact",
+        title_cataleg: "General Vaccine Catalog",
+        title_magatzems: "Warehouses & Fridges Setup",
+        title_proveidors: "Suppliers & Laboratories Directory",
+        title_moviments: "Movements, Initial Stock & Consumption",
+        title_comandes: "Orders & Receptions Management",
+        title_devolucions: "Returns & Sanitary Write-offs",
+        title_inventari: "Warehouse Inventory Control",
+        title_documents: "Digital PDF Document Archive",
+        title_contacte: "Support & Issue Tracking",
+        btn_new: "New record",
+        btn_export: "Export CSV",
+        btn_print: "Print",
+        settings_appearance: "Language & Visual Appearance",
+        settings_lang_label: "Select Application Language",
+        settings_theme_label: "Screen Mode (Light / Dark)",
+        settings_backup: "Security Backup & Restore"
+      }
+    };
+
+    let currentLang = localStorage.getItem('SANYS_LANG') || 'ca';
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('SANYS_LANG', lang);
+      const dict = translations[lang] || translations.ca;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      ['ca', 'es', 'en'].forEach(l => {
+        const btn = document.getElementById(`lang-btn-${l}`);
+        if (btn) {
+          btn.className = l === lang
+            ? "py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-sky-600 text-white border-sky-600"
+            : "py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300";
+        }
+      });
+
+      initDateBadge();
+    }
+
+    // ----------------------------------------------------
+    // 2. MODE CLAR / FOSC (DARK MODE)
+    // ----------------------------------------------------
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('SANYS_DARK', isDark ? '1' : '0');
+      showToast('Aparença Actualitzada', isDark ? 'Mode Fosc activat.' : 'Mode Clar activat.', 'info');
+    }
+
+    function initTheme() {
+      if (localStorage.getItem('SANYS_DARK') === '1') {
+        document.body.classList.add('dark-mode');
+      }
+    }
+
+    // ----------------------------------------------------
+    // 3. ESTAT DE DADES I SINCRONITZACIÓ EN TEMPS REAL
+    // ----------------------------------------------------
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -1042,91 +1343,306 @@
       ],
       cataleg: [
         { id: 'CAT1', codi: 'VAC001', nom: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', proveidor: 'GlaxoSmithKline (GSK)', minim: 30, inicial: 100 },
-        { id: 'CAT2', codi: 'VAC002', nom: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 },
-        { id: 'CAT3', codi: 'VAC003', nom: 'Triple Vírica', marca: 'Priorix', codiProv: 'GSK-PRI', proveidor: 'GlaxoSmithKline (GSK)', minim: 20, inicial: 60 },
-        { id: 'CAT4', codi: 'VAC004', nom: 'Grip Estacional', marca: 'Vaxigrip Tetra', codiProv: 'SNF-VAX4', proveidor: 'Sanofi Pasteur', minim: 50, inicial: 150 }
+        { id: 'CAT2', codi: 'VAC002', nom: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 }
       ],
       inventari: [
         { id: 'INV1', magatzemId: 'MAG1', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 20, disponible: 45 },
-        { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 },
-        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 },
-        { id: 'INV4', magatzemId: 'MAG2', codi: 'VAC003', vacuna: 'Triple Vírica', marca: 'Priorix', codiProv: 'GSK-PRI', lot: 'PRX441', caducitat: '2026-11-20', minim: 10, disponible: 22 },
-        { id: 'INV5', magatzemId: 'MAG1', codi: 'VAC004', vacuna: 'Grip Estacional', marca: 'Vaxigrip Tetra', codiProv: 'SNF-VAX4', lot: 'VG2026X', caducitat: '2027-01-10', minim: 35, disponible: 60 }
+        { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 }
       ],
-      moviments: [
-        { id: 'MOV1', data: '2026-10-18', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', tipus: 'Traspàs', origen: 'Magatzem 1 - Nevera Principal Farmàcia', destinacio: 'Magatzem 2 - Nevera Pediatria Urgències', lot: '23K88B', caducitat: '2027-04-30', unitats: 10, detall: 'Reposició rutinària Pediatria' },
-        { id: 'MOV2', data: '2026-10-19', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', tipus: 'Consum', origen: 'Magatzem 2 - Nevera Pediatria Urgències', destinacio: 'PAC2034, PAC2035', lot: '23K88B', caducitat: '2027-04-30', unitats: 2, detall: 'Administració 2 infants' }
-      ],
-      comandes: [
-        { id: 'CMD1', data: '2026-10-10', comanda: 'COM-2026-044', proveidor: 'GlaxoSmithKline (GSK)', codiVac: 'VAC001', vacuna: 'Hexavalent (Infanrix Hexa)', codiProv: 'GSK-INF6', unitats: 50, estat: 'Recepcionat' },
-        { id: 'CMD2', data: '2026-10-15', comanda: 'COM-2026-045', proveidor: 'Pfizer Salut', codiVac: 'VAC002', vacuna: 'Pneumococ Conjugada (Prevenar 20)', codiProv: 'PFZ-P20', unitats: 40, estat: 'Pendent' }
-      ],
-      devolucions: [
-        { id: 'DEV1', data: '2026-10-12', numBaixa: 'BAI-2026-01', magatzem: 'Magatzem 1 - Nevera Principal Farmàcia', codi: 'VAC002', vacuna: 'Pneumococ Conjugada', lot: 'PF9021', motiu: 'Baixa per trencament', unitats: 2, proveidor: 'Pfizer Salut' }
-      ]
-    };
-
-    let AppState = {
-      magatzems: [],
-      proveidors: [],
-      cataleg: [],
-      inventari: [],
       moviments: [],
       comandes: [],
-      devolucions: []
+      devolucions: [],
+      updatedAt: Date.now()
     };
+
+    let AppState = {};
 
     function loadState() {
       try {
         const stored = localStorage.getItem('SANYS_DATA_v1');
-        if (stored) {
-          AppState = JSON.parse(stored);
-        } else {
-          AppState = JSON.parse(JSON.stringify(defaultData));
-          saveState();
-        }
+        AppState = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(defaultData));
       } catch (e) {
-        console.error('Error recuperant localStorage:', e);
         AppState = JSON.parse(JSON.stringify(defaultData));
       }
     }
 
     function saveState() {
+      AppState.updatedAt = Date.now();
       localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
+      pushToCloud(false); // Sincronitza automàticament amb la resta de mòbils si el núvol està configurat
     }
 
-    // Helper per obtenir la Marca d'una vacuna encara que el registre sigui antic
+    // Sincronització entre pestanyes obertes o canvis d'emmagatzematge
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'SANYS_DATA_v1') {
+        loadState();
+        renderAll();
+      }
+    });
+
+    // Conector Cloud Multi-Dispositiu (API REST / JSONBin / Back4App)
+    function saveCloudConfig() {
+      const url = document.getElementById('cloud-url').value.trim();
+      const key = document.getElementById('cloud-key').value.trim();
+      localStorage.setItem('SANYS_CLOUD_URL', url);
+      localStorage.setItem('SANYS_CLOUD_KEY', key);
+      updateCloudBadge();
+      if (url) {
+        pushToCloud(true);
+      } else {
+        showToast('Mode Local', 'S\'ha desactivat la sincronització al núvol.', 'info');
+      }
+    }
+
+    function updateCloudBadge() {
+      const url = localStorage.getItem('SANYS_CLOUD_URL') || '';
+      const dot = document.getElementById('cloudStatusDot');
+      const txt = document.getElementById('cloudStatusText');
+      document.getElementById('cloud-url').value = url;
+      document.getElementById('cloud-key').value = localStorage.getItem('SANYS_CLOUD_KEY') || '';
+
+      const dict = translations[currentLang] || translations.ca;
+      if (url) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        txt.textContent = dict.status_cloud;
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+        txt.textContent = dict.status_local;
+      }
+    }
+
+    async function pushToCloud(manual = false) {
+      const url = localStorage.getItem('SANYS_CLOUD_URL');
+      const key = localStorage.getItem('SANYS_CLOUD_KEY');
+      if (!url) {
+        if (manual) showToast('Configuració pendent', 'Introdueix primer la URL del servidor Cloud.', 'error');
+        return;
+      }
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (key) headers['X-Master-Key'] = key;
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(AppState)
+        });
+        if (res.ok && manual) {
+          showToast('Sincronitzat al Núvol', 'Tots els dispositius mòbils rebran les dades actualitzades.');
+        }
+      } catch (e) {
+        if (manual) showToast('Error de Xarxa', 'No s\'ha pogut connectar amb el servidor Cloud.', 'error');
+      }
+    }
+
+    async function pullFromCloud(manual = false) {
+      const url = localStorage.getItem('SANYS_CLOUD_URL');
+      const key = localStorage.getItem('SANYS_CLOUD_KEY');
+      if (!url) {
+        if (manual) showToast('Configuració pendent', 'Introdueix primer la URL del servidor Cloud.', 'error');
+        return;
+      }
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (key) headers['X-Master-Key'] = key;
+        const res = await fetch(url, { method: 'GET', headers });
+        if (!res.ok) throw new Error('Error HTTP');
+        const data = await res.json();
+        const remoteState = data.record || data;
+        if (remoteState && remoteState.cataleg) {
+          AppState = remoteState;
+          localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
+          renderAll();
+          if (manual) showToast('Dades Actualitzades', 'S\'han descarregat els últims canvis del núvol.');
+        }
+      } catch (e) {
+        if (manual) showToast('Error de Sincronització', 'Verifica la URL i la clau d\'accés.', 'error');
+      }
+    }
+
+    // Còpia de Seguretat (Exportar i Restaurar fitxer .JSON)
+    function downloadBackupJSON() {
+      const dataStr = JSON.stringify(AppState, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `SanyStock_Backup_${dateStr}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Còpia Creada', 'El fitxer de còpia de seguretat s\'ha descarregat.');
+    }
+
+    function restoreBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.cataleg && imported.inventari) {
+            AppState = imported;
+            saveState();
+            renderAll();
+            showToast('Còpia Restaurada', 'Totes les dades s\'han restablert correctament.');
+          } else {
+            showToast('Fitxer no vàlid', 'El fitxer no té l\'estructura de SanyStock.', 'error');
+          }
+        } catch (err) {
+          showToast('Error de lectura', 'No s\'ha pogut llegir el fitxer JSON.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ----------------------------------------------------
+    // 4. GESTOR DOCUMENTAL DE PDFs (INDEXEDDB)
+    // ----------------------------------------------------
+    let pdfDb = null;
+
+    function initPdfDatabase() {
+      const request = indexedDB.open('SanyStock_PDF_DB', 1);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('pdfs')) {
+          db.createObjectStore('pdfs', { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = (e) => {
+        pdfDb = e.target.result;
+        renderPdfDocuments();
+      };
+    }
+
+    function uploadPdfDocument(e) {
+      e.preventDefault();
+      const titol = document.getElementById('pdf-titol').value.trim();
+      const categoria = document.getElementById('pdf-categoria').value;
+      const fileInput = document.getElementById('pdf-file');
+      const file = fileInput.files[0];
+
+      if (!file || file.type !== 'application/pdf') {
+        showToast('Format incorrecte', 'Selecciona un fitxer en format PDF.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const docRecord = {
+          id: 'PDF_' + Date.now(),
+          data: new Date().toISOString().split('T')[0],
+          titol,
+          categoria,
+          fileName: file.name,
+          fileSize: (file.size / 1024).toFixed(1) + ' KB',
+          dataUrl: reader.result
+        };
+
+        const tx = pdfDb.transaction('pdfs', 'readwrite');
+        tx.objectStore('pdfs').put(docRecord);
+        tx.oncomplete = () => {
+          document.getElementById('pdf-titol').value = '';
+          fileInput.value = '';
+          renderPdfDocuments();
+          showToast('Document Guardat', `El PDF "${titol}" s'ha arxivat correctament.`);
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderPdfDocuments() {
+      if (!pdfDb) return;
+      const tbody = document.getElementById('tbody-documents');
+      tbody.innerHTML = '';
+
+      const tx = pdfDb.transaction('pdfs', 'readonly');
+      const req = tx.objectStore('pdfs').getAll();
+
+      req.onsuccess = () => {
+        const docs = req.result || [];
+        if (docs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No hi ha documents PDF arxivats. Puja el teu manual d'usuari, comandes o albarans.</td></tr>`;
+          return;
+        }
+
+        docs.slice().reverse().forEach(doc => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-sky-50/40 transition";
+          tr.innerHTML = `
+            <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(doc.data)}</td>
+            <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800">${escapeHtml(doc.categoria)}</span></td>
+            <td class="p-3.5 font-bold text-slate-800">${escapeHtml(doc.titol)}</td>
+            <td class="p-3.5 text-xs font-mono text-slate-500">${escapeHtml(doc.fileName)}</td>
+            <td class="p-3.5 text-center text-xs text-slate-600">${doc.fileSize}</td>
+            <td class="p-3.5 text-right space-x-2">
+              <button onclick="openPdfDocument('${doc.id}')" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1 rounded-lg text-xs font-semibold">Veure / Descarregar</button>
+              <button onclick="deletePdfDocument('${doc.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+    }
+
+    function openPdfDocument(id) {
+      const tx = pdfDb.transaction('pdfs', 'readonly');
+      const req = tx.objectStore('pdfs').get(id);
+      req.onsuccess = () => {
+        const doc = req.result;
+        if (!doc) return;
+        const link = document.createElement('a');
+        link.href = doc.dataUrl;
+        link.download = doc.fileName;
+        link.target = '_blank';
+        link.click();
+      };
+    }
+
+    function deletePdfDocument(id) {
+      const tx = pdfDb.transaction('pdfs', 'readwrite');
+      tx.objectStore('pdfs').delete(id);
+      tx.oncomplete = () => {
+        renderPdfDocuments();
+        showToast('PDF Eliminat', 'El document ha estat esborrat de l\'arxiu.');
+      };
+    }
+
+    // ----------------------------------------------------
+    // 5. FORMULARI DE CONTACTE (LORENA BORRELL)
+    // ----------------------------------------------------
+    function sendSupportEmail(e) {
+      e.preventDefault();
+      const tipus = document.getElementById('sup-tipus').value;
+      const missatge = document.getElementById('sup-missatge').value.trim();
+      const subject = encodeURIComponent(`[SanyStock - ${tipus}] Consulta d'usuari`);
+      const body = encodeURIComponent(`Hola Lorena,\n\nTipus d'avís: ${tipus}\n\nDetall:\n${missatge}\n\nEnviat des de SanyStock.`);
+      window.location.href = `mailto:Lorena.borrell@outlook.es?subject=${subject}&body=${body}`;
+      showToast('Obrint Correu', 'S\'ha preparat el missatge per a Lorena Borrell.');
+    }
+
+    // ----------------------------------------------------
+    // 6. LECTOR QR I LÒGICA GENERAL DE L'APLICACIÓ
+    // ----------------------------------------------------
     function getMarcaByCodi(codi, fallbackMarca) {
       if (fallbackMarca) return fallbackMarca;
       const cat = AppState.cataleg.find(c => c.codi === codi);
       return cat && cat.marca ? cat.marca : '-';
     }
 
-    // ----------------------------------------------------
-    // SISTEMA LECTOR DE QR I CODIS DE BARRES (HTML5-QRCODE)
-    // ----------------------------------------------------
     let html5QrCodeInstance = null;
     let currentQrTarget = null;
 
     function startQRScanner(targetField) {
       currentQrTarget = targetField;
       document.getElementById('modal-qr-scanner').classList.remove('hidden');
-
-      if (!html5QrCodeInstance) {
-        html5QrCodeInstance = new Html5Qrcode("qr-reader");
-      }
-
-      const config = { fps: 10, qrbox: { width: 220, height: 150 } };
+      if (!html5QrCodeInstance) html5QrCodeInstance = new Html5Qrcode("qr-reader");
 
       html5QrCodeInstance.start(
         { facingMode: "environment" },
-        config,
-        (decodedText) => {
-          handleQRCodeResult(decodedText.trim());
-        },
-        (errorMessage) => {}
-      ).catch((err) => {
-        console.error("No s'ha pogut iniciar la càmera:", err);
+        { fps: 10, qrbox: { width: 220, height: 150 } },
+        (decodedText) => handleQRCodeResult(decodedText.trim()),
+        () => {}
+      ).catch(() => {
         showToast("Error de Càmera", "Revisa els permisos de càmera del navegador.", "error");
         stopQRScanner();
       });
@@ -1134,10 +1650,7 @@
 
     function stopQRScanner() {
       if (html5QrCodeInstance && html5QrCodeInstance.isScanning) {
-        html5QrCodeInstance.stop().then(() => {
-          document.getElementById('modal-qr-scanner').classList.add('hidden');
-        }).catch((err) => {
-          console.error("Error aturant càmera:", err);
+        html5QrCodeInstance.stop().finally(() => {
           document.getElementById('modal-qr-scanner').classList.add('hidden');
         });
       } else {
@@ -1151,99 +1664,52 @@
 
       if (currentQrTarget === 'cat-codi') {
         document.getElementById('cat-codi').value = cleanCode;
-        showToast('Codi Escanejat', `Codi assignat: ${cleanCode}`);
-      }
-      else if (currentQrTarget === 'mov-lot') {
-        const foundInv = AppState.inventari.find(i => 
-          i.lot.toUpperCase() === cleanCode || 
-          i.codi.toUpperCase() === cleanCode ||
-          cleanCode.includes(i.lot.toUpperCase())
-        );
+        showToast('Codi Escanejat', cleanCode);
+      } else if (currentQrTarget === 'mov-lot') {
+        const foundInv = AppState.inventari.find(i => i.lot.toUpperCase() === cleanCode || i.codi.toUpperCase() === cleanCode);
         if (foundInv) {
           document.getElementById('mov-lot-select').value = foundInv.id;
           onMovimentLotChange();
-          showToast('Vacuna Identificada', `${foundInv.vacuna} (Lot: ${foundInv.lot})`);
+          showToast('Vacuna Identificada', `${foundInv.vacuna} (${foundInv.lot})`);
         } else {
-          showToast('No trobat a Inventari', `El codi/lot "${cleanCode}" no consta a l'inventari actual.`, 'error');
+          showToast('No trobat', `El codi/lot "${cleanCode}" no consta a l'inventari.`, 'error');
         }
-      }
-      else if (currentQrTarget === 'mov-ini-vacuna') {
-        const foundCat = AppState.cataleg.find(c => 
-          c.codi.toUpperCase() === cleanCode || 
-          (c.codiProv && c.codiProv.toUpperCase() === cleanCode) ||
-          cleanCode.includes(c.codi.toUpperCase())
-        );
+      } else if (currentQrTarget === 'mov-ini-vacuna') {
+        const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === cleanCode);
         if (foundCat) {
           document.getElementById('mov-ini-vacuna').value = foundCat.id;
-          showToast('Vacuna Seleccionada', `${foundCat.nom} (${foundCat.marca || '-'})`);
-        } else {
-          showToast('No trobada al Catàleg', `Cap vacuna amb el codi "${cleanCode}".`, 'error');
+          showToast('Vacuna Seleccionada', foundCat.nom);
         }
-      }
-      else if (currentQrTarget === 'mov-ini-lot') {
+      } else if (currentQrTarget === 'mov-ini-lot') {
         document.getElementById('mov-ini-lot').value = cleanCode;
-        showToast('Lot Inicial Escanejat', `Lot assignat: ${cleanCode}`);
-      }
-      else if (currentQrTarget === 'cmd-vacuna') {
-        const foundCat = AppState.cataleg.find(c => 
-          c.codi.toUpperCase() === cleanCode || 
-          (c.codiProv && c.codiProv.toUpperCase() === cleanCode) ||
-          cleanCode.includes(c.codi.toUpperCase())
-        );
+      } else if (currentQrTarget === 'cmd-vacuna') {
+        const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === cleanCode);
         if (foundCat) {
           document.getElementById('cmd-vacuna-select').value = foundCat.id;
           onComandaVacunaChange();
-          showToast('Vacuna Seleccionada', foundCat.nom);
-        } else {
-          showToast('No trobada al Catàleg', `Cap vacuna amb el codi "${cleanCode}".`, 'error');
         }
-      }
-      else if (currentQrTarget === 'rec-codi') {
+      } else if (currentQrTarget === 'rec-codi') {
         document.getElementById('rec-codi').value = cleanCode;
-        const foundCat = AppState.cataleg.find(c => 
-          c.codi.toUpperCase() === cleanCode || 
-          (c.codiProv && c.codiProv.toUpperCase() === cleanCode)
-        );
-        if (foundCat) {
-          document.getElementById('rec-codi').value = foundCat.codi;
-          document.getElementById('rec-vacuna').value = foundCat.nom;
-          document.getElementById('rec-proveidor').value = foundCat.proveidor || '';
-          showToast('Vacuna Reconeguda', foundCat.nom);
-        } else {
-          showToast('Codi Llegit', `Codi registrat: ${cleanCode}`);
-        }
-      }
-      else if (currentQrTarget === 'rec-lot') {
+      } else if (currentQrTarget === 'rec-lot') {
         document.getElementById('rec-lot').value = cleanCode;
-        showToast('Lot Escanejat', `Lot assignat: ${cleanCode}`);
-      }
-      else if (currentQrTarget === 'dev-lot') {
-        const foundInv = AppState.inventari.find(i => 
-          i.lot.toUpperCase() === cleanCode || 
-          i.codi.toUpperCase() === cleanCode ||
-          cleanCode.includes(i.lot.toUpperCase())
-        );
+      } else if (currentQrTarget === 'dev-lot') {
+        const foundInv = AppState.inventari.find(i => i.lot.toUpperCase() === cleanCode || i.codi.toUpperCase() === cleanCode);
         if (foundInv) {
           document.getElementById('dev-lot-select').value = foundInv.id;
           onDevolucioLotChange();
-          showToast('Lot Identificat per a Baixa', `${foundInv.vacuna} (Lot: ${foundInv.lot})`);
-        } else {
-          showToast('Lot no localitzat', `No s'ha trobat "${cleanCode}" en estoc.`, 'error');
         }
-      }
-      else if (currentQrTarget === 'inventari-search') {
+      } else if (currentQrTarget === 'inventari-search') {
         document.getElementById('invSearchInput').value = cleanCode;
         renderInventari();
-        showToast('Filtre QR Aplicat', `Mostrant resultats per: ${cleanCode}`, 'info');
       }
     }
 
-    // ----------------------------------------------------
-    // INICIALITZACIÓ I DATA ACTUAL EN CATALÀ
-    // ----------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
       loadState();
-      initDateBadge();
+      initPdfDatabase();
+      changeLanguage(currentLang);
+      updateCloudBadge();
       populateDropdowns();
       renderAll();
 
@@ -1252,43 +1718,44 @@
         const el = document.getElementById(id);
         if (el) el.value = todayISO;
       });
+
+      // Sincronització automàtica en segon pla cada 15 segons si hi ha núvol actiu
+      setInterval(() => {
+        if (localStorage.getItem('SANYS_CLOUD_URL')) {
+          pullFromCloud(false);
+        }
+      }, 15000);
     });
 
     function initDateBadge() {
       const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const dateStr = now.toLocaleDateString('ca-ES', options);
-      const formatted = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-      document.getElementById('currentDateBadge').textContent = formatted;
+      const localeMap = { ca: 'ca-ES', es: 'es-ES', en: 'en-GB' };
+      const dateStr = now.toLocaleDateString(localeMap[currentLang] || 'ca-ES', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+      document.getElementById('currentDateBadge').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     }
 
-    // ----------------------------------------------------
-    // CONTROL DE NAVEGACIÓ ENTRE PESTANYES
-    // ----------------------------------------------------
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(section => section.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-sky-100', 'text-sky-900', 'font-bold', 'border-sky-300');
-        btn.classList.add('text-slate-600');
+      document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-sky-100', 'text-sky-900', 'font-bold');
+        b.classList.add('text-slate-600');
       });
 
-      const activeSection = document.getElementById(`section-${tabId}`);
-      if (activeSection) activeSection.classList.remove('hidden');
+      const sec = document.getElementById(`section-${tabId}`);
+      if (sec) sec.classList.remove('hidden');
 
-      const activeBtn = document.getElementById(`tab-${tabId}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('text-slate-600');
-        activeBtn.classList.add('bg-sky-100', 'text-sky-900', 'font-bold');
+      const btn = document.getElementById(`tab-${tabId}`);
+      if (btn) {
+        btn.classList.remove('text-slate-600');
+        btn.classList.add('bg-sky-100', 'text-sky-900', 'font-bold');
       }
 
-      if (tabId === 'inventari') {
-        renderInventari();
-      }
+      if (tabId === 'inventari') renderInventari();
+      if (tabId === 'documents') renderPdfDocuments();
     }
 
-    // ----------------------------------------------------
-    // RENDERITZACIÓ DE TOTES LES TAULES
-    // ----------------------------------------------------
     function renderAll() {
       renderCataleg();
       renderMagatzems();
@@ -1300,423 +1767,271 @@
       populateDropdowns();
     }
 
-    // 1. CATÀLEG
     function renderCataleg() {
       const tbody = document.getElementById('tbody-cataleg');
       tbody.innerHTML = '';
-
       if (AppState.cataleg.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha vacunes registrades al catàleg.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha vacunes registrades.</td></tr>`;
         return;
       }
-
       AppState.cataleg.forEach(item => {
-        const totalDisponible = AppState.inventari
-          .filter(inv => inv.codi === item.codi)
-          .reduce((sum, inv) => sum + Number(inv.disponible), 0);
-
+        const totalDisp = AppState.inventari.filter(i => i.codi === item.codi).reduce((s, i) => s + Number(i.disponible), 0);
         const tr = document.createElement('tr');
         tr.className = "hover:bg-sky-50/40 transition";
         tr.innerHTML = `
           <td class="p-3.5 font-bold text-sky-900">${escapeHtml(item.codi)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(item.nom)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(item.nom)}</td>
           <td class="p-3.5 font-semibold text-teal-700">${escapeHtml(item.marca || '-')}</td>
           <td class="p-3.5 text-slate-600">${escapeHtml(item.proveidor)}</td>
-          <td class="p-3.5 text-slate-500 font-mono text-xs">${escapeHtml(item.codiProv || '-')}</td>
-          <td class="p-3.5 text-center font-semibold text-slate-700">${item.minim} uts.</td>
-          <td class="p-3.5 text-center text-slate-600">${item.inicial || 0} uts.</td>
-          <td class="p-3.5 text-center">
-            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${totalDisponible < item.minim ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
-              ${totalDisponible} uts.
-            </span>
-          </td>
+          <td class="p-3.5 font-mono text-xs">${escapeHtml(item.codiProv || '-')}</td>
+          <td class="p-3.5 text-center font-semibold">${item.minim} uts.</td>
+          <td class="p-3.5 text-center">${item.inicial || 0} uts.</td>
+          <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${totalDisp < item.minim ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${totalDisp} uts.</span></td>
           <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editCataleg('${item.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+            <button onclick="editCataleg('${item.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 2. MAGATZEMS
     function renderMagatzems() {
       const tbody = document.getElementById('tbody-magatzems');
       tbody.innerHTML = '';
-
-      if (AppState.magatzems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">No hi ha magatzems configurats.</td></tr>`;
-        return;
-      }
-
       AppState.magatzems.forEach(m => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
         tr.innerHTML = `
-          <td class="p-3.5 font-bold text-sky-900 font-mono">${escapeHtml(m.codi)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(m.nom)}</td>
+          <td class="p-3.5 font-bold font-mono">${escapeHtml(m.codi)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(m.nom)}</td>
           <td class="p-3.5 text-slate-600">${escapeHtml(m.ubicacio || '-')}</td>
           <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editMagatzem('${m.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+            <button onclick="editMagatzem('${m.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 3. PROVEÏDORS
     function renderProveidors() {
       const tbody = document.getElementById('tbody-proveidors');
       tbody.innerHTML = '';
-
-      if (AppState.proveidors.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">No hi ha proveïdors registrats.</td></tr>`;
-        return;
-      }
-
       AppState.proveidors.forEach(p => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
         tr.innerHTML = `
-          <td class="p-3.5 font-bold text-sky-900 font-mono">${escapeHtml(p.codi)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(p.nom)}</td>
-          <td class="p-3.5 text-slate-600 text-xs">${formatDateDMY(p.dataAlta)}</td>
-          <td class="p-3.5 text-slate-600 font-mono text-xs">${escapeHtml(p.telefon || '-')}</td>
-          <td class="p-3.5 text-slate-700">${escapeHtml(p.contacte || '-')}</td>
-          <td class="p-3.5 text-slate-500 text-xs">${escapeHtml(p.ubicacio || '-')}</td>
+          <td class="p-3.5 font-bold font-mono">${escapeHtml(p.codi)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(p.nom)}</td>
+          <td class="p-3.5 text-xs">${formatDateDMY(p.dataAlta)}</td>
+          <td class="p-3.5 font-mono text-xs">${escapeHtml(p.telefon || '-')}</td>
+          <td class="p-3.5">${escapeHtml(p.contacte || '-')}</td>
+          <td class="p-3.5 text-xs">${escapeHtml(p.ubicacio || '-')}</td>
           <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editProveidor('${p.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+            <button onclick="editProveidor('${p.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 4. MOVIMENTS
     function renderMoviments() {
       const tbody = document.getElementById('tbody-moviments');
       tbody.innerHTML = '';
-
-      if (AppState.moviments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">No s'ha registrat cap moviment de vacunes.</td></tr>`;
-        return;
-      }
-
       AppState.moviments.slice().reverse().forEach(mov => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
-        let badgeStyle = 'bg-sky-100 text-sky-800';
-        if (mov.tipus === 'Consum') badgeStyle = 'bg-purple-100 text-purple-800';
-        if (mov.tipus === 'Estoc Inicial') badgeStyle = 'bg-emerald-100 text-emerald-800';
-
         const marcaText = getMarcaByCodi(mov.codi, mov.marca);
-
         tr.innerHTML = `
-          <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(mov.data)}</td>
-          <td class="p-3.5 font-mono text-xs font-bold text-sky-900">${escapeHtml(mov.codi)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(mov.vacuna)}</td>
+          <td class="p-3.5 text-xs">${formatDateDMY(mov.data)}</td>
+          <td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(mov.codi)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(mov.vacuna)}</td>
           <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
-          <td class="p-3.5">
-            <span class="px-2 py-0.5 rounded-md text-xs font-semibold ${badgeStyle}">
-              ${escapeHtml(mov.tipus)}
-            </span>
-          </td>
-          <td class="p-3.5 text-xs text-slate-600">${escapeHtml(mov.origen)}</td>
-          <td class="p-3.5 text-xs font-medium text-slate-700">${escapeHtml(mov.destinacio || mov.detall || '-')}</td>
-          <td class="p-3.5 font-mono text-xs text-teal-800 font-semibold">${escapeHtml(mov.lot)}</td>
-          <td class="p-3.5 text-xs text-slate-500">${formatDateDMY(mov.caducitat)}</td>
-          <td class="p-3.5 text-center font-bold text-slate-800">${mov.unitats}</td>
-          <td class="p-3.5 text-right no-print">
-            <button onclick="deleteItem('moviments', '${mov.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Eliminar</button>
-          </td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800">${escapeHtml(mov.tipus)}</span></td>
+          <td class="p-3.5 text-xs">${escapeHtml(mov.origen)}</td>
+          <td class="p-3.5 text-xs font-medium">${escapeHtml(mov.destinacio || '-')}</td>
+          <td class="p-3.5 font-mono text-xs font-semibold">${escapeHtml(mov.lot)}</td>
+          <td class="p-3.5 text-xs">${formatDateDMY(mov.caducitat)}</td>
+          <td class="p-3.5 text-center font-bold">${mov.unitats}</td>
+          <td class="p-3.5 text-right no-print"><button onclick="deleteItem('moviments', '${mov.id}')" class="text-red-500 font-semibold text-xs">Eliminar</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 5. COMANDES
     function renderComandes() {
       const tbody = document.getElementById('tbody-comandes');
       tbody.innerHTML = '';
-
-      if (AppState.comandes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha comandes en curs ni històriques.</td></tr>`;
-        return;
-      }
-
       AppState.comandes.slice().reverse().forEach(c => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
-        let badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
-        if (c.estat === 'Recepcionat') badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-        if (c.estat === 'Recepció parcial') badgeColor = 'bg-blue-100 text-blue-800 border-blue-300';
-
         tr.innerHTML = `
-          <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(c.data)}</td>
-          <td class="p-3.5 font-bold text-sky-900 font-mono text-xs">${escapeHtml(c.comanda)}</td>
-          <td class="p-3.5 text-slate-700">${escapeHtml(c.proveidor)}</td>
-          <td class="p-3.5 text-xs font-mono text-slate-500">${escapeHtml(c.codiVac)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(c.vacuna)}</td>
-          <td class="p-3.5 text-xs text-slate-500">${escapeHtml(c.codiProv || '-')}</td>
-          <td class="p-3.5 text-center font-bold text-slate-800">${c.unitats}</td>
-          <td class="p-3.5 text-center">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}">
-              ${escapeHtml(c.estat)}
-            </span>
-          </td>
+          <td class="p-3.5 text-xs">${formatDateDMY(c.data)}</td>
+          <td class="p-3.5 font-bold font-mono text-xs">${escapeHtml(c.comanda)}</td>
+          <td class="p-3.5">${escapeHtml(c.proveidor)}</td>
+          <td class="p-3.5 text-xs font-mono">${escapeHtml(c.codiVac)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(c.vacuna)}</td>
+          <td class="p-3.5 text-xs">${escapeHtml(c.codiProv || '-')}</td>
+          <td class="p-3.5 text-center font-bold">${c.unitats}</td>
+          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">${escapeHtml(c.estat)}</span></td>
           <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editComanda('${c.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+            <button onclick="editComanda('${c.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 6. DEVOLUCIONS
     function renderDevolucions() {
       const tbody = document.getElementById('tbody-devolucions');
       tbody.innerHTML = '';
-
-      if (AppState.devolucions.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No hi ha registres de devolucions o baixes.</td></tr>`;
-        return;
-      }
-
       AppState.devolucions.slice().reverse().forEach(d => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
         tr.innerHTML = `
-          <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(d.data)}</td>
+          <td class="p-3.5 text-xs">${formatDateDMY(d.data)}</td>
           <td class="p-3.5 font-mono text-xs font-bold text-red-900">${escapeHtml(d.numBaixa)}</td>
-          <td class="p-3.5 text-xs text-slate-700">${escapeHtml(d.magatzem)}</td>
-          <td class="p-3.5 font-mono text-xs text-slate-600">${escapeHtml(d.codi)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(d.vacuna)}</td>
-          <td class="p-3.5 font-mono text-xs text-teal-800">${escapeHtml(d.lot)}</td>
-          <td class="p-3.5 text-xs font-medium text-red-700 bg-red-50 rounded px-2 py-0.5">${escapeHtml(d.motiu)}</td>
+          <td class="p-3.5 text-xs">${escapeHtml(d.magatzem)}</td>
+          <td class="p-3.5 font-mono text-xs">${escapeHtml(d.codi)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(d.vacuna)}</td>
+          <td class="p-3.5 font-mono text-xs">${escapeHtml(d.lot)}</td>
+          <td class="p-3.5 text-xs text-red-700">${escapeHtml(d.motiu)}</td>
           <td class="p-3.5 text-center font-bold text-red-600">-${d.unitats}</td>
-          <td class="p-3.5 text-xs text-slate-600">${escapeHtml(d.proveidor || '-')}</td>
-          <td class="p-3.5 text-right no-print">
-            <button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Eliminar</button>
-          </td>
+          <td class="p-3.5 text-xs">${escapeHtml(d.proveidor || '-')}</td>
+          <td class="p-3.5 text-right no-print"><button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 font-semibold text-xs">Eliminar</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 7. INVENTARI EN TEMPS REAL
     function renderInventari() {
       const tbody = document.getElementById('tbody-inventari');
       tbody.innerHTML = '';
-
-      const filterSelect = document.getElementById('filterMagatzemSelect');
-      const selectedFilter = filterSelect ? filterSelect.value : 'TOTS';
+      const selectedFilter = document.getElementById('filterMagatzemSelect')?.value || 'TOTS';
       const searchQuery = (document.getElementById('invSearchInput')?.value || '').trim().toUpperCase();
 
       let items = AppState.inventari;
-      if (selectedFilter && selectedFilter !== 'TOTS') {
-        items = items.filter(inv => inv.magatzemId === selectedFilter);
-      }
+      if (selectedFilter !== 'TOTS') items = items.filter(i => i.magatzemId === selectedFilter);
       if (searchQuery) {
-        items = items.filter(inv => {
-          const marca = getMarcaByCodi(inv.codi, inv.marca).toUpperCase();
-          return inv.codi.toUpperCase().includes(searchQuery) ||
-                 inv.vacuna.toUpperCase().includes(searchQuery) ||
-                 marca.includes(searchQuery) ||
-                 inv.lot.toUpperCase().includes(searchQuery);
+        items = items.filter(i => {
+          const m = getMarcaByCodi(i.codi, i.marca).toUpperCase();
+          return i.codi.toUpperCase().includes(searchQuery) || i.vacuna.toUpperCase().includes(searchQuery) || m.includes(searchQuery) || i.lot.toUpperCase().includes(searchQuery);
         });
       }
 
-      let totalDosis = 0;
-      let alertesEstoc = 0;
-      let caducitatsProperes = 0;
-
-      const today = new Date();
+      let totalDosis = 0, alertesEstoc = 0, caducitatsProperes = 0;
       const in90Days = new Date();
-      in90Days.setDate(today.getDate() + 90);
+      in90Days.setDate(in90Days.getDate() + 90);
 
       AppState.inventari.forEach(i => {
         totalDosis += Number(i.disponible);
-        if (Number(i.disponible) <= Number(i.minim)) {
-          alertesEstoc++;
-        }
-        if (i.caducitat) {
-          const cDate = new Date(i.caducitat);
-          if (cDate <= in90Days) {
-            caducitatsProperes++;
-          }
-        }
+        if (Number(i.disponible) <= Number(i.minim)) alertesEstoc++;
+        if (i.caducitat && new Date(i.caducitat) <= in90Days) caducitatsProperes++;
       });
 
       document.getElementById('kpi-total-unitats').textContent = totalDosis;
       document.getElementById('kpi-alerta-estoc').textContent = alertesEstoc;
       document.getElementById('kpi-caducitat-propera').textContent = caducitatsProperes;
 
-      if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No hi ha estoc registrat per al filtre seleccionat.</td></tr>`;
-        return;
-      }
-
       items.forEach(inv => {
         const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-        const nomMagatzem = mag ? mag.nom : inv.magatzemId;
+        const nomMag = mag ? mag.nom : inv.magatzemId;
         const marcaText = getMarcaByCodi(inv.codi, inv.marca);
-
-        let estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Correcte</span>`;
-        if (Number(inv.disponible) <= 0) {
-          estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">Esgotat (0)</span>`;
-        } else if (Number(inv.disponible) <= Number(inv.minim)) {
-          estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">Baix Estoc</span>`;
-        }
-
-        let caducitatText = formatDateDMY(inv.caducitat);
-        if (inv.caducitat) {
-          const dCad = new Date(inv.caducitat);
-          if (dCad <= in90Days) {
-            caducitatText += ` <span class="text-[10px] bg-red-100 text-red-700 px-1 py-0.5 rounded font-bold ml-1">&lt; 90d</span>`;
-          }
-        }
+        let estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Correcte</span>`;
+        if (Number(inv.disponible) <= 0) estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Esgotat</span>`;
+        else if (Number(inv.disponible) <= Number(inv.minim)) estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Baix Estoc</span>`;
 
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
         tr.innerHTML = `
-          <td class="p-3.5 text-xs font-semibold text-sky-950">${escapeHtml(nomMagatzem)}</td>
-          <td class="p-3.5 font-mono text-xs font-bold text-sky-900">${escapeHtml(inv.codi)}</td>
-          <td class="p-3.5 font-medium text-slate-800">${escapeHtml(inv.vacuna)}</td>
+          <td class="p-3.5 text-xs font-semibold">${escapeHtml(nomMag)}</td>
+          <td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(inv.codi)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(inv.vacuna)}</td>
           <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
-          <td class="p-3.5 text-xs text-slate-500">${escapeHtml(inv.codiProv || '-')}</td>
-          <td class="p-3.5 font-mono text-xs font-bold text-teal-800 bg-teal-50 px-2 rounded inline-block my-2.5">${escapeHtml(inv.lot)}</td>
-          <td class="p-3.5 text-xs text-slate-600">${caducitatText}</td>
-          <td class="p-3.5 text-center text-xs text-slate-600">${inv.minim} uts.</td>
-          <td class="p-3.5 text-center font-black text-sm ${Number(inv.disponible) <= Number(inv.minim) ? 'text-amber-600' : 'text-slate-800'}">${inv.disponible}</td>
+          <td class="p-3.5 text-xs">${escapeHtml(inv.codiProv || '-')}</td>
+          <td class="p-3.5 font-mono text-xs font-bold text-teal-800">${escapeHtml(inv.lot)}</td>
+          <td class="p-3.5 text-xs">${formatDateDMY(inv.caducitat)}</td>
+          <td class="p-3.5 text-center text-xs">${inv.minim} uts.</td>
+          <td class="p-3.5 text-center font-black text-sm">${inv.disponible}</td>
           <td class="p-3.5 text-center">${estatBadge}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // ----------------------------------------------------
-    // ACTUALITZACIÓ DINÀMICA DE SELECTORS I DESPLEGABLES
-    // ----------------------------------------------------
     function populateDropdowns() {
-      const provSelects = ['cat-proveidor', 'cmd-proveidor', 'dev-proveidor'];
-      provSelects.forEach(id => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        const currentVal = select.value;
-        select.innerHTML = '<option value="">-- Selecciona Proveïdor --</option>';
+      ['cat-proveidor', 'cmd-proveidor', 'dev-proveidor'].forEach(id => {
+        const s = document.getElementById(id);
+        if (!s) return;
+        const val = s.value;
+        s.innerHTML = '<option value="">-- Selecciona Proveïdor --</option>';
         AppState.proveidors.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p.nom;
-          opt.textContent = `${p.nom} (${p.codi})`;
-          select.appendChild(opt);
+          s.innerHTML += `<option value="${escapeHtml(p.nom)}">${escapeHtml(p.nom)} (${escapeHtml(p.codi)})</option>`;
         });
-        if (currentVal) select.value = currentVal;
+        if (val) s.value = val;
       });
 
-      const magSelects = ['mov-destinacio', 'rec-magatzem'];
-      magSelects.forEach(id => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        const currentVal = select.value;
-        select.innerHTML = '<option value="">-- Selecciona Magatzem --</option>';
+      ['mov-destinacio', 'rec-magatzem'].forEach(id => {
+        const s = document.getElementById(id);
+        if (!s) return;
+        const val = s.value;
+        s.innerHTML = '<option value="">-- Selecciona Magatzem --</option>';
         AppState.magatzems.forEach(m => {
-          const opt = document.createElement('option');
-          opt.value = m.id;
-          opt.textContent = m.nom;
-          select.appendChild(opt);
+          s.innerHTML += `<option value="${m.id}">${escapeHtml(m.nom)}</option>`;
         });
-        if (currentVal) select.value = currentVal;
+        if (val) s.value = val;
       });
 
       const filterSelect = document.getElementById('filterMagatzemSelect');
       if (filterSelect) {
-        const currentFilter = filterSelect.value || 'TOTS';
-        filterSelect.innerHTML = '<option value="TOTS">Tots els Magatzems i Neveres</option>';
+        const val = filterSelect.value || 'TOTS';
+        filterSelect.innerHTML = '<option value="TOTS">Tots els Magatzems</option>';
         AppState.magatzems.forEach(m => {
-          const opt = document.createElement('option');
-          opt.value = m.id;
-          opt.textContent = m.nom;
-          filterSelect.appendChild(opt);
+          filterSelect.innerHTML += `<option value="${m.id}">${escapeHtml(m.nom)}</option>`;
         });
-        filterSelect.value = currentFilter;
+        filterSelect.value = val;
       }
 
-      // Desplegables de vacunes del Catàleg (en Comandes i en Estoc Inicial de Moviments)
-      const vacSelects = ['cmd-vacuna-select', 'mov-ini-vacuna'];
-      vacSelects.forEach(id => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        const currentVal = select.value;
-        select.innerHTML = '<option value="">-- Selecciona Vacuna del Catàleg --</option>';
+      ['cmd-vacuna-select', 'mov-ini-vacuna'].forEach(id => {
+        const s = document.getElementById(id);
+        if (!s) return;
+        const val = s.value;
+        s.innerHTML = '<option value="">-- Selecciona Vacuna --</option>';
         AppState.cataleg.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.id;
-          const marcaLabel = c.marca ? ` - ${c.marca}` : '';
-          opt.textContent = `${c.nom}${marcaLabel} (${c.codi})`;
-          select.appendChild(opt);
+          s.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom)} - ${escapeHtml(c.marca || '')} (${escapeHtml(c.codi)})</option>`;
         });
-        if (currentVal) select.value = currentVal;
+        if (val) s.value = val;
       });
 
-      populateLotsDropdowns();
-
-      const recCmdSelect = document.getElementById('rec-comanda-select');
-      if (recCmdSelect) {
-        recCmdSelect.innerHTML = '<option value="">-- Comanda lliure (sense associar) --</option>';
-        AppState.comandes.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.id;
-          opt.textContent = `${c.comanda} - ${c.vacuna} (${c.unitats} uts.) [${c.estat}]`;
-          recCmdSelect.appendChild(opt);
-        });
-      }
-    }
-
-    function populateLotsDropdowns() {
-      const movLot = document.getElementById('mov-lot-select');
-      const devLot = document.getElementById('dev-lot-select');
-
-      const buildOptions = (target) => {
-        if (!target) return;
-        target.innerHTML = '<option value="">-- Selecciona un Lot existent --</option>';
+      ['mov-lot-select', 'dev-lot-select'].forEach(id => {
+        const s = document.getElementById(id);
+        if (!s) return;
+        s.innerHTML = '<option value="">-- Selecciona un Lot existent --</option>';
         AppState.inventari.forEach(inv => {
           const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
           const nomMag = mag ? mag.nom : inv.magatzemId;
-          const marca = getMarcaByCodi(inv.codi, inv.marca);
-          const opt = document.createElement('option');
-          opt.value = inv.id;
-          opt.textContent = `Lot: ${inv.lot} | ${inv.vacuna} (${marca}) | ${nomMag} (Disp: ${inv.disponible})`;
-          target.appendChild(opt);
+          s.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} | ${escapeHtml(nomMag)} (Disp: ${inv.disponible})</option>`;
         });
-      };
+      });
 
-      buildOptions(movLot);
-      buildOptions(devLot);
-    }
-
-    // ----------------------------------------------------
-    // ACCIONS I MODALS: GUARDAR I EDITAR
-    // ----------------------------------------------------
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.remove('hidden');
-      populateDropdowns();
-      if (modalId === 'modal-moviments') {
-        toggleMovimentFields();
+      const recCmdSelect = document.getElementById('rec-comanda-select');
+      if (recCmdSelect) {
+        recCmdSelect.innerHTML = '<option value="">-- Comanda lliure --</option>';
+        AppState.comandes.forEach(c => {
+          recCmdSelect.innerHTML += `<option value="${c.id}">${escapeHtml(c.comanda)} - ${escapeHtml(c.vacuna)} (${c.unitats} uts.)</option>`;
+        });
       }
     }
 
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
-      const form = document.querySelector(`#${modalId} form`);
-      if (form) form.reset();
-      const idInput = form ? form.querySelector('input[type="hidden"]') : null;
-      if (idInput) idInput.value = '';
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      populateDropdowns();
+      if (id === 'modal-moviments') toggleMovimentFields();
     }
 
-    // Guardar o Editar Vacuna al Catàleg (amb Vacuna i Marca separats)
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+      const form = document.querySelector(`#${id} form`);
+      if (form) form.reset();
+    }
+
     function saveCataleg(e) {
       e.preventDefault();
       const id = document.getElementById('cat-id').value;
@@ -1730,33 +2045,20 @@
 
       if (id) {
         const item = AppState.cataleg.find(c => c.id === id);
-        if (item) {
-          item.codi = codi;
-          item.nom = nom;
-          item.marca = marca;
-          item.codiProv = codiProv;
-          item.proveidor = proveidor;
-          item.minim = minim;
-          item.inicial = inicial;
-          showToast('Catàleg actualitzat', 'Fitxa de vacuna modificada correctament.');
-        }
+        if (item) Object.assign(item, { codi, nom, marca, codiProv, proveidor, minim, inicial });
       } else {
-        AppState.cataleg.push({
-          id: 'CAT_' + Date.now(),
-          codi, nom, marca, codiProv, proveidor, minim, inicial
-        });
-        showToast('Nou registre', 'Vacuna i marca afegides al catàleg.');
+        AppState.cataleg.push({ id: 'CAT_' + Date.now(), codi, nom, marca, codiProv, proveidor, minim, inicial });
       }
-
       saveState();
       closeModal('modal-cataleg');
-      renderCataleg();
-      renderInventari();
+      renderAll();
+      showToast('Catàleg guardat', 'Fitxa de vacuna desada.');
     }
 
     function editCataleg(id) {
       const item = AppState.cataleg.find(c => c.id === id);
       if (!item) return;
+      openModal('modal-cataleg');
       document.getElementById('cat-id').value = item.id;
       document.getElementById('cat-codi').value = item.codi;
       document.getElementById('cat-nom').value = item.nom;
@@ -1765,8 +2067,6 @@
       document.getElementById('cat-proveidor').value = item.proveidor;
       document.getElementById('cat-minim').value = item.minim;
       document.getElementById('cat-inicial').value = item.inicial;
-      document.getElementById('modal-cataleg-title').textContent = 'Editar Fitxa de Vacuna';
-      openModal('modal-cataleg');
     }
 
     function saveMagatzem(e) {
@@ -1775,38 +2075,25 @@
       const codi = document.getElementById('mag-codi').value.trim();
       const nom = document.getElementById('mag-nom').value.trim();
       const ubicacio = document.getElementById('mag-ubicacio').value.trim();
-
       if (id) {
         const m = AppState.magatzems.find(x => x.id === id);
-        if (m) {
-          m.codi = codi;
-          m.nom = nom;
-          m.ubicacio = ubicacio;
-          showToast('Magatzem modificat', 'Dades del magatzem actualitzades.');
-        }
+        if (m) Object.assign(m, { codi, nom, ubicacio });
       } else {
-        AppState.magatzems.push({
-          id: 'MAG_' + Date.now(),
-          codi, nom, ubicacio
-        });
-        showToast('Magatzem creat', 'Nou magatzem afegit al sistema.');
+        AppState.magatzems.push({ id: 'MAG_' + Date.now(), codi, nom, ubicacio });
       }
-
       saveState();
       closeModal('modal-magatzems');
-      renderMagatzems();
-      populateDropdowns();
+      renderAll();
     }
 
     function editMagatzem(id) {
       const m = AppState.magatzems.find(x => x.id === id);
       if (!m) return;
+      openModal('modal-magatzems');
       document.getElementById('mag-id').value = m.id;
       document.getElementById('mag-codi').value = m.codi;
       document.getElementById('mag-nom').value = m.nom;
       document.getElementById('mag-ubicacio').value = m.ubicacio || '';
-      document.getElementById('modal-magatzems-title').textContent = 'Editar Magatzem';
-      openModal('modal-magatzems');
     }
 
     function saveProveidor(e) {
@@ -1818,35 +2105,21 @@
       const telefon = document.getElementById('prov-telefon').value.trim();
       const contacte = document.getElementById('prov-contacte').value.trim();
       const ubicacio = document.getElementById('prov-ubicacio').value.trim();
-
       if (id) {
         const p = AppState.proveidors.find(x => x.id === id);
-        if (p) {
-          p.codi = codi;
-          p.dataAlta = dataAlta;
-          p.nom = nom;
-          p.telefon = telefon;
-          p.contacte = contacte;
-          p.ubicacio = ubicacio;
-          showToast('Proveïdor actualitzat', 'Les dades del proveïdor s\'han desat.');
-        }
+        if (p) Object.assign(p, { codi, dataAlta, nom, telefon, contacte, ubicacio });
       } else {
-        AppState.proveidors.push({
-          id: 'PRV_' + Date.now(),
-          codi, dataAlta, nom, telefon, contacte, ubicacio
-        });
-        showToast('Proveïdor desat', 'Nou proveïdor afegit satisfactòriament.');
+        AppState.proveidors.push({ id: 'PRV_' + Date.now(), codi, dataAlta, nom, telefon, contacte, ubicacio });
       }
-
       saveState();
       closeModal('modal-proveidors');
-      renderProveidors();
-      populateDropdowns();
+      renderAll();
     }
 
     function editProveidor(id) {
       const p = AppState.proveidors.find(x => x.id === id);
       if (!p) return;
+      openModal('modal-proveidors');
       document.getElementById('prov-id').value = p.id;
       document.getElementById('prov-codi').value = p.codi;
       document.getElementById('prov-data').value = p.dataAlta;
@@ -1854,72 +2127,31 @@
       document.getElementById('prov-telefon').value = p.telefon || '';
       document.getElementById('prov-contacte').value = p.contacte || '';
       document.getElementById('prov-ubicacio').value = p.ubicacio || '';
-      document.getElementById('modal-proveidors-title').textContent = 'Editar Proveïdor';
-      openModal('modal-proveidors');
     }
 
-    // ----------------------------------------------------
-    // MOVIMENTS: Canvi dinàmic entre Traspàs, Consum i Estoc Inicial
-    // ----------------------------------------------------
     function toggleMovimentFields() {
       const tipus = document.getElementById('mov-tipus').value;
-      const blockExistent = document.getElementById('block-mov-existent');
-      const blockInicial = document.getElementById('block-mov-inicial');
-      const fieldTraspas = document.getElementById('field-mov-traspas');
-      const fieldConsum = document.getElementById('field-mov-consum');
-      const labelUnitats = document.getElementById('label-mov-unitats');
-
-      if (tipus === 'Estoc Inicial') {
-        blockExistent.classList.add('hidden');
-        blockInicial.classList.remove('hidden');
-        fieldTraspas.classList.remove('hidden');
-        fieldConsum.classList.add('hidden');
-        labelUnitats.textContent = "Unitats d'Estoc Inicial a ingressar *";
-      } else if (tipus === 'Consum') {
-        blockExistent.classList.remove('hidden');
-        blockInicial.classList.add('hidden');
-        fieldTraspas.classList.add('hidden');
-        fieldConsum.classList.remove('hidden');
-        labelUnitats.textContent = "Unitats a consumir *";
-      } else {
-        // Traspàs
-        blockExistent.classList.remove('hidden');
-        blockInicial.classList.add('hidden');
-        fieldTraspas.classList.remove('hidden');
-        fieldConsum.classList.add('hidden');
-        labelUnitats.textContent = "Unitats a traspassar *";
-      }
+      document.getElementById('block-mov-existent').classList.toggle('hidden', tipus === 'Estoc Inicial');
+      document.getElementById('block-mov-inicial').classList.toggle('hidden', tipus !== 'Estoc Inicial');
+      document.getElementById('field-mov-traspas').classList.toggle('hidden', tipus === 'Consum');
+      document.getElementById('field-mov-consum').classList.toggle('hidden', tipus !== 'Consum');
     }
 
     function onMovimentLotChange() {
-      const invId = document.getElementById('mov-lot-select').value;
-      const inv = AppState.inventari.find(i => i.id === invId);
-
-      if (inv) {
-        const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-        document.getElementById('mov-prev-codi').textContent = inv.codi;
-        document.getElementById('mov-prev-nom').textContent = inv.vacuna;
-        document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(inv.codi, inv.marca);
-        document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
-        document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
-        document.getElementById('mov-prev-disponible').textContent = inv.disponible;
-      } else {
-        document.getElementById('mov-prev-codi').textContent = '-';
-        document.getElementById('mov-prev-nom').textContent = '-';
-        document.getElementById('mov-prev-marca').textContent = '-';
-        document.getElementById('mov-prev-caducitat').textContent = '-';
-        document.getElementById('mov-prev-origen').textContent = '-';
-        document.getElementById('mov-prev-disponible').textContent = '0';
-      }
+      const inv = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
+      if (!inv) return;
+      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+      document.getElementById('mov-prev-codi').textContent = inv.codi;
+      document.getElementById('mov-prev-nom').textContent = inv.vacuna;
+      document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(inv.codi, inv.marca);
+      document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
+      document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
+      document.getElementById('mov-prev-disponible').textContent = inv.disponible;
     }
 
     function updateConsumUnitsFromSUM() {
-      const sumVal = document.getElementById('mov-sum').value.trim();
-      if (!sumVal) return;
-      const pacs = sumVal.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      if (pacs.length > 0) {
-        document.getElementById('mov-unitats').value = pacs.length;
-      }
+      const pacs = document.getElementById('mov-sum').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (pacs.length > 0) document.getElementById('mov-unitats').value = pacs.length;
     }
 
     function saveMoviment(e) {
@@ -1928,156 +2160,75 @@
       const tipus = document.getElementById('mov-tipus').value;
       const unitats = Number(document.getElementById('mov-unitats').value);
 
-      // OPCIÓ 1: ESTOC INICIAL
       if (tipus === 'Estoc Inicial') {
-        const catId = document.getElementById('mov-ini-vacuna').value;
+        const cat = AppState.cataleg.find(c => c.id === document.getElementById('mov-ini-vacuna').value);
         const lot = document.getElementById('mov-ini-lot').value.trim().toUpperCase();
         const caducitat = document.getElementById('mov-ini-caducitat').value;
         const destMagId = document.getElementById('mov-destinacio').value;
+        if (!cat || !lot || !caducitat || !destMagId) return;
 
-        if (!catId || !lot || !caducitat || !destMagId) {
-          showToast('Dades incompletes', 'Selecciona vacuna, lot, caducitat i magatzem de destinació.', 'error');
-          return;
-        }
-
-        const cat = AppState.cataleg.find(c => c.id === catId);
         const magDest = AppState.magatzems.find(m => m.id === destMagId);
-        const nomDest = magDest ? magDest.nom : destMagId;
-
-        // Sumar a l'inventari del magatzem seleccionat
         const existent = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === lot && i.codi === cat.codi);
-        if (existent) {
-          existent.disponible = Number(existent.disponible) + unitats;
-        } else {
+        if (existent) existent.disponible = Number(existent.disponible) + unitats;
+        else {
           AppState.inventari.push({
-            id: 'INV_' + Date.now(),
-            magatzemId: destMagId,
-            codi: cat.codi,
-            vacuna: cat.nom,
-            marca: cat.marca || '',
-            codiProv: cat.codiProv || '',
-            lot,
-            caducitat,
-            minim: Math.round((Number(cat.minim) || 10) / 2),
-            disponible: unitats
+            id: 'INV_' + Date.now(), magatzemId: destMagId, codi: cat.codi, vacuna: cat.nom,
+            marca: cat.marca || '', codiProv: cat.codiProv || '', lot, caducitat,
+            minim: Math.round((Number(cat.minim) || 10) / 2), disponible: unitats
           });
         }
-
-        // Actualitzar l'Estoc Inicial acumulat a la fitxa del Catàleg
         cat.inicial = (Number(cat.inicial) || 0) + unitats;
-
-        // Enregistrar a l'històric de moviments
         AppState.moviments.push({
-          id: 'MOV_' + Date.now(),
-          data,
-          codi: cat.codi,
-          vacuna: cat.nom,
-          marca: cat.marca || '-',
-          tipus: 'Estoc Inicial',
-          origen: 'Càrrega Inicial',
-          destinacio: nomDest,
-          lot,
-          caducitat,
-          unitats,
-          detall: 'Alta d\'Estoc Inicial'
+          id: 'MOV_' + Date.now(), data, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '-',
+          tipus: 'Estoc Inicial', origen: 'Càrrega Inicial', destinacio: magDest ? magDest.nom : destMagId, lot, caducitat, unitats
         });
-
-        showToast('Estoc Inicial Registrat', `S'han ingressat ${unitats} unitats de ${cat.nom} a ${nomDest}.`);
         saveState();
         closeModal('modal-moviments');
         renderAll();
         return;
       }
 
-      // OPCIÓ 2 i 3: TRASPÀS O CONSUM (Sobre un Lot existent)
-      const invId = document.getElementById('mov-lot-select').value;
-      const invOrigen = AppState.inventari.find(i => i.id === invId);
-      if (!invOrigen) {
-        showToast('Error', 'Cal seleccionar un lot vàlid de l\'inventari.', 'error');
+      const invOrigen = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
+      if (!invOrigen || unitats > Number(invOrigen.disponible)) {
+        showToast('Error', 'Verifica el lot i l\'estoc disponible.', 'error');
         return;
       }
-
-      if (unitats > Number(invOrigen.disponible)) {
-        showToast('Estoc Insuficient', `Només hi ha ${invOrigen.disponible} unitats disponibles en aquest lot.`, 'error');
-        return;
-      }
-
       const magOrigen = AppState.magatzems.find(m => m.id === invOrigen.magatzemId);
       const nomOrigen = magOrigen ? magOrigen.nom : invOrigen.magatzemId;
       const marcaOrigen = getMarcaByCodi(invOrigen.codi, invOrigen.marca);
 
       if (tipus === 'Traspàs') {
         const destMagId = document.getElementById('mov-destinacio').value;
-        if (!destMagId) {
-          showToast('Avís', 'Selecciona un magatzem de destinació.', 'error');
-          return;
-        }
-        if (destMagId === invOrigen.magatzemId) {
-          showToast('Avís', 'El magatzem de destinació ha de ser diferent a l\'origen.', 'error');
-          return;
-        }
-
+        if (!destMagId || destMagId === invOrigen.magatzemId) return;
         const magDest = AppState.magatzems.find(m => m.id === destMagId);
-        const nomDest = magDest ? magDest.nom : destMagId;
-
-        invOrigen.disponible = Number(invOrigen.disponible) - unitats;
-
+        invOrigen.disponible -= unitats;
         const invDest = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === invOrigen.lot && i.codi === invOrigen.codi);
-        if (invDest) {
-          invDest.disponible = Number(invDest.disponible) + unitats;
-        } else {
-          AppState.inventari.push({
-            id: 'INV_' + Date.now(),
-            magatzemId: destMagId,
-            codi: invOrigen.codi,
-            vacuna: invOrigen.vacuna,
-            marca: marcaOrigen,
-            codiProv: invOrigen.codiProv,
-            lot: invOrigen.lot,
-            caducitat: invOrigen.caducitat,
-            minim: invOrigen.minim,
-            disponible: unitats
-          });
-        }
+        if (invDest) invDest.disponible = Number(invDest.disponible) + unitats;
+        else AppState.inventari.push({ ...invOrigen, id: 'INV_' + Date.now(), magatzemId: destMagId, disponible: unitats });
 
         AppState.moviments.push({
-          id: 'MOV_' + Date.now(),
-          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
-          tipus: 'Traspàs', origen: nomOrigen, destinacio: nomDest,
-          lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats, detall: 'Traspàs entre magatzems'
+          id: 'MOV_' + Date.now(), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
+          tipus: 'Traspàs', origen: nomOrigen, destinacio: magDest ? magDest.nom : destMagId, lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats
         });
-
-        showToast('Traspàs Realitzat', `${unitats} unitats traspassades cap a ${nomDest}.`);
-
       } else {
         const codiSUM = document.getElementById('mov-sum').value.trim() || 'Consum clínic';
-        invOrigen.disponible = Number(invOrigen.disponible) - unitats;
-
+        invOrigen.disponible -= unitats;
         AppState.moviments.push({
-          id: 'MOV_' + Date.now(),
-          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
-          tipus: 'Consum', origen: nomOrigen, destinacio: codiSUM,
-          lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats, detall: `Administrat: ${codiSUM}`
+          id: 'MOV_' + Date.now(), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
+          tipus: 'Consum', origen: nomOrigen, destinacio: codiSUM, lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats
         });
-
-        showToast('Consum Enregistrat', `${unitats} dosis descomptades de l'inventari.`);
       }
-
       saveState();
       closeModal('modal-moviments');
       renderAll();
     }
 
     function onComandaVacunaChange() {
-      const catId = document.getElementById('cmd-vacuna-select').value;
-      const cat = AppState.cataleg.find(c => c.id === catId);
+      const cat = AppState.cataleg.find(c => c.id === document.getElementById('cmd-vacuna-select').value);
       if (cat) {
         document.getElementById('cmd-codivac').value = cat.codi;
         document.getElementById('cmd-codiprov').value = cat.codiProv || '';
         document.getElementById('cmd-proveidor').value = cat.proveidor || '';
-      } else {
-        document.getElementById('cmd-codivac').value = '';
-        document.getElementById('cmd-codiprov').value = '';
       }
     }
 
@@ -2087,9 +2238,8 @@
       const data = document.getElementById('cmd-data').value;
       const comanda = document.getElementById('cmd-num').value.trim();
       const proveidor = document.getElementById('cmd-proveidor').value;
-      const catId = document.getElementById('cmd-vacuna-select').value;
-      const cat = AppState.cataleg.find(c => c.id === catId);
-      const vacuna = cat ? (cat.marca ? `${cat.nom} (${cat.marca})` : cat.nom) : 'Vacuna';
+      const cat = AppState.cataleg.find(c => c.id === document.getElementById('cmd-vacuna-select').value);
+      const vacuna = cat ? `${cat.nom} (${cat.marca || ''})` : 'Vacuna';
       const codiVac = document.getElementById('cmd-codivac').value;
       const codiProv = document.getElementById('cmd-codiprov').value;
       const unitats = Number(document.getElementById('cmd-unitats').value);
@@ -2097,51 +2247,31 @@
 
       if (id) {
         const c = AppState.comandes.find(x => x.id === id);
-        if (c) {
-          c.data = data;
-          c.comanda = comanda;
-          c.proveidor = proveidor;
-          c.codiVac = codiVac;
-          c.vacuna = vacuna;
-          c.codiProv = codiProv;
-          c.unitats = unitats;
-          c.estat = estat;
-          showToast('Comanda Actualitzada', 'Les dades de la comanda s\'han guardat.');
-        }
+        if (c) Object.assign(c, { data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat });
       } else {
-        AppState.comandes.push({
-          id: 'CMD_' + Date.now(),
-          data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat
-        });
-        showToast('Comanda Creada', `S'ha registrat la comanda ${comanda}.`);
+        AppState.comandes.push({ id: 'CMD_' + Date.now(), data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat });
       }
-
       saveState();
       closeModal('modal-comandes');
-      renderComandes();
-      populateDropdowns();
+      renderAll();
     }
 
     function editComanda(id) {
       const c = AppState.comandes.find(x => x.id === id);
       if (!c) return;
+      openModal('modal-comandes');
       document.getElementById('cmd-id').value = c.id;
       document.getElementById('cmd-data').value = c.data;
       document.getElementById('cmd-num').value = c.comanda;
       document.getElementById('cmd-proveidor').value = c.proveidor;
-      const cat = AppState.cataleg.find(x => x.codi === c.codiVac);
-      if (cat) document.getElementById('cmd-vacuna-select').value = cat.id;
       document.getElementById('cmd-codivac').value = c.codiVac;
       document.getElementById('cmd-codiprov').value = c.codiProv || '';
       document.getElementById('cmd-unitats').value = c.unitats;
       document.getElementById('cmd-estat').value = c.estat;
-      document.getElementById('modal-comandes-title').textContent = 'Editar Comanda';
-      openModal('modal-comandes');
     }
 
     function onRecepcioComandaChange() {
-      const cmdId = document.getElementById('rec-comanda-select').value;
-      const cmd = AppState.comandes.find(c => c.id === cmdId);
+      const cmd = AppState.comandes.find(c => c.id === document.getElementById('rec-comanda-select').value);
       if (cmd) {
         document.getElementById('rec-proveidor').value = cmd.proveidor;
         document.getElementById('rec-codi').value = cmd.codiVac;
@@ -2152,10 +2282,7 @@
 
     function saveRecepcio(e) {
       e.preventDefault();
-      const data = document.getElementById('rec-data').value;
-      const albara = document.getElementById('rec-albara').value.trim();
       const cmdId = document.getElementById('rec-comanda-select').value;
-      const proveidor = document.getElementById('rec-proveidor').value.trim();
       const codi = document.getElementById('rec-codi').value.trim();
       const vacuna = document.getElementById('rec-vacuna').value.trim();
       const lot = document.getElementById('rec-lot').value.trim().toUpperCase();
@@ -2163,193 +2290,106 @@
       const magatzemId = document.getElementById('rec-magatzem').value;
       const unitats = Number(document.getElementById('rec-unitats').value);
 
-      if (!magatzemId) {
-        showToast('Error', 'Selecciona el magatzem o nevera de destinació.', 'error');
-        return;
-      }
-
       if (cmdId) {
         const cmd = AppState.comandes.find(c => c.id === cmdId);
         if (cmd) cmd.estat = 'Recepcionat';
       }
-
       const existent = AppState.inventari.find(i => i.magatzemId === magatzemId && i.lot === lot && i.codi === codi);
-      if (existent) {
-        existent.disponible = Number(existent.disponible) + unitats;
-      } else {
+      if (existent) existent.disponible = Number(existent.disponible) + unitats;
+      else {
         const cat = AppState.cataleg.find(c => c.codi === codi);
         AppState.inventari.push({
-          id: 'INV_' + Date.now(),
-          magatzemId,
-          codi,
-          vacuna: cat ? cat.nom : vacuna,
-          marca: cat ? (cat.marca || '') : '',
-          codiProv: cat ? cat.codiProv : '',
-          lot,
-          caducitat,
-          minim: cat ? Math.round(cat.minim / 2) : 10,
-          disponible: unitats
+          id: 'INV_' + Date.now(), magatzemId, codi, vacuna: cat ? cat.nom : vacuna,
+          marca: cat ? (cat.marca || '') : '', codiProv: cat ? cat.codiProv : '', lot, caducitat, minim: 10, disponible: unitats
         });
       }
-
-      showToast('Recepció Confirmada', `S'han afegit ${unitats} unitats a l'inventari sota l'albarà ${albara}.`);
       saveState();
       closeModal('modal-recepcio');
       renderAll();
     }
 
     function onDevolucioLotChange() {
-      const invId = document.getElementById('dev-lot-select').value;
-      const inv = AppState.inventari.find(i => i.id === invId);
-
-      if (inv) {
-        const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-        document.getElementById('dev-prev-nom').textContent = inv.vacuna;
-        document.getElementById('dev-prev-magatzem').textContent = mag ? mag.nom : inv.magatzemId;
-        document.getElementById('dev-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
-        document.getElementById('dev-prev-disponible').textContent = inv.disponible;
-      } else {
-        document.getElementById('dev-prev-nom').textContent = '-';
-        document.getElementById('dev-prev-magatzem').textContent = '-';
-        document.getElementById('dev-prev-caducitat').textContent = '-';
-        document.getElementById('dev-prev-disponible').textContent = '0';
-      }
+      const inv = AppState.inventari.find(i => i.id === document.getElementById('dev-lot-select').value);
+      if (!inv) return;
+      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+      document.getElementById('dev-prev-nom').textContent = inv.vacuna;
+      document.getElementById('dev-prev-magatzem').textContent = mag ? mag.nom : inv.magatzemId;
+      document.getElementById('dev-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
+      document.getElementById('dev-prev-disponible').textContent = inv.disponible;
     }
 
     function saveDevolucio(e) {
       e.preventDefault();
       const data = document.getElementById('dev-data').value;
       const numBaixa = document.getElementById('dev-num').value.trim();
-      const invId = document.getElementById('dev-lot-select').value;
+      const inv = AppState.inventari.find(i => i.id === document.getElementById('dev-lot-select').value);
       const motiu = document.getElementById('dev-motiu').value;
       const proveidor = document.getElementById('dev-proveidor').value;
       const unitats = Number(document.getElementById('dev-unitats').value);
-
-      const inv = AppState.inventari.find(i => i.id === invId);
-      if (!inv) {
-        showToast('Error', 'Selecciona un lot vàlid de l\'inventari.', 'error');
-        return;
-      }
-
-      if (unitats > Number(inv.disponible)) {
-        showToast('Estoc Insuficient', `Només hi ha ${inv.disponible} unitats disponibles en aquest lot.`, 'error');
-        return;
-      }
+      if (!inv || unitats > Number(inv.disponible)) return;
 
       const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-      const nomMagatzem = mag ? mag.nom : inv.magatzemId;
-
-      inv.disponible = Number(inv.disponible) - unitats;
-
+      inv.disponible -= unitats;
       AppState.devolucions.push({
-        id: 'DEV_' + Date.now(),
-        data, numBaixa, magatzem: nomMagatzem,
-        codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot,
-        motiu, unitats, proveidor
+        id: 'DEV_' + Date.now(), data, numBaixa, magatzem: mag ? mag.nom : inv.magatzemId,
+        codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot, motiu, unitats, proveidor
       });
-
-      showToast('Baixa Tramitada', `${unitats} unitats retirades correctament de l'inventari.`);
       saveState();
       closeModal('modal-devolucions');
       renderAll();
     }
 
-    function deleteItem(collectionName, id) {
-      if (!AppState[collectionName]) return;
-      AppState[collectionName] = AppState[collectionName].filter(item => item.id !== id);
+    function deleteItem(col, id) {
+      AppState[col] = AppState[col].filter(i => i.id !== id);
       saveState();
-      showToast('Registre eliminat', 'L\'element ha estat esborrat correctament.');
       renderAll();
     }
 
     function exportTableToCSV(tableKey, filename) {
-      let rows = [];
       const table = document.getElementById(`table-${tableKey}`);
       if (!table) return;
-
-      const trs = table.querySelectorAll('tr');
-      trs.forEach(tr => {
-        const cols = tr.querySelectorAll('th, td');
+      let rows = [];
+      table.querySelectorAll('tr').forEach(tr => {
         let rowData = [];
-        cols.forEach((col, index) => {
-          if (col.classList.contains('no-print')) return;
-          let text = col.innerText.replace(/"/g, '""').trim();
-          rowData.push(`"${text}"`);
+        tr.querySelectorAll('th, td').forEach(col => {
+          if (!col.classList.contains('no-print')) rowData.push(`"${col.innerText.replace(/"/g, '""').trim()}"`);
         });
         if (rowData.length > 0) rows.push(rowData.join(';'));
       });
-
-      const csvContent = "\uFEFF" + rows.join('\r\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(["\uFEFF" + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
       link.click();
-      document.body.removeChild(link);
-      showToast('Exportació Completada', `El fitxer ${filename} s'ha descarregat.`, 'info');
     }
 
-    function formatDateDMY(isoDate) {
-      if (!isoDate) return '-';
-      const parts = isoDate.split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
-      return isoDate;
+    function formatDateDMY(iso) {
+      if (!iso) return '-';
+      const p = iso.split('-');
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
     }
 
     function escapeHtml(str) {
       if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function showToast(title, message, type = 'success') {
       const toast = document.getElementById('toastNotification');
-      const tTitle = document.getElementById('toastTitle');
-      const tMsg = document.getElementById('toastMessage');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = message;
       const tIcon = document.getElementById('toastIcon');
-
-      tTitle.textContent = title;
-      tMsg.textContent = message;
-
-      if (type === 'error') {
-        tIcon.className = "w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-red-600";
-        tIcon.textContent = '✕';
-      } else if (type === 'info') {
-        tIcon.className = "w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-sky-600";
-        tIcon.textContent = 'ℹ';
-      } else {
-        tIcon.className = "w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-teal-600";
-        tIcon.textContent = '✓';
-      }
-
+      tIcon.className = `w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white ${type === 'error' ? 'bg-red-600' : type === 'info' ? 'bg-sky-600' : 'bg-teal-600'}`;
+      tIcon.textContent = type === 'error' ? '✕' : type === 'info' ? 'ℹ' : '✓';
       toast.classList.remove('translate-y-24', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      setTimeout(() => {
-        toast.classList.add('translate-y-24', 'opacity-0');
-        toast.classList.remove('translate-y-0', 'opacity-100');
-      }, 3500);
+      setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3500);
     }
   </script>
-  <!-- Registre del Service Worker per a funcionament PWA a Android/iOS -->
+  <!-- Registre del Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((registration) => {
-            console.log('Service Worker registrat amb èxit:', registration.scope);
-          })
-          .catch((error) => {
-            console.error('Error registrant el Service Worker:', error);
-          });
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
       });
     }
   </script>
