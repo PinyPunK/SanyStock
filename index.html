@@ -8,6 +8,8 @@
   <title>SanyStock - Gestió de l'Estoc Vacunal</title>
   <!-- Tailwind CSS per al disseny net i adaptable -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Llibreria Html5-QRCode per a lectura òptica de QR i codis de barres amb la càmera -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -35,10 +37,18 @@
       body { background: white !important; font-size: 11pt; color: #000; }
       .shadow-md, .shadow-sm, .shadow-xl { box-shadow: none !important; border: 1px solid #ccc !important; }
     }
-    /* Estils de scroll suau per a taules amples en tauletes o pantalles petites */
     .table-container {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+    }
+    #qr-reader {
+      border: none !important;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    #qr-reader video {
+      border-radius: 0.75rem;
+      object-fit: cover;
     }
   </style>
 </head>
@@ -71,7 +81,7 @@
           </div>
         </div>
 
-        <!-- Indicador dinàmic: Data d'avui (Sense botons de perill) -->
+        <!-- Indicador dinàmic: Data d'avui -->
         <div class="flex items-center gap-3">
           <div class="bg-sky-50 border border-sky-200 rounded-xl px-4 py-2 flex items-center space-x-2.5">
             <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +141,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
             <h2 class="text-xl font-bold text-sky-900">Catàleg General de Vacunes</h2>
-            <p class="text-xs text-slate-500">Manteniment de fitxes tècniques, proveïdors assignats i estocs globals.</p>
+            <p class="text-xs text-slate-500">Manteniment de fitxes tècniques, marques comercials, proveïdors i estocs globals.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-cataleg')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
@@ -155,16 +165,16 @@
               <tr>
                 <th class="p-3.5">Codi</th>
                 <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Nom Comercial / Marca</th>
                 <th class="p-3.5">Proveïdor</th>
                 <th class="p-3.5">Codi Prov.</th>
-                <th class="p-3.5 text-center">Estoc Mínim Total</th>
-                <th class="p-3.5 text-center">Estoc Disponible Real</th>
+                <th class="p-3.5 text-center">Estoc Mínim</th>
+                <th class="p-3.5 text-center">Estoc Inicial</th>
+                <th class="p-3.5 text-center">Estoc Disponible</th>
                 <th class="p-3.5 text-right no-print">Opcions</th>
               </tr>
             </thead>
-            <tbody id="tbody-cataleg" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JavaScript -->
-            </tbody>
+            <tbody id="tbody-cataleg" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -204,9 +214,7 @@
                 <th class="p-3.5 text-right no-print">Opcions</th>
               </tr>
             </thead>
-            <tbody id="tbody-magatzems" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JS -->
-            </tbody>
+            <tbody id="tbody-magatzems" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -249,9 +257,7 @@
                 <th class="p-3.5 text-right no-print">Opcions</th>
               </tr>
             </thead>
-            <tbody id="tbody-proveidors" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JS -->
-            </tbody>
+            <tbody id="tbody-proveidors" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -262,8 +268,8 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-bold text-sky-900">Registre de Moviments Interns i Consum</h2>
-            <p class="text-xs text-slate-500">Traspàs entre magatzems i registre de consums clínics per codi SUM (PAC).</p>
+            <h2 class="text-xl font-bold text-sky-900">Registre de Moviments, Estoc Inicial i Consum</h2>
+            <p class="text-xs text-slate-500">Càrrega d'estoc inicial, traspàs entre magatzems i registre de consums clínics per codi SUM (PAC).</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5">
             <button onclick="openModal('modal-moviments')" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
@@ -288,6 +294,7 @@
                 <th class="p-3.5">Data</th>
                 <th class="p-3.5">Codi</th>
                 <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Marca</th>
                 <th class="p-3.5">Tipus</th>
                 <th class="p-3.5">Origen</th>
                 <th class="p-3.5">Destinació / Pacients</th>
@@ -297,9 +304,7 @@
                 <th class="p-3.5 text-right no-print">Opcions</th>
               </tr>
             </thead>
-            <tbody id="tbody-moviments" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JS -->
-            </tbody>
+            <tbody id="tbody-moviments" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -348,9 +353,7 @@
                 <th class="p-3.5 text-right no-print">Opcions</th>
               </tr>
             </thead>
-            <tbody id="tbody-comandes" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JS -->
-            </tbody>
+            <tbody id="tbody-comandes" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -396,9 +399,7 @@
                 <th class="p-3.5 text-right no-print">Opcions</th>
               </tr>
             </thead>
-            <tbody id="tbody-devolucions" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JS -->
-            </tbody>
+            <tbody id="tbody-devolucions" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -442,13 +443,20 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
             <h2 class="text-xl font-bold text-sky-900">Control d'Inventari per Magatzem</h2>
-            <p class="text-xs text-slate-500">Visualització per nevera i magatzem, seguiment estricte de lots i dates de caducitat.</p>
+            <p class="text-xs text-slate-500">Visualització per nevera i magatzem, seguiment estricte de lots i cerca per QR.</p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
+              <input type="text" id="invSearchInput" oninput="renderInventari()" placeholder="Cerca codi, vacuna, marca o lot..." class="bg-transparent border-0 text-xs px-2.5 py-1 focus:outline-none text-slate-700 w-36 sm:w-48">
+              <button type="button" onclick="startQRScanner('inventari-search')" title="Escanejar QR per filtrar inventari" class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                QR
+              </button>
+            </div>
+
             <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
-              <label for="filterMagatzemSelect" class="text-xs font-semibold text-slate-600 pl-2">Filtrar per:</label>
+              <label for="filterMagatzemSelect" class="text-xs font-semibold text-slate-600 pl-2">Magatzem:</label>
               <select id="filterMagatzemSelect" onchange="renderInventari()" class="bg-white border-0 text-xs font-semibold text-sky-900 rounded-lg p-1.5 focus:ring-2 focus:ring-sky-500">
-                <!-- Opcions dinàmiques -->
               </select>
             </div>
             <button onclick="exportTableToCSV('inventari', 'SanyStock_Inventari.csv')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3.5 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
@@ -469,6 +477,7 @@
                 <th class="p-3.5">Magatzem</th>
                 <th class="p-3.5">Codi</th>
                 <th class="p-3.5">Vacuna</th>
+                <th class="p-3.5">Nom Comercial / Marca</th>
                 <th class="p-3.5">Codi Prov.</th>
                 <th class="p-3.5">Lot</th>
                 <th class="p-3.5">Caducitat</th>
@@ -477,9 +486,7 @@
                 <th class="p-3.5 text-center">Estat Sanitari</th>
               </tr>
             </thead>
-            <tbody id="tbody-inventari" class="divide-y divide-slate-100 bg-white">
-              <!-- Renderitzat amb JS -->
-            </tbody>
+            <tbody id="tbody-inventari" class="divide-y divide-slate-100 bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -491,7 +498,7 @@
   <!-- MODALS D'ENREGISTRAMENT I EDICIÓ           -->
   <!-- ========================================== -->
 
-  <!-- MODAL 1: CATÀLEG -->
+  <!-- MODAL 1: CATÀLEG (Amb camp Vacuna i camp Nom comercial/Marca separats) -->
   <div id="modal-cataleg" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
@@ -506,21 +513,34 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
-            <input type="text" id="cat-codi" required placeholder="Ex. VAC001" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+            <div class="flex gap-1.5">
+              <input type="text" id="cat-codi" required placeholder="Ex. VAC001" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+              <button type="button" onclick="startQRScanner('cat-codi')" title="Escanejar Codi amb Càmera" class="bg-sky-100 hover:bg-sky-200 text-sky-800 px-3 rounded-xl border border-sky-300 flex items-center justify-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Proveïdor</label>
             <input type="text" id="cat-codiprov" placeholder="Ex. P-GSK-01" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
           </div>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nom Comercial / Vacuna *</label>
-          <input type="text" id="cat-nom" required placeholder="Ex. Hexavalent (Infanrix Hexa)" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+
+        <!-- NOUS CAMPS SEPARATS: Vacuna i Nom comercial/Marca -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Vacuna *</label>
+            <input type="text" id="cat-nom" required placeholder="Ex. Hexavalent" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nom comercial / Marca *</label>
+            <input type="text" id="cat-marca" required placeholder="Ex. Infanrix Hexa" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+          </div>
         </div>
+
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
           <select id="cat-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-            <!-- Desplegable automàtic amb els proveïdors -->
           </select>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -615,7 +635,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: MOVIMENTS -->
+  <!-- MODAL 4: MOVIMENTS (Amb opció d'Estoc Inicial, Traspàs i Consum) -->
   <div id="modal-moviments" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden transform transition-all">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
@@ -633,49 +653,91 @@
             <select id="mov-tipus" required onchange="toggleMovimentFields()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-semibold text-sky-900">
               <option value="Traspàs">Traspàs entre magatzems</option>
               <option value="Consum">Consum Clínic / Administració</option>
+              <option value="Estoc Inicial">Estoc Inicial</option>
             </select>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Seleccionar Lot disponible en Inventari *</label>
-          <select id="mov-lot-select" required onchange="onMovimentLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-sky-50/50">
-            <!-- Omplert dinàmicament -->
-          </select>
+        <!-- BLOC A: Selecció de Lot ja existent (per a Traspàs i Consum) -->
+        <div id="block-mov-existent" class="space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700">Seleccionar Lot disponible en Inventari *</label>
+              <button type="button" onclick="startQRScanner('mov-lot')" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300 flex items-center gap-1 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                Escanejar QR Vacuna/Lot
+              </button>
+            </div>
+            <select id="mov-lot-select" onchange="onMovimentLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 bg-sky-50/50">
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
+            <div>
+              <span class="text-slate-500 block">Codi:</span>
+              <span id="mov-prev-codi" class="font-semibold text-slate-800">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Vacuna:</span>
+              <span id="mov-prev-nom" class="font-semibold text-slate-800">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Marca:</span>
+              <span id="mov-prev-marca" class="font-semibold text-teal-700">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Caducitat:</span>
+              <span id="mov-prev-caducitat" class="font-semibold text-slate-800">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Magatzem Origen:</span>
+              <span id="mov-prev-origen" class="font-semibold text-sky-800">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Estoc actual:</span>
+              <span id="mov-prev-disponible" class="font-bold text-emerald-700">0</span>
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
+        <!-- BLOC B: Camps per registrar un Estoc Inicial nou -->
+        <div id="block-mov-inicial" class="hidden space-y-4 bg-teal-50/40 p-3.5 rounded-xl border border-teal-100">
           <div>
-            <span class="text-slate-500 block">Codi:</span>
-            <span id="mov-prev-codi" class="font-semibold text-slate-800">-</span>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700">Selecciona Vacuna del Catàleg *</label>
+              <button type="button" onclick="startQRScanner('mov-ini-vacuna')" class="text-xs bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold px-2.5 py-1 rounded-lg border border-teal-300 flex items-center gap-1 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                Escanejar QR
+              </button>
+            </div>
+            <select id="mov-ini-vacuna" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-white">
+            </select>
           </div>
-          <div class="col-span-2">
-            <span class="text-slate-500 block">Vacuna:</span>
-            <span id="mov-prev-nom" class="font-semibold text-slate-800">-</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Caducitat:</span>
-            <span id="mov-prev-caducitat" class="font-semibold text-slate-800">-</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Magatzem Origen:</span>
-            <span id="mov-prev-origen" class="font-semibold text-sky-800">-</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Estoc actual:</span>
-            <span id="mov-prev-disponible" class="font-bold text-emerald-700">0</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Lot Inicial *</label>
+              <div class="flex gap-1.5">
+                <input type="text" id="mov-ini-lot" placeholder="Ex. LOT-2026A" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase bg-white">
+                <button type="button" onclick="startQRScanner('mov-ini-lot')" title="Escanejar QR del Lot" class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 rounded-xl border border-teal-300 flex items-center justify-center transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Data de Caducitat *</label>
+              <input type="date" id="mov-ini-caducitat" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-white">
+            </div>
           </div>
         </div>
 
-        <!-- Si és Traspàs -->
+        <!-- Si és Traspàs o Estoc Inicial: Magatzem de Destinació -->
         <div id="field-mov-traspas">
           <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem de Destinació *</label>
           <select id="mov-destinacio" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-            <!-- Llista de magatzems -->
           </select>
         </div>
 
-        <!-- Si és Consum -->
+        <!-- Si és Consum: Codi SUM / Pacients -->
         <div id="field-mov-consum" class="hidden space-y-2">
           <label class="block text-xs font-semibold text-slate-700 mb-1">Codi SUM / Pacient (ex. PAC1234 o diversos separats per comes)</label>
           <input type="text" id="mov-sum" oninput="updateConsumUnitsFromSUM()" placeholder="PAC1001, PAC1002" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
@@ -683,7 +745,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Unitats a moure / consumir *</label>
+          <label id="label-mov-unitats" class="block text-xs font-semibold text-slate-700 mb-1">Unitats a moure / consumir *</label>
           <input type="number" id="mov-unitats" min="1" value="1" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
         </div>
 
@@ -718,14 +780,18 @@
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor *</label>
           <select id="cmd-proveidor" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-            <!-- Desplegable automàtic -->
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Selecciona Vacuna del Catàleg *</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-slate-700">Selecciona Vacuna del Catàleg *</label>
+            <button type="button" onclick="startQRScanner('cmd-vacuna')" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300 flex items-center gap-1 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              Escanejar QR Vacuna
+            </button>
+          </div>
           <select id="cmd-vacuna-select" required onchange="onComandaVacunaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-            <!-- Vacunes del catàleg -->
           </select>
         </div>
 
@@ -788,7 +854,6 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Comanda Associada</label>
             <select id="rec-comanda-select" onchange="onRecepcioComandaChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-              <!-- Comandes pendents -->
             </select>
           </div>
           <div>
@@ -800,7 +865,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
-            <input type="text" id="rec-codi" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
+            <div class="flex gap-1.5">
+              <input type="text" id="rec-codi" required class="w-full rounded-xl bg-slate-50 border-slate-300 border p-2.5 text-sm">
+              <button type="button" onclick="startQRScanner('rec-codi')" title="Escanejar QR Codi Vacuna" class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 rounded-xl border border-teal-300 flex items-center justify-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Vacuna *</label>
@@ -811,7 +881,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Número de Lot *</label>
-            <input type="text" id="rec-lot" required placeholder="LOT-A4389" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase">
+            <div class="flex gap-1.5">
+              <input type="text" id="rec-lot" required placeholder="LOT-A4389" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase">
+              <button type="button" onclick="startQRScanner('rec-lot')" title="Escanejar QR del Lot" class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-3 rounded-xl border border-teal-300 flex items-center justify-center transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Data de Caducitat *</label>
@@ -823,7 +898,6 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem / Nevera de destí *</label>
             <select id="rec-magatzem" required class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-              <!-- Llista de magatzems -->
             </select>
           </div>
           <div>
@@ -860,9 +934,14 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Selecciona Lot a Donar de Baixa *</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-slate-700">Selecciona Lot a Donar de Baixa *</label>
+            <button type="button" onclick="startQRScanner('dev-lot')" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-2.5 py-1 rounded-lg border border-red-300 flex items-center gap-1 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              Escanejar QR Vacuna/Lot
+            </button>
+          </div>
           <select id="dev-lot-select" required onchange="onDevolucioLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-            <!-- Lots disponibles a inventari -->
           </select>
         </div>
 
@@ -898,7 +977,6 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Proveïdor Destinatari</label>
             <select id="dev-proveidor" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
-              <!-- Proveïdors -->
             </select>
           </div>
           <div>
@@ -915,7 +993,31 @@
     </div>
   </div>
 
-  <!-- CAIXA DE MISSATGES / TOAST NOTIFICACIÓ PERSONALITZADA (Sense alert()) -->
+  <!-- ========================================== -->
+  <!-- MODAL 8: ESCÀNER DE CODI QR / BARRES       -->
+  <!-- ========================================== -->
+  <div id="modal-qr-scanner" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-sky-200 overflow-hidden">
+      <div class="bg-sky-800 px-5 py-3.5 flex items-center justify-between text-white">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <svg class="w-5 h-5 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+          Lector Òptic QR / Codi de Barres
+        </h3>
+        <button type="button" onclick="stopQRScanner()" class="text-white hover:text-sky-200 text-xl font-bold">&times;</button>
+      </div>
+      <div class="p-5">
+        <div id="qr-reader" class="w-full bg-slate-900 min-h-[240px] flex items-center justify-center"></div>
+        <p class="text-xs text-center text-slate-500 mt-3">Enfoca el codi QR o codi de barres de la caixa de la vacuna amb la càmera.</p>
+        <div class="mt-4 flex justify-center">
+          <button type="button" onclick="stopQRScanner()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition">
+            Tancar Càmera
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAIXA DE MISSATGES / TOAST NOTIFICACIÓ PERSONALITZADA -->
   <div id="toastNotification" class="fixed bottom-5 right-5 z-50 flex items-center p-4 max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl transform translate-y-24 opacity-0 transition-all duration-300">
     <div id="toastIcon" class="w-9 h-9 rounded-xl flex items-center justify-center mr-3 font-bold text-white bg-teal-600">✓</div>
     <div>
@@ -925,10 +1027,9 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- JAVASCRIPT: LÒGICA I PERSISTÈNCIA          -->
+  <!-- JAVASCRIPT: LÒGICA, QR I PERSISTÈNCIA      -->
   <!-- ========================================== -->
   <script>
-    // Dades inicials d'exemple (únicament s'usen si l'usuari entra per primera vegada)
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -940,28 +1041,28 @@
         { id: 'PRV3', codi: 'PFZ-03', nom: 'Pfizer Salut', dataAlta: '2025-03-01', telefon: '915 900 800', contacte: 'Clara Pons', ubicacio: 'Alcobendas, Madrid' }
       ],
       cataleg: [
-        { id: 'CAT1', codi: 'VAC001', nom: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', proveidor: 'GlaxoSmithKline (GSK)', minim: 30, inicial: 100 },
-        { id: 'CAT2', codi: 'VAC002', nom: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 },
-        { id: 'CAT3', codi: 'VAC003', nom: 'Priorix (Triple Vírica)', codiProv: 'GSK-PRI', proveidor: 'GlaxoSmithKline (GSK)', minim: 20, inicial: 60 },
-        { id: 'CAT4', codi: 'VAC004', nom: 'Vaxigrip Tetra (Grip estacional)', codiProv: 'SNF-VAX4', proveidor: 'Sanofi Pasteur', minim: 50, inicial: 150 }
+        { id: 'CAT1', codi: 'VAC001', nom: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', proveidor: 'GlaxoSmithKline (GSK)', minim: 30, inicial: 100 },
+        { id: 'CAT2', codi: 'VAC002', nom: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 },
+        { id: 'CAT3', codi: 'VAC003', nom: 'Triple Vírica', marca: 'Priorix', codiProv: 'GSK-PRI', proveidor: 'GlaxoSmithKline (GSK)', minim: 20, inicial: 60 },
+        { id: 'CAT4', codi: 'VAC004', nom: 'Grip Estacional', marca: 'Vaxigrip Tetra', codiProv: 'SNF-VAX4', proveidor: 'Sanofi Pasteur', minim: 50, inicial: 150 }
       ],
       inventari: [
-        { id: 'INV1', magatzemId: 'MAG1', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 20, disponible: 45 },
-        { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 },
-        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 },
-        { id: 'INV4', magatzemId: 'MAG2', codi: 'VAC003', vacuna: 'Priorix (Triple Vírica)', codiProv: 'GSK-PRI', lot: 'PRX441', caducitat: '2026-11-20', minim: 10, disponible: 22 },
-        { id: 'INV5', magatzemId: 'MAG1', codi: 'VAC004', vacuna: 'Vaxigrip Tetra (Grip estacional)', codiProv: 'SNF-VAX4', lot: 'VG2026X', caducitat: '2027-01-10', minim: 35, disponible: 60 }
+        { id: 'INV1', magatzemId: 'MAG1', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 20, disponible: 45 },
+        { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 },
+        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 },
+        { id: 'INV4', magatzemId: 'MAG2', codi: 'VAC003', vacuna: 'Triple Vírica', marca: 'Priorix', codiProv: 'GSK-PRI', lot: 'PRX441', caducitat: '2026-11-20', minim: 10, disponible: 22 },
+        { id: 'INV5', magatzemId: 'MAG1', codi: 'VAC004', vacuna: 'Grip Estacional', marca: 'Vaxigrip Tetra', codiProv: 'SNF-VAX4', lot: 'VG2026X', caducitat: '2027-01-10', minim: 35, disponible: 60 }
       ],
       moviments: [
-        { id: 'MOV1', data: '2026-10-18', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', tipus: 'Traspàs', origen: 'Magatzem 1 - Nevera Principal Farmàcia', destinacio: 'Magatzem 2 - Nevera Pediatria Urgències', lot: '23K88B', caducitat: '2027-04-30', unitats: 10, detall: 'Reposició rutinària Pediatria' },
-        { id: 'MOV2', data: '2026-10-19', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', tipus: 'Consum', origen: 'Magatzem 2 - Nevera Pediatria Urgències', destinacio: 'PAC2034, PAC2035', lot: '23K88B', caducitat: '2027-04-30', unitats: 2, detall: 'Administració 2 infants' }
+        { id: 'MOV1', data: '2026-10-18', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', tipus: 'Traspàs', origen: 'Magatzem 1 - Nevera Principal Farmàcia', destinacio: 'Magatzem 2 - Nevera Pediatria Urgències', lot: '23K88B', caducitat: '2027-04-30', unitats: 10, detall: 'Reposició rutinària Pediatria' },
+        { id: 'MOV2', data: '2026-10-19', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', tipus: 'Consum', origen: 'Magatzem 2 - Nevera Pediatria Urgències', destinacio: 'PAC2034, PAC2035', lot: '23K88B', caducitat: '2027-04-30', unitats: 2, detall: 'Administració 2 infants' }
       ],
       comandes: [
-        { id: 'CMD1', data: '2026-10-10', comanda: 'COM-2026-044', proveidor: 'GlaxoSmithKline (GSK)', codiVac: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', unitats: 50, estat: 'Recepcionat' },
-        { id: 'CMD2', data: '2026-10-15', comanda: 'COM-2026-045', proveidor: 'Pfizer Salut', codiVac: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', unitats: 40, estat: 'Pendent' }
+        { id: 'CMD1', data: '2026-10-10', comanda: 'COM-2026-044', proveidor: 'GlaxoSmithKline (GSK)', codiVac: 'VAC001', vacuna: 'Hexavalent (Infanrix Hexa)', codiProv: 'GSK-INF6', unitats: 50, estat: 'Recepcionat' },
+        { id: 'CMD2', data: '2026-10-15', comanda: 'COM-2026-045', proveidor: 'Pfizer Salut', codiVac: 'VAC002', vacuna: 'Pneumococ Conjugada (Prevenar 20)', codiProv: 'PFZ-P20', unitats: 40, estat: 'Pendent' }
       ],
       devolucions: [
-        { id: 'DEV1', data: '2026-10-12', numBaixa: 'BAI-2026-01', magatzem: 'Magatzem 1 - Nevera Principal Farmàcia', codi: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', lot: 'PF9021', motiu: 'Baixa per trencament', unitats: 2, proveidor: 'Pfizer Salut' }
+        { id: 'DEV1', data: '2026-10-12', numBaixa: 'BAI-2026-01', magatzem: 'Magatzem 1 - Nevera Principal Farmàcia', codi: 'VAC002', vacuna: 'Pneumococ Conjugada', lot: 'PF9021', motiu: 'Baixa per trencament', unitats: 2, proveidor: 'Pfizer Salut' }
       ]
     };
 
@@ -992,6 +1093,149 @@
 
     function saveState() {
       localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
+    }
+
+    // Helper per obtenir la Marca d'una vacuna encara que el registre sigui antic
+    function getMarcaByCodi(codi, fallbackMarca) {
+      if (fallbackMarca) return fallbackMarca;
+      const cat = AppState.cataleg.find(c => c.codi === codi);
+      return cat && cat.marca ? cat.marca : '-';
+    }
+
+    // ----------------------------------------------------
+    // SISTEMA LECTOR DE QR I CODIS DE BARRES (HTML5-QRCODE)
+    // ----------------------------------------------------
+    let html5QrCodeInstance = null;
+    let currentQrTarget = null;
+
+    function startQRScanner(targetField) {
+      currentQrTarget = targetField;
+      document.getElementById('modal-qr-scanner').classList.remove('hidden');
+
+      if (!html5QrCodeInstance) {
+        html5QrCodeInstance = new Html5Qrcode("qr-reader");
+      }
+
+      const config = { fps: 10, qrbox: { width: 220, height: 150 } };
+
+      html5QrCodeInstance.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          handleQRCodeResult(decodedText.trim());
+        },
+        (errorMessage) => {}
+      ).catch((err) => {
+        console.error("No s'ha pogut iniciar la càmera:", err);
+        showToast("Error de Càmera", "Revisa els permisos de càmera del navegador.", "error");
+        stopQRScanner();
+      });
+    }
+
+    function stopQRScanner() {
+      if (html5QrCodeInstance && html5QrCodeInstance.isScanning) {
+        html5QrCodeInstance.stop().then(() => {
+          document.getElementById('modal-qr-scanner').classList.add('hidden');
+        }).catch((err) => {
+          console.error("Error aturant càmera:", err);
+          document.getElementById('modal-qr-scanner').classList.add('hidden');
+        });
+      } else {
+        document.getElementById('modal-qr-scanner').classList.add('hidden');
+      }
+    }
+
+    function handleQRCodeResult(code) {
+      stopQRScanner();
+      const cleanCode = code.toUpperCase();
+
+      if (currentQrTarget === 'cat-codi') {
+        document.getElementById('cat-codi').value = cleanCode;
+        showToast('Codi Escanejat', `Codi assignat: ${cleanCode}`);
+      }
+      else if (currentQrTarget === 'mov-lot') {
+        const foundInv = AppState.inventari.find(i => 
+          i.lot.toUpperCase() === cleanCode || 
+          i.codi.toUpperCase() === cleanCode ||
+          cleanCode.includes(i.lot.toUpperCase())
+        );
+        if (foundInv) {
+          document.getElementById('mov-lot-select').value = foundInv.id;
+          onMovimentLotChange();
+          showToast('Vacuna Identificada', `${foundInv.vacuna} (Lot: ${foundInv.lot})`);
+        } else {
+          showToast('No trobat a Inventari', `El codi/lot "${cleanCode}" no consta a l'inventari actual.`, 'error');
+        }
+      }
+      else if (currentQrTarget === 'mov-ini-vacuna') {
+        const foundCat = AppState.cataleg.find(c => 
+          c.codi.toUpperCase() === cleanCode || 
+          (c.codiProv && c.codiProv.toUpperCase() === cleanCode) ||
+          cleanCode.includes(c.codi.toUpperCase())
+        );
+        if (foundCat) {
+          document.getElementById('mov-ini-vacuna').value = foundCat.id;
+          showToast('Vacuna Seleccionada', `${foundCat.nom} (${foundCat.marca || '-'})`);
+        } else {
+          showToast('No trobada al Catàleg', `Cap vacuna amb el codi "${cleanCode}".`, 'error');
+        }
+      }
+      else if (currentQrTarget === 'mov-ini-lot') {
+        document.getElementById('mov-ini-lot').value = cleanCode;
+        showToast('Lot Inicial Escanejat', `Lot assignat: ${cleanCode}`);
+      }
+      else if (currentQrTarget === 'cmd-vacuna') {
+        const foundCat = AppState.cataleg.find(c => 
+          c.codi.toUpperCase() === cleanCode || 
+          (c.codiProv && c.codiProv.toUpperCase() === cleanCode) ||
+          cleanCode.includes(c.codi.toUpperCase())
+        );
+        if (foundCat) {
+          document.getElementById('cmd-vacuna-select').value = foundCat.id;
+          onComandaVacunaChange();
+          showToast('Vacuna Seleccionada', foundCat.nom);
+        } else {
+          showToast('No trobada al Catàleg', `Cap vacuna amb el codi "${cleanCode}".`, 'error');
+        }
+      }
+      else if (currentQrTarget === 'rec-codi') {
+        document.getElementById('rec-codi').value = cleanCode;
+        const foundCat = AppState.cataleg.find(c => 
+          c.codi.toUpperCase() === cleanCode || 
+          (c.codiProv && c.codiProv.toUpperCase() === cleanCode)
+        );
+        if (foundCat) {
+          document.getElementById('rec-codi').value = foundCat.codi;
+          document.getElementById('rec-vacuna').value = foundCat.nom;
+          document.getElementById('rec-proveidor').value = foundCat.proveidor || '';
+          showToast('Vacuna Reconeguda', foundCat.nom);
+        } else {
+          showToast('Codi Llegit', `Codi registrat: ${cleanCode}`);
+        }
+      }
+      else if (currentQrTarget === 'rec-lot') {
+        document.getElementById('rec-lot').value = cleanCode;
+        showToast('Lot Escanejat', `Lot assignat: ${cleanCode}`);
+      }
+      else if (currentQrTarget === 'dev-lot') {
+        const foundInv = AppState.inventari.find(i => 
+          i.lot.toUpperCase() === cleanCode || 
+          i.codi.toUpperCase() === cleanCode ||
+          cleanCode.includes(i.lot.toUpperCase())
+        );
+        if (foundInv) {
+          document.getElementById('dev-lot-select').value = foundInv.id;
+          onDevolucioLotChange();
+          showToast('Lot Identificat per a Baixa', `${foundInv.vacuna} (Lot: ${foundInv.lot})`);
+        } else {
+          showToast('Lot no localitzat', `No s'ha trobat "${cleanCode}" en estoc.`, 'error');
+        }
+      }
+      else if (currentQrTarget === 'inventari-search') {
+        document.getElementById('invSearchInput').value = cleanCode;
+        renderInventari();
+        showToast('Filtre QR Aplicat', `Mostrant resultats per: ${cleanCode}`, 'info');
+      }
     }
 
     // ----------------------------------------------------
@@ -1062,7 +1306,7 @@
       tbody.innerHTML = '';
 
       if (AppState.cataleg.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">No hi ha vacunes registrades al catàleg.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha vacunes registrades al catàleg.</td></tr>`;
         return;
       }
 
@@ -1076,9 +1320,11 @@
         tr.innerHTML = `
           <td class="p-3.5 font-bold text-sky-900">${escapeHtml(item.codi)}</td>
           <td class="p-3.5 font-medium text-slate-800">${escapeHtml(item.nom)}</td>
+          <td class="p-3.5 font-semibold text-teal-700">${escapeHtml(item.marca || '-')}</td>
           <td class="p-3.5 text-slate-600">${escapeHtml(item.proveidor)}</td>
           <td class="p-3.5 text-slate-500 font-mono text-xs">${escapeHtml(item.codiProv || '-')}</td>
           <td class="p-3.5 text-center font-semibold text-slate-700">${item.minim} uts.</td>
+          <td class="p-3.5 text-center text-slate-600">${item.inicial || 0} uts.</td>
           <td class="p-3.5 text-center">
             <span class="px-2.5 py-1 rounded-full text-xs font-bold ${totalDisponible < item.minim ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
               ${totalDisponible} uts.
@@ -1154,20 +1400,26 @@
       tbody.innerHTML = '';
 
       if (AppState.moviments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No s'ha registrat cap moviment de vacunes.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">No s'ha registrat cap moviment de vacunes.</td></tr>`;
         return;
       }
 
       AppState.moviments.slice().reverse().forEach(mov => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-sky-50/40 transition";
-        const isTraspas = mov.tipus === 'Traspàs';
+        let badgeStyle = 'bg-sky-100 text-sky-800';
+        if (mov.tipus === 'Consum') badgeStyle = 'bg-purple-100 text-purple-800';
+        if (mov.tipus === 'Estoc Inicial') badgeStyle = 'bg-emerald-100 text-emerald-800';
+
+        const marcaText = getMarcaByCodi(mov.codi, mov.marca);
+
         tr.innerHTML = `
           <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(mov.data)}</td>
           <td class="p-3.5 font-mono text-xs font-bold text-sky-900">${escapeHtml(mov.codi)}</td>
           <td class="p-3.5 font-medium text-slate-800">${escapeHtml(mov.vacuna)}</td>
+          <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
           <td class="p-3.5">
-            <span class="px-2 py-0.5 rounded-md text-xs font-semibold ${isTraspas ? 'bg-sky-100 text-sky-800' : 'bg-purple-100 text-purple-800'}">
+            <span class="px-2 py-0.5 rounded-md text-xs font-semibold ${badgeStyle}">
               ${escapeHtml(mov.tipus)}
             </span>
           </td>
@@ -1261,10 +1513,20 @@
 
       const filterSelect = document.getElementById('filterMagatzemSelect');
       const selectedFilter = filterSelect ? filterSelect.value : 'TOTS';
+      const searchQuery = (document.getElementById('invSearchInput')?.value || '').trim().toUpperCase();
 
       let items = AppState.inventari;
       if (selectedFilter && selectedFilter !== 'TOTS') {
         items = items.filter(inv => inv.magatzemId === selectedFilter);
+      }
+      if (searchQuery) {
+        items = items.filter(inv => {
+          const marca = getMarcaByCodi(inv.codi, inv.marca).toUpperCase();
+          return inv.codi.toUpperCase().includes(searchQuery) ||
+                 inv.vacuna.toUpperCase().includes(searchQuery) ||
+                 marca.includes(searchQuery) ||
+                 inv.lot.toUpperCase().includes(searchQuery);
+        });
       }
 
       let totalDosis = 0;
@@ -1293,13 +1555,14 @@
       document.getElementById('kpi-caducitat-propera').textContent = caducitatsProperes;
 
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha estoc registrat per al filtre seleccionat.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No hi ha estoc registrat per al filtre seleccionat.</td></tr>`;
         return;
       }
 
       items.forEach(inv => {
         const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
         const nomMagatzem = mag ? mag.nom : inv.magatzemId;
+        const marcaText = getMarcaByCodi(inv.codi, inv.marca);
 
         let estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Correcte</span>`;
         if (Number(inv.disponible) <= 0) {
@@ -1322,6 +1585,7 @@
           <td class="p-3.5 text-xs font-semibold text-sky-950">${escapeHtml(nomMagatzem)}</td>
           <td class="p-3.5 font-mono text-xs font-bold text-sky-900">${escapeHtml(inv.codi)}</td>
           <td class="p-3.5 font-medium text-slate-800">${escapeHtml(inv.vacuna)}</td>
+          <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
           <td class="p-3.5 text-xs text-slate-500">${escapeHtml(inv.codiProv || '-')}</td>
           <td class="p-3.5 font-mono text-xs font-bold text-teal-800 bg-teal-50 px-2 rounded inline-block my-2.5">${escapeHtml(inv.lot)}</td>
           <td class="p-3.5 text-xs text-slate-600">${caducitatText}</td>
@@ -1380,16 +1644,22 @@
         filterSelect.value = currentFilter;
       }
 
-      const cmdVacSelect = document.getElementById('cmd-vacuna-select');
-      if (cmdVacSelect) {
-        cmdVacSelect.innerHTML = '<option value="">-- Selecciona Vacuna del Catàleg --</option>';
+      // Desplegables de vacunes del Catàleg (en Comandes i en Estoc Inicial de Moviments)
+      const vacSelects = ['cmd-vacuna-select', 'mov-ini-vacuna'];
+      vacSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Selecciona Vacuna del Catàleg --</option>';
         AppState.cataleg.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.id;
-          opt.textContent = `${c.nom} (${c.codi})`;
-          cmdVacSelect.appendChild(opt);
+          const marcaLabel = c.marca ? ` - ${c.marca}` : '';
+          opt.textContent = `${c.nom}${marcaLabel} (${c.codi})`;
+          select.appendChild(opt);
         });
-      }
+        if (currentVal) select.value = currentVal;
+      });
 
       populateLotsDropdowns();
 
@@ -1415,9 +1685,10 @@
         AppState.inventari.forEach(inv => {
           const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
           const nomMag = mag ? mag.nom : inv.magatzemId;
+          const marca = getMarcaByCodi(inv.codi, inv.marca);
           const opt = document.createElement('option');
           opt.value = inv.id;
-          opt.textContent = `Lot: ${inv.lot} | ${inv.vacuna} | Magatzem: ${nomMag} (Disp: ${inv.disponible})`;
+          opt.textContent = `Lot: ${inv.lot} | ${inv.vacuna} (${marca}) | ${nomMag} (Disp: ${inv.disponible})`;
           target.appendChild(opt);
         });
       };
@@ -1432,6 +1703,9 @@
     function openModal(modalId) {
       document.getElementById(modalId).classList.remove('hidden');
       populateDropdowns();
+      if (modalId === 'modal-moviments') {
+        toggleMovimentFields();
+      }
     }
 
     function closeModal(modalId) {
@@ -1442,12 +1716,13 @@
       if (idInput) idInput.value = '';
     }
 
-    // CATÀLEG: Guardar / Editar
+    // Guardar o Editar Vacuna al Catàleg (amb Vacuna i Marca separats)
     function saveCataleg(e) {
       e.preventDefault();
       const id = document.getElementById('cat-id').value;
       const codi = document.getElementById('cat-codi').value.trim();
       const nom = document.getElementById('cat-nom').value.trim();
+      const marca = document.getElementById('cat-marca').value.trim();
       const codiProv = document.getElementById('cat-codiprov').value.trim();
       const proveidor = document.getElementById('cat-proveidor').value;
       const minim = Number(document.getElementById('cat-minim').value) || 0;
@@ -1458,6 +1733,7 @@
         if (item) {
           item.codi = codi;
           item.nom = nom;
+          item.marca = marca;
           item.codiProv = codiProv;
           item.proveidor = proveidor;
           item.minim = minim;
@@ -1467,9 +1743,9 @@
       } else {
         AppState.cataleg.push({
           id: 'CAT_' + Date.now(),
-          codi, nom, codiProv, proveidor, minim, inicial
+          codi, nom, marca, codiProv, proveidor, minim, inicial
         });
-        showToast('Nou registre', 'Vacuna afegida correctament al catàleg.');
+        showToast('Nou registre', 'Vacuna i marca afegides al catàleg.');
       }
 
       saveState();
@@ -1484,6 +1760,7 @@
       document.getElementById('cat-id').value = item.id;
       document.getElementById('cat-codi').value = item.codi;
       document.getElementById('cat-nom').value = item.nom;
+      document.getElementById('cat-marca').value = item.marca || '';
       document.getElementById('cat-codiprov').value = item.codiProv || '';
       document.getElementById('cat-proveidor').value = item.proveidor;
       document.getElementById('cat-minim').value = item.minim;
@@ -1492,7 +1769,6 @@
       openModal('modal-cataleg');
     }
 
-    // MAGATZEMS: Guardar / Editar
     function saveMagatzem(e) {
       e.preventDefault();
       const id = document.getElementById('mag-id').value;
@@ -1533,7 +1809,6 @@
       openModal('modal-magatzems');
     }
 
-    // PROVEÏDORS: Guardar / Editar
     function saveProveidor(e) {
       e.preventDefault();
       const id = document.getElementById('prov-id').value;
@@ -1583,18 +1858,36 @@
       openModal('modal-proveidors');
     }
 
-    // MOVIMENTS: Lògica de canvi de formulari segons Traspàs / Consum
+    // ----------------------------------------------------
+    // MOVIMENTS: Canvi dinàmic entre Traspàs, Consum i Estoc Inicial
+    // ----------------------------------------------------
     function toggleMovimentFields() {
       const tipus = document.getElementById('mov-tipus').value;
+      const blockExistent = document.getElementById('block-mov-existent');
+      const blockInicial = document.getElementById('block-mov-inicial');
       const fieldTraspas = document.getElementById('field-mov-traspas');
       const fieldConsum = document.getElementById('field-mov-consum');
+      const labelUnitats = document.getElementById('label-mov-unitats');
 
-      if (tipus === 'Consum') {
-        fieldTraspas.classList.add('hidden');
-        fieldConsum.classList.remove('hidden');
-      } else {
+      if (tipus === 'Estoc Inicial') {
+        blockExistent.classList.add('hidden');
+        blockInicial.classList.remove('hidden');
         fieldTraspas.classList.remove('hidden');
         fieldConsum.classList.add('hidden');
+        labelUnitats.textContent = "Unitats d'Estoc Inicial a ingressar *";
+      } else if (tipus === 'Consum') {
+        blockExistent.classList.remove('hidden');
+        blockInicial.classList.add('hidden');
+        fieldTraspas.classList.add('hidden');
+        fieldConsum.classList.remove('hidden');
+        labelUnitats.textContent = "Unitats a consumir *";
+      } else {
+        // Traspàs
+        blockExistent.classList.remove('hidden');
+        blockInicial.classList.add('hidden');
+        fieldTraspas.classList.remove('hidden');
+        fieldConsum.classList.add('hidden');
+        labelUnitats.textContent = "Unitats a traspassar *";
       }
     }
 
@@ -1606,12 +1899,14 @@
         const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
         document.getElementById('mov-prev-codi').textContent = inv.codi;
         document.getElementById('mov-prev-nom').textContent = inv.vacuna;
+        document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(inv.codi, inv.marca);
         document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
         document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
         document.getElementById('mov-prev-disponible').textContent = inv.disponible;
       } else {
         document.getElementById('mov-prev-codi').textContent = '-';
         document.getElementById('mov-prev-nom').textContent = '-';
+        document.getElementById('mov-prev-marca').textContent = '-';
         document.getElementById('mov-prev-caducitat').textContent = '-';
         document.getElementById('mov-prev-origen').textContent = '-';
         document.getElementById('mov-prev-disponible').textContent = '0';
@@ -1631,9 +1926,71 @@
       e.preventDefault();
       const data = document.getElementById('mov-data').value;
       const tipus = document.getElementById('mov-tipus').value;
-      const invId = document.getElementById('mov-lot-select').value;
       const unitats = Number(document.getElementById('mov-unitats').value);
 
+      // OPCIÓ 1: ESTOC INICIAL
+      if (tipus === 'Estoc Inicial') {
+        const catId = document.getElementById('mov-ini-vacuna').value;
+        const lot = document.getElementById('mov-ini-lot').value.trim().toUpperCase();
+        const caducitat = document.getElementById('mov-ini-caducitat').value;
+        const destMagId = document.getElementById('mov-destinacio').value;
+
+        if (!catId || !lot || !caducitat || !destMagId) {
+          showToast('Dades incompletes', 'Selecciona vacuna, lot, caducitat i magatzem de destinació.', 'error');
+          return;
+        }
+
+        const cat = AppState.cataleg.find(c => c.id === catId);
+        const magDest = AppState.magatzems.find(m => m.id === destMagId);
+        const nomDest = magDest ? magDest.nom : destMagId;
+
+        // Sumar a l'inventari del magatzem seleccionat
+        const existent = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === lot && i.codi === cat.codi);
+        if (existent) {
+          existent.disponible = Number(existent.disponible) + unitats;
+        } else {
+          AppState.inventari.push({
+            id: 'INV_' + Date.now(),
+            magatzemId: destMagId,
+            codi: cat.codi,
+            vacuna: cat.nom,
+            marca: cat.marca || '',
+            codiProv: cat.codiProv || '',
+            lot,
+            caducitat,
+            minim: Math.round((Number(cat.minim) || 10) / 2),
+            disponible: unitats
+          });
+        }
+
+        // Actualitzar l'Estoc Inicial acumulat a la fitxa del Catàleg
+        cat.inicial = (Number(cat.inicial) || 0) + unitats;
+
+        // Enregistrar a l'històric de moviments
+        AppState.moviments.push({
+          id: 'MOV_' + Date.now(),
+          data,
+          codi: cat.codi,
+          vacuna: cat.nom,
+          marca: cat.marca || '-',
+          tipus: 'Estoc Inicial',
+          origen: 'Càrrega Inicial',
+          destinacio: nomDest,
+          lot,
+          caducitat,
+          unitats,
+          detall: 'Alta d\'Estoc Inicial'
+        });
+
+        showToast('Estoc Inicial Registrat', `S'han ingressat ${unitats} unitats de ${cat.nom} a ${nomDest}.`);
+        saveState();
+        closeModal('modal-moviments');
+        renderAll();
+        return;
+      }
+
+      // OPCIÓ 2 i 3: TRASPÀS O CONSUM (Sobre un Lot existent)
+      const invId = document.getElementById('mov-lot-select').value;
       const invOrigen = AppState.inventari.find(i => i.id === invId);
       if (!invOrigen) {
         showToast('Error', 'Cal seleccionar un lot vàlid de l\'inventari.', 'error');
@@ -1647,6 +2004,7 @@
 
       const magOrigen = AppState.magatzems.find(m => m.id === invOrigen.magatzemId);
       const nomOrigen = magOrigen ? magOrigen.nom : invOrigen.magatzemId;
+      const marcaOrigen = getMarcaByCodi(invOrigen.codi, invOrigen.marca);
 
       if (tipus === 'Traspàs') {
         const destMagId = document.getElementById('mov-destinacio').value;
@@ -1673,6 +2031,7 @@
             magatzemId: destMagId,
             codi: invOrigen.codi,
             vacuna: invOrigen.vacuna,
+            marca: marcaOrigen,
             codiProv: invOrigen.codiProv,
             lot: invOrigen.lot,
             caducitat: invOrigen.caducitat,
@@ -1683,7 +2042,7 @@
 
         AppState.moviments.push({
           id: 'MOV_' + Date.now(),
-          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna,
+          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
           tipus: 'Traspàs', origen: nomOrigen, destinacio: nomDest,
           lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats, detall: 'Traspàs entre magatzems'
         });
@@ -1696,7 +2055,7 @@
 
         AppState.moviments.push({
           id: 'MOV_' + Date.now(),
-          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna,
+          data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
           tipus: 'Consum', origen: nomOrigen, destinacio: codiSUM,
           lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats, detall: `Administrat: ${codiSUM}`
         });
@@ -1709,7 +2068,6 @@
       renderAll();
     }
 
-    // COMANDES: Autocompletar vacuna
     function onComandaVacunaChange() {
       const catId = document.getElementById('cmd-vacuna-select').value;
       const cat = AppState.cataleg.find(c => c.id === catId);
@@ -1731,7 +2089,7 @@
       const proveidor = document.getElementById('cmd-proveidor').value;
       const catId = document.getElementById('cmd-vacuna-select').value;
       const cat = AppState.cataleg.find(c => c.id === catId);
-      const vacuna = cat ? cat.nom : 'Vacuna';
+      const vacuna = cat ? (cat.marca ? `${cat.nom} (${cat.marca})` : cat.nom) : 'Vacuna';
       const codiVac = document.getElementById('cmd-codivac').value;
       const codiProv = document.getElementById('cmd-codiprov').value;
       const unitats = Number(document.getElementById('cmd-unitats').value);
@@ -1781,7 +2139,6 @@
       openModal('modal-comandes');
     }
 
-    // RECEPCIÓ D'ALBARÀ: Entrada automàtica a l'inventari
     function onRecepcioComandaChange() {
       const cmdId = document.getElementById('rec-comanda-select').value;
       const cmd = AppState.comandes.find(c => c.id === cmdId);
@@ -1825,7 +2182,8 @@
           id: 'INV_' + Date.now(),
           magatzemId,
           codi,
-          vacuna,
+          vacuna: cat ? cat.nom : vacuna,
+          marca: cat ? (cat.marca || '') : '',
           codiProv: cat ? cat.codiProv : '',
           lot,
           caducitat,
@@ -1840,7 +2198,6 @@
       renderAll();
     }
 
-    // DEVOLUCIONS I BAIXES: Resta automàtica d'inventari
     function onDevolucioLotChange() {
       const invId = document.getElementById('dev-lot-select').value;
       const inv = AppState.inventari.find(i => i.id === invId);
@@ -1897,7 +2254,6 @@
       renderAll();
     }
 
-    // ELIMINACIÓ UNIVERSAL D'ELEMENTS
     function deleteItem(collectionName, id) {
       if (!AppState[collectionName]) return;
       AppState[collectionName] = AppState[collectionName].filter(item => item.id !== id);
@@ -1906,9 +2262,6 @@
       renderAll();
     }
 
-    // ----------------------------------------------------
-    // UTILITATS D'EXPORTACIÓ A CSV (EXCEL)
-    // ----------------------------------------------------
     function exportTableToCSV(tableKey, filename) {
       let rows = [];
       const table = document.getElementById(`table-${tableKey}`);
@@ -1938,9 +2291,6 @@
       showToast('Exportació Completada', `El fitxer ${filename} s'ha descarregat.`, 'info');
     }
 
-    // ----------------------------------------------------
-    // FORMATS I HELPERS
-    // ----------------------------------------------------
     function formatDateDMY(isoDate) {
       if (!isoDate) return '-';
       const parts = isoDate.split('-');
