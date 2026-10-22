@@ -55,7 +55,6 @@
         <div class="flex items-center space-x-3.5">
           <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-sky-600 via-teal-500 to-cyan-400 p-0.5 shadow-md">
             <div class="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden">
-              <!-- Logotip Oficial SanyStock -->
               <img 
                 src="Logo_App.png" 
                 alt="Logotip Oficial SanyStock" 
@@ -72,7 +71,7 @@
           </div>
         </div>
 
-        <!-- Indicador dinàmic: Data d'avui i estat de seguretat -->
+        <!-- Indicador dinàmic: Data d'avui (Sense botons de perill) -->
         <div class="flex items-center gap-3">
           <div class="bg-sky-50 border border-sky-200 rounded-xl px-4 py-2 flex items-center space-x-2.5">
             <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,12 +82,6 @@
               <div id="currentDateBadge" class="text-xs font-bold text-slate-700">Carregant...</div>
             </div>
           </div>
-
-          <button onclick="resetDataPrompt()" title="Reiniciar dades de prova" class="no-print p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition border border-transparent hover:border-red-200">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-          </button>
         </div>
 
       </div>
@@ -935,9 +928,7 @@
   <!-- JAVASCRIPT: LÒGICA I PERSISTÈNCIA          -->
   <!-- ========================================== -->
   <script>
-    // ----------------------------------------------------
-    // DADES INICIALS D'EXEMPLE SANITARI HOMOLOGADES
-    // ----------------------------------------------------
+    // Dades inicials d'exemple (únicament s'usen si l'usuari entra per primera vegada)
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -957,7 +948,7 @@
       inventari: [
         { id: 'INV1', magatzemId: 'MAG1', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 20, disponible: 45 },
         { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Infanrix Hexa (Hexavalent)', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 },
-        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 }, // Alerta baix estoc
+        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Prevenar 20 (Pneumococ)', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 },
         { id: 'INV4', magatzemId: 'MAG2', codi: 'VAC003', vacuna: 'Priorix (Triple Vírica)', codiProv: 'GSK-PRI', lot: 'PRX441', caducitat: '2026-11-20', minim: 10, disponible: 22 },
         { id: 'INV5', magatzemId: 'MAG1', codi: 'VAC004', vacuna: 'Vaxigrip Tetra (Grip estacional)', codiProv: 'SNF-VAX4', lot: 'VG2026X', caducitat: '2027-01-10', minim: 35, disponible: 60 }
       ],
@@ -974,7 +965,6 @@
       ]
     };
 
-    // Estructures a LocalStorage
     let AppState = {
       magatzems: [],
       proveidors: [],
@@ -1004,13 +994,6 @@
       localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
     }
 
-    function resetDataPrompt() {
-      showToast('Restablint dades...', 'S\'han carregat les dades sanitàries inicials.', 'info');
-      AppState = JSON.parse(JSON.stringify(defaultData));
-      saveState();
-      renderAll();
-    }
-
     // ----------------------------------------------------
     // INICIALITZACIÓ I DATA ACTUAL EN CATALÀ
     // ----------------------------------------------------
@@ -1020,7 +1003,6 @@
       populateDropdowns();
       renderAll();
 
-      // Posar dates per defecte als inputs tipus date
       const todayISO = new Date().toISOString().split('T')[0];
       ['prov-data', 'mov-data', 'cmd-data', 'rec-data', 'dev-data'].forEach(id => {
         const el = document.getElementById(id);
@@ -1032,7 +1014,6 @@
       const now = new Date();
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const dateStr = now.toLocaleDateString('ca-ES', options);
-      // Capitalitzar la primera lletra
       const formatted = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
       document.getElementById('currentDateBadge').textContent = formatted;
     }
@@ -1086,7 +1067,6 @@
       }
 
       AppState.cataleg.forEach(item => {
-        // Càlcul de l'estoc real disponible sumant tots els lots d'aquesta vacuna a tots els magatzems
         const totalDisponible = AppState.inventari
           .filter(inv => inv.codi === item.codi)
           .reduce((sum, inv) => sum + Number(inv.disponible), 0);
@@ -1321,7 +1301,6 @@
         const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
         const nomMagatzem = mag ? mag.nom : inv.magatzemId;
 
-        // Càlcul d'estat sanitari
         let estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Correcte</span>`;
         if (Number(inv.disponible) <= 0) {
           estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">Esgotat (0)</span>`;
@@ -1329,7 +1308,6 @@
           estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">Baix Estoc</span>`;
         }
 
-        // Alerta visual de data de caducitat
         let caducitatText = formatDateDMY(inv.caducitat);
         if (inv.caducitat) {
           const dCad = new Date(inv.caducitat);
@@ -1359,7 +1337,6 @@
     // ACTUALITZACIÓ DINÀMICA DE SELECTORS I DESPLEGABLES
     // ----------------------------------------------------
     function populateDropdowns() {
-      // 1. Desplegables de proveïdors
       const provSelects = ['cat-proveidor', 'cmd-proveidor', 'dev-proveidor'];
       provSelects.forEach(id => {
         const select = document.getElementById(id);
@@ -1375,7 +1352,6 @@
         if (currentVal) select.value = currentVal;
       });
 
-      // 2. Desplegables de magatzems
       const magSelects = ['mov-destinacio', 'rec-magatzem'];
       magSelects.forEach(id => {
         const select = document.getElementById(id);
@@ -1391,7 +1367,6 @@
         if (currentVal) select.value = currentVal;
       });
 
-      // 3. Filtre per magatzem a la pantalla d'Inventari
       const filterSelect = document.getElementById('filterMagatzemSelect');
       if (filterSelect) {
         const currentFilter = filterSelect.value || 'TOTS';
@@ -1405,7 +1380,6 @@
         filterSelect.value = currentFilter;
       }
 
-      // 4. Desplegable de vacunes per a Nova Comanda
       const cmdVacSelect = document.getElementById('cmd-vacuna-select');
       if (cmdVacSelect) {
         cmdVacSelect.innerHTML = '<option value="">-- Selecciona Vacuna del Catàleg --</option>';
@@ -1417,10 +1391,8 @@
         });
       }
 
-      // 5. Desplegables de Lots per a Moviments i Devolucions
       populateLotsDropdowns();
 
-      // 6. Desplegable de comandes per a la Recepció
       const recCmdSelect = document.getElementById('rec-comanda-select');
       if (recCmdSelect) {
         recCmdSelect.innerHTML = '<option value="">-- Comanda lliure (sense associar) --</option>';
@@ -1464,7 +1436,6 @@
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.add('hidden');
-      // Neteja formularis si existeixen
       const form = document.querySelector(`#${modalId} form`);
       if (form) form.reset();
       const idInput = form ? form.querySelector('input[type="hidden"]') : null;
@@ -1647,7 +1618,6 @@
       }
     }
 
-    // Calcula unitats a partir de la separació per comes de PACs (Codi SUM)
     function updateConsumUnitsFromSUM() {
       const sumVal = document.getElementById('mov-sum').value.trim();
       if (!sumVal) return;
@@ -1657,7 +1627,6 @@
       }
     }
 
-    // REGLA CLAU: Execució i actualització en temps real d'Inventari per Traspàs / Consum
     function saveMoviment(e) {
       e.preventDefault();
       const data = document.getElementById('mov-data').value;
@@ -1693,10 +1662,8 @@
         const magDest = AppState.magatzems.find(m => m.id === destMagId);
         const nomDest = magDest ? magDest.nom : destMagId;
 
-        // 1. Restem de l'origen
         invOrigen.disponible = Number(invOrigen.disponible) - unitats;
 
-        // 2. Sumem al destí (si ja existeix el mateix lot en aquest magatzem, sumem, sinó creem la línia)
         const invDest = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === invOrigen.lot && i.codi === invOrigen.codi);
         if (invDest) {
           invDest.disponible = Number(invDest.disponible) + unitats;
@@ -1714,7 +1681,6 @@
           });
         }
 
-        // 3. Registrem el moviment
         AppState.moviments.push({
           id: 'MOV_' + Date.now(),
           data, codi: invOrigen.codi, vacuna: invOrigen.vacuna,
@@ -1725,9 +1691,7 @@
         showToast('Traspàs Realitzat', `${unitats} unitats traspassades cap a ${nomDest}.`);
 
       } else {
-        // Consum
         const codiSUM = document.getElementById('mov-sum').value.trim() || 'Consum clínic';
-        // Restem de l'origen
         invOrigen.disponible = Number(invOrigen.disponible) - unitats;
 
         AppState.moviments.push({
@@ -1847,18 +1811,15 @@
         return;
       }
 
-      // Si ve d'una comanda prèvia, actualitzem el seu estat a Recepcionat
       if (cmdId) {
         const cmd = AppState.comandes.find(c => c.id === cmdId);
         if (cmd) cmd.estat = 'Recepcionat';
       }
 
-      // Entrada automàtica d'estoc a l'inventari del magatzem seleccionat
       const existent = AppState.inventari.find(i => i.magatzemId === magatzemId && i.lot === lot && i.codi === codi);
       if (existent) {
         existent.disponible = Number(existent.disponible) + unitats;
       } else {
-        // Busquem dades de catàleg per saber l'estoc mínim recomanat
         const cat = AppState.cataleg.find(c => c.codi === codi);
         AppState.inventari.push({
           id: 'INV_' + Date.now(),
@@ -1921,10 +1882,8 @@
       const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
       const nomMagatzem = mag ? mag.nom : inv.magatzemId;
 
-      // Restem automàticament de l'estoc
       inv.disponible = Number(inv.disponible) - unitats;
 
-      // Registrem la devolució
       AppState.devolucions.push({
         id: 'DEV_' + Date.now(),
         data, numBaixa, magatzem: nomMagatzem,
@@ -1960,7 +1919,6 @@
         const cols = tr.querySelectorAll('th, td');
         let rowData = [];
         cols.forEach((col, index) => {
-          // Ignorem la columna d'opcions en la impressió/exportació
           if (col.classList.contains('no-print')) return;
           let text = col.innerText.replace(/"/g, '""').trim();
           rowData.push(`"${text}"`);
@@ -2002,7 +1960,6 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Sistema de notificacions personalitzat (mai fem servir alert())
     function showToast(title, message, type = 'success') {
       const toast = document.getElementById('toastNotification');
       const tTitle = document.getElementById('toastTitle');
