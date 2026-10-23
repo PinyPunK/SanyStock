@@ -136,7 +136,7 @@
 
       </div>
 
-      <!-- Menú de pestanyes principal (10 pestanyes) -->
+      <!-- Menú de pestanyes principal -->
       <nav class="flex space-x-1 sm:space-x-1.5 mt-3 overflow-x-auto pb-1 no-print border-t border-slate-100 pt-2 text-xs sm:text-sm font-medium">
         <button onclick="switchTab('cataleg')" id="tab-cataleg" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap bg-sky-100 text-sky-900 font-bold">
           <span data-i18n="nav_cataleg">Catàleg</span>
@@ -159,7 +159,6 @@
         <button onclick="switchTab('inventari')" id="tab-inventari" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap font-bold text-teal-700 bg-teal-50 border border-teal-200">
           <span data-i18n="nav_inventari">Inventari General</span>
         </button>
-        <!-- NOVES PESTANYES SOL·LICITADES -->
         <button onclick="switchTab('documents')" id="tab-documents" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
           <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
           <span data-i18n="nav_documents">Documents PDF</span>
@@ -507,9 +506,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- NOVA PESTANYA 8: DOCUMENTS PDF             -->
-    <!-- ========================================== -->
+    <!-- PESTANYA 8: DOCUMENTS PDF -->
     <section id="section-documents" class="tab-content hidden">
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
@@ -519,11 +516,10 @@
           </div>
         </div>
 
-        <!-- Formulari de pujada de PDF -->
         <form onsubmit="uploadPdfDocument(event)" class="bg-sky-50/60 border border-sky-100 rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Títol del Document *</label>
-            <input type="text" id="pdf-titol" required placeholder="Ex. Manual SanyStock v1 / Albarà GSK" class="w-full rounded-xl border-slate-300 border p-2 text-sm bg-white">
+            <input type="text" id="pdf-titol" required placeholder="Ex. Manual SanyStock v1" class="w-full rounded-xl border-slate-300 border p-2 text-sm bg-white">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Categoria *</label>
@@ -546,7 +542,6 @@
           </div>
         </form>
 
-        <!-- Llistat de PDFs guardats -->
         <div class="table-container rounded-xl border border-slate-200">
           <table class="w-full text-left text-xs sm:text-sm border-collapse">
             <thead class="bg-sky-50 text-sky-950 font-semibold border-b border-sky-100 uppercase tracking-wider text-[11px]">
@@ -565,13 +560,11 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- NOVA PESTANYA 9: AJUSTES / CONFIGURACIÓ    -->
-    <!-- ========================================== -->
+    <!-- PESTANYA 9: AJUSTES / CONFIGURACIÓ -->
     <section id="section-ajustes" class="tab-content hidden">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
-        <!-- Targeta 1: Idioma i Aparença (Clar / Fosc) -->
+        <!-- Targeta 1: Idioma i Aparença -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
           <div class="border-b border-slate-100 pb-3">
             <h3 data-i18n="settings_appearance" class="text-lg font-bold text-sky-900">Idioma i Aparença Visual</h3>
@@ -581,15 +574,9 @@
           <div>
             <label data-i18n="settings_lang_label" class="block text-xs font-bold uppercase text-slate-600 mb-2">Seleccionar Idioma de l'Aplicació</label>
             <div class="grid grid-cols-3 gap-2.5">
-              <button type="button" onclick="changeLanguage('ca')" id="lang-btn-ca" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-sky-600 text-white border-sky-600">
-                🏴 Català
-              </button>
-              <button type="button" onclick="changeLanguage('es')" id="lang-btn-es" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300">
-                🇪🇸 Español
-              </button>
-              <button type="button" onclick="changeLanguage('en')" id="lang-btn-en" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300">
-                🇬🇧 English
-              </button>
+              <button type="button" onclick="changeLanguage('ca')" id="lang-btn-ca" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-sky-600 text-white border-sky-600">🏴 Català</button>
+              <button type="button" onclick="changeLanguage('es')" id="lang-btn-es" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300">🇪🇸 Español</button>
+              <button type="button" onclick="changeLanguage('en')" id="lang-btn-en" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300">🇬🇧 English</button>
             </div>
           </div>
 
@@ -597,14 +584,12 @@
             <label data-i18n="settings_theme_label" class="block text-xs font-bold uppercase text-slate-600 mb-2">Mode de Pantalla (Clar / Fosc)</label>
             <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <span class="text-sm font-semibold text-slate-700">Activar Mode Fosc Sanitari (Dark Mode)</span>
-              <button type="button" onclick="toggleDarkMode()" id="darkModeBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 transition">
-                🌙 Canviar Tema
-              </button>
+              <button type="button" onclick="toggleDarkMode()" id="darkModeBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 transition">🌙 Canviar Tema</button>
             </div>
           </div>
         </div>
 
-        <!-- Targeta 2: Còpia de Seguretat i Restauració -->
+        <!-- Targeta 2: Còpia de Seguretat -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
           <div class="border-b border-slate-100 pb-3">
             <h3 data-i18n="settings_backup" class="text-lg font-bold text-sky-900">Còpia de Seguretat (Backup)</h3>
@@ -615,23 +600,20 @@
             <div class="bg-teal-50/60 border border-teal-200 p-4 rounded-xl flex items-center justify-between">
               <div>
                 <div class="text-sm font-bold text-teal-950">Crear Còpia de Seguretat</div>
-                <div class="text-xs text-teal-700">Descarrega un fitxer .JSON amb tot el catàleg, lots i moviments.</div>
+                <div class="text-xs text-teal-700">Descarrega un fitxer .JSON amb tot el catàleg i lots.</div>
               </div>
-              <button type="button" onclick="downloadBackupJSON()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition whitespace-nowrap">
-                ⬇️ Descarregar Còpia
-              </button>
+              <button type="button" onclick="downloadBackupJSON()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition whitespace-nowrap">⬇️ Descarregar Còpia</button>
             </div>
 
             <div class="bg-amber-50/60 border border-amber-200 p-4 rounded-xl space-y-2.5">
               <div class="text-sm font-bold text-amber-950">Restablir Còpia Guardada</div>
-              <div class="text-xs text-amber-800">Selecciona un fitxer de còpia (.json) del teu dispositiu per restaurar les dades:</div>
+              <div class="text-xs text-amber-800">Selecciona un fitxer de còpia (.json) per restaurar:</div>
               <input type="file" id="restoreBackupInput" accept=".json" onchange="restoreBackupJSON(event)" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700">
             </div>
           </div>
         </div>
 
-        <!-- Targeta 3: Sincronització en Temps Real entre Dispositius Mòbils (APK / PWA) -->
-        <!-- Targeta 3: Sincronització en Temps Real entre Dispositius Mòbils (APK / PWA) -->
+        <!-- Targeta 3: Sincronització en Temps Real Multi-Dispositiu (Cloud) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 space-y-4">
           <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -639,22 +621,16 @@
               <p class="text-xs text-slate-500">Connecta les APK instal·lades en diferents mòbils perquè totes les dades s'actualitzin a l'instant.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button type="button" onclick="createNewCloudBin()" class="bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3.5 py-2 rounded-xl text-xs transition border border-purple-300">
-                ✨ Crear Contenidor Automàtic
-              </button>
-              <button type="button" onclick="pullFromCloud(true)" class="bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3.5 py-2 rounded-xl text-xs transition">
-                🔄 Descarregar del Núvol Ara
-              </button>
-              <button type="button" onclick="pushToCloud(true)" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
-                ☁️ Pujar Canvis al Núvol
-              </button>
+              <button type="button" onclick="createNewCloudBin()" class="bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3.5 py-2 rounded-xl text-xs transition border border-purple-300">✨ Crear Contenidor Automàtic</button>
+              <button type="button" onclick="pullFromCloud(true)" class="bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3.5 py-2 rounded-xl text-xs transition">🔄 Descarregar del Núvol Ara</button>
+              <button type="button" onclick="pushToCloud(true)" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">☁️ Pujar Canvis al Núvol</button>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 mb-1">URL del Servidor Cloud o Bin ID (JSONBin)</label>
-              <input type="text" id="cloud-url" placeholder="Ex. https://api.jsonbin.io/v3/b/6718... o només el teu Bin ID" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <input type="text" id="cloud-url" placeholder="Ex. https://api.jsonbin.io/v3/b/6718... o només el Bin ID" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Clau d'Accés / X-Master-Key *</label>
@@ -662,17 +638,12 @@
             </div>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <p class="text-xs text-slate-500">
-              <strong>Truc ràpid:</strong> Si només poses la teva <em>X-Master-Key</em> i prems <strong>"✨ Crear Contenidor Automàtic"</strong>, l'app generarà la URL per tu!
-            </p>
-            <button type="button" onclick="saveCloudConfig()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-sm transition">
-              Guardar Connexió Cloud
-            </button>
+            <p class="text-xs text-slate-500"><strong>Truc ràpid:</strong> Si només poses la teva <em>X-Master-Key</em> i prems <strong>"✨ Crear Contenidor Automàtic"</strong>, l'app generarà la URL per tu!</p>
+            <button type="button" onclick="saveCloudConfig()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-sm transition">Guardar Connexió Cloud</button>
           </div>
         </div>
-    </section>
 
-    <!-- Targeta 4: Gestió d'Instal·lació i Desinstal·lació de l'App -->
+        <!-- Targeta 4: Gestió d'Instal·lació i Desinstal·lació de l'App -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:col-span-2 space-y-4">
           <div class="border-b border-slate-100 pb-3">
             <h3 class="text-lg font-bold text-sky-900">📱 Instal·lació i Gestió de l'Aplicació (APK / PWA)</h3>
@@ -680,7 +651,7 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <!-- Botó d'Instal·lació -->
+            <!-- Botó d'Instal·lació Intel·ligent -->
             <div class="bg-sky-50/60 border border-sky-200 p-4 rounded-xl flex items-center justify-between">
               <div>
                 <div class="text-sm font-bold text-sky-950">Instal·lar SanyStock</div>
@@ -691,7 +662,7 @@
               </button>
             </div>
 
-            <!-- Botó de Desinstal·lació -->
+            <!-- Botó de Desinstal·lació de Cache -->
             <div class="bg-rose-50/60 border border-rose-200 p-4 rounded-xl flex items-center justify-between">
               <div>
                 <div class="text-sm font-bold text-rose-950">Desinstal·lar App</div>
@@ -704,9 +675,10 @@
           </div>
         </div>
 
-    <!-- ========================================== -->
-    <!-- NOVA PESTANYA 10: CONTACTE I SUPORT        -->
-    <!-- ========================================== -->
+      </div>
+    </section>
+
+    <!-- PESTANYA 10: CONTACTE I SUPORT -->
     <section id="section-contacte" class="tab-content hidden">
       <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
         <div class="bg-gradient-to-r from-sky-800 via-sky-700 to-teal-600 p-6 text-white">
@@ -747,16 +719,11 @@
             </div>
 
             <div class="pt-2 flex flex-wrap gap-2.5">
-              <a href="mailto:Lorena.borrell@outlook.es?subject=Suport%20SanyStock" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition inline-flex items-center gap-1.5">
-                ✉️ Enviar Correu
-              </a>
-              <a href="tel:+34634485244" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition inline-flex items-center gap-1.5">
-                📲 Trucar Ara
-              </a>
+              <a href="mailto:Lorena.borrell@outlook.es?subject=Suport%20SanyStock" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition inline-flex items-center gap-1.5">✉️ Enviar Correu</a>
+              <a href="tel:+34634485244" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition inline-flex items-center gap-1.5">📲 Trucar Ara</a>
             </div>
           </div>
 
-          <!-- Formulari ràpid per enviar incidència per correu -->
           <form onsubmit="sendSupportEmail(event)" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
             <h4 class="text-xs font-bold uppercase tracking-wider text-sky-900">Enviar tiquet ràpid d'incidència</h4>
             <div>
@@ -769,11 +736,9 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-600 mb-1">Descripció del missatge *</label>
-              <textarea id="sup-missatge" rows="3" required placeholder="Escriu aquí el teu dubte o incidència..." class="w-full rounded-xl border-slate-300 border p-2 text-xs bg-white"></textarea>
+              <textarea id="sup-missatge" rows="3" required placeholder="Escriu aquí el teu dubte..." class="w-full rounded-xl border-slate-300 border p-2 text-xs bg-white"></textarea>
             </div>
-            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl text-xs transition">
-              Generar i Enviar Missatge a Lorena Borrell
-            </button>
+            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl text-xs transition">Generar i Enviar Missatge</button>
           </form>
         </div>
       </div>
@@ -1190,7 +1155,7 @@
     </div>
   </div>
 
-  <!-- MODAL 8: ESCÀNER DE CODI QR / BARRES -->
+  <!-- MODAL 8: ESCÀNER QR -->
   <div id="modal-qr-scanner" class="fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-sky-200 overflow-hidden">
       <div class="bg-sky-800 px-5 py-3.5 flex items-center justify-between text-white">
@@ -1220,9 +1185,6 @@
   <!-- JAVASCRIPT: LÒGICA, CLOUD, PDF, I18N       -->
   <!-- ========================================== -->
   <script>
-    // ----------------------------------------------------
-    // 1. DICCIONARI MULTILINGÜE (CATALÀ, ESPAÑOL, ENGLISH)
-    // ----------------------------------------------------
     const translations = {
       ca: {
         badge_sanitari: "Sanitari",
@@ -1345,13 +1307,9 @@
             : "py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-white text-slate-700 border-slate-300";
         }
       });
-
       initDateBadge();
     }
 
-    // ----------------------------------------------------
-    // 2. MODE CLAR / FOSC (DARK MODE)
-    // ----------------------------------------------------
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle('dark-mode');
       localStorage.setItem('SANYS_DARK', isDark ? '1' : '0');
@@ -1364,9 +1322,6 @@
       }
     }
 
-    // ----------------------------------------------------
-    // 3. ESTAT DE DADES I SINCRONITZACIÓ EN TEMPS REAL
-    // ----------------------------------------------------
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -1405,10 +1360,9 @@
     function saveState() {
       AppState.updatedAt = Date.now();
       localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
-      pushToCloud(false); // Sincronitza automàticament amb la resta de mòbils si el núvol està configurat
+      pushToCloud(false);
     }
 
-    // Sincronització entre pestanyes obertes o canvis d'emmagatzematge
     window.addEventListener('storage', (event) => {
       if (event.key === 'SANYS_DATA_v1') {
         loadState();
@@ -1416,18 +1370,29 @@
       }
     });
 
-    // Conector Cloud Multi-Dispositiu (API REST / JSONBin / Back4App)
+    function formatCloudUrl(rawInput) {
+      let clean = (rawInput || '').trim();
+      if (!clean) return '';
+      clean = clean.replace(/\/+$/, '');
+      if (/^[a-zA-Z0-9]{20,30}$/.test(clean)) {
+        return `https://api.jsonbin.io/v3/b/${clean}`;
+      }
+      if (clean.includes('jsonbin.io') && !clean.includes('/v3/b/')) {
+        const parts = clean.split('/');
+        return `https://api.jsonbin.io/v3/b/${parts[parts.length - 1]}`;
+      }
+      return clean;
+    }
+
     function saveCloudConfig() {
-      const url = document.getElementById('cloud-url').value.trim();
+      const url = formatCloudUrl(document.getElementById('cloud-url').value);
       const key = document.getElementById('cloud-key').value.trim();
+      document.getElementById('cloud-url').value = url;
       localStorage.setItem('SANYS_CLOUD_URL', url);
       localStorage.setItem('SANYS_CLOUD_KEY', key);
       updateCloudBadge();
-      if (url) {
-        pushToCloud(true);
-      } else {
-        showToast('Mode Local', 'S\'ha desactivat la sincronització al núvol.', 'info');
-      }
+      if (url) pushToCloud(true);
+      else showToast('Mode Local', 'S\'ha desactivat la sincronització al núvol.', 'info');
     }
 
     function updateCloudBadge() {
@@ -1436,7 +1401,6 @@
       const txt = document.getElementById('cloudStatusText');
       document.getElementById('cloud-url').value = url;
       document.getElementById('cloud-key').value = localStorage.getItem('SANYS_CLOUD_KEY') || '';
-
       const dict = translations[currentLang] || translations.ca;
       if (url) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
@@ -1447,66 +1411,135 @@
       }
     }
 
+    async function createNewCloudBin() {
+      const key = document.getElementById('cloud-key').value.trim();
+      if (!key) {
+        showToast('Falta la Clau', 'Enganxa primer la teva X-Master-Key.', 'error');
+        return;
+      }
+      showToast('Creant contenidor...', 'Connectant amb el servidor Cloud...', 'info');
+      try {
+        const res = await fetch('https://api.jsonbin.io/v3/b', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Master-Key': key, 'X-Bin-Name': 'SanyStock_DB' },
+          body: JSON.stringify(AppState)
+        });
+        if (!res.ok) throw new Error(`Codi HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.metadata && data.metadata.id) {
+          const newUrl = `https://api.jsonbin.io/v3/b/${data.metadata.id}`;
+          document.getElementById('cloud-url').value = newUrl;
+          localStorage.setItem('SANYS_CLOUD_URL', newUrl);
+          localStorage.setItem('SANYS_CLOUD_KEY', key);
+          updateCloudBadge();
+          showToast('Contenidor Creat!', 'URL generada i guardada automàticament.');
+        }
+      } catch (e) {
+        showToast('Error', `No s'ha pogut crear (${e.message}). Revisa la X-Master-Key.`, 'error');
+      }
+    }
+
     async function pushToCloud(manual = false) {
-      const url = localStorage.getItem('SANYS_CLOUD_URL');
-      const key = localStorage.getItem('SANYS_CLOUD_KEY');
+      const url = formatCloudUrl(document.getElementById('cloud-url')?.value || localStorage.getItem('SANYS_CLOUD_URL'));
+      const key = (document.getElementById('cloud-key')?.value || localStorage.getItem('SANYS_CLOUD_KEY') || '').trim();
       if (!url) {
-        if (manual) showToast('Configuració pendent', 'Introdueix primer la URL del servidor Cloud.', 'error');
+        if (manual) showToast('Configuració pendent', 'Introdueix la URL o crea un contenidor.', 'error');
         return;
       }
       try {
         const headers = { 'Content-Type': 'application/json' };
         if (key) headers['X-Master-Key'] = key;
-        const res = await fetch(url, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(AppState)
-        });
-        if (res.ok && manual) {
-          showToast('Sincronitzat al Núvol', 'Tots els dispositius mòbils rebran les dades actualitzades.');
-        }
+        const res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(AppState) });
+        if (!res.ok) throw new Error(`Error servidor (${res.status})`);
+        if (manual) showToast('Sincronitzat', 'Dades pujades al núvol correctament.');
       } catch (e) {
-        if (manual) showToast('Error de Xarxa', 'No s\'ha pogut connectar amb el servidor Cloud.', 'error');
+        if (manual) showToast('Error al pujar', e.message, 'error');
       }
     }
 
     async function pullFromCloud(manual = false) {
-      const url = localStorage.getItem('SANYS_CLOUD_URL');
-      const key = localStorage.getItem('SANYS_CLOUD_KEY');
+      const url = formatCloudUrl(document.getElementById('cloud-url')?.value || localStorage.getItem('SANYS_CLOUD_URL'));
+      const key = (document.getElementById('cloud-key')?.value || localStorage.getItem('SANYS_CLOUD_KEY') || '').trim();
       if (!url) {
-        if (manual) showToast('Configuració pendent', 'Introdueix primer la URL del servidor Cloud.', 'error');
+        if (manual) showToast('Configuració pendent', 'Introdueix la URL del núvol.', 'error');
         return;
       }
+      localStorage.setItem('SANYS_CLOUD_URL', url);
+      localStorage.setItem('SANYS_CLOUD_KEY', key);
       try {
         const headers = { 'Content-Type': 'application/json' };
         if (key) headers['X-Master-Key'] = key;
         const res = await fetch(url, { method: 'GET', headers });
-        if (!res.ok) throw new Error('Error HTTP');
+        if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
         const data = await res.json();
         const remoteState = data.record || data;
-        if (remoteState && remoteState.cataleg) {
+        if (remoteState && Array.isArray(remoteState.cataleg)) {
           AppState = remoteState;
           localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
+          updateCloudBadge();
           renderAll();
-          if (manual) showToast('Dades Actualitzades', 'S\'han descarregat els últims canvis del núvol.');
+          if (manual) showToast('Actualitzat', 'Dades descarregades del núvol.');
+        } else {
+          await pushToCloud(false);
+          updateCloudBadge();
+          if (manual) showToast('Inicialitzat', 'El contenidor estava buit i s\'han pujat les dades.');
         }
       } catch (e) {
-        if (manual) showToast('Error de Sincronització', 'Verifica la URL i la clau d\'accés.', 'error');
+        if (manual) showToast('Error de Sincronització', e.message, 'error');
       }
     }
 
-    // Còpia de Seguretat (Exportar i Restaurar fitxer .JSON)
+    // ----------------------------------------------------
+    // GESTIÓN INTEL·LIGENT D'INSTAL·LACIÓ I DESINSTAL·LACIÓ PWA
+    // ----------------------------------------------------
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    async function installPWAApp() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        showToast('Instal·lació a iPhone', 'Prem el botó "Compartir" de Safari i selecciona "Afegir a la pantalla d\'inici".', 'info');
+        return;
+      }
+
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choiceResult = await deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          showToast('Instal·lació Acceptada', 'SanyStock s\'està instal·lant.');
+        }
+        deferredPrompt = null;
+        return;
+      }
+
+      showToast('Menú del Navegador', 'Obre el menú de tres punts ( ⋮ ) de Chrome i selecciona "Instal·lar aplicació" o "Afegeix a la pantalla d\'inici".', 'info');
+    }
+
+    async function uninstallPWAApp() {
+      if (confirm('Vols desinstal·lar SanyStock i netejar les dades de cache en aquest dispositiu?')) {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (let reg of regs) await reg.unregister();
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          for (let k of keys) await caches.delete(k);
+        }
+        showToast('Desinstal·lat', 'Registres eliminats. Ja pots treure la icona de la pantalla.', 'info');
+      }
+    }
+
     function downloadBackupJSON() {
-      const dataStr = JSON.stringify(AppState, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      const blob = new Blob([JSON.stringify(AppState, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
-      const dateStr = new Date().toISOString().split('T')[0];
-      a.href = url;
-      a.download = `SanyStock_Backup_${dateStr}.json`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `SanyStock_Backup_${new Date().toISOString().split('T')[0]}.json`;
       a.click();
-      URL.revokeObjectURL(url);
-      showToast('Còpia Creada', 'El fitxer de còpia de seguretat s\'ha descarregat.');
+      showToast('Còpia Creada', 'Fitxer de backup descarregat.');
     }
 
     function restoreBackupJSON(event) {
@@ -1516,33 +1549,27 @@
       reader.onload = (e) => {
         try {
           const imported = JSON.parse(e.target.result);
-          if (imported && imported.cataleg && imported.inventari) {
+          if (imported && imported.cataleg) {
             AppState = imported;
             saveState();
             renderAll();
-            showToast('Còpia Restaurada', 'Totes les dades s\'han restablert correctament.');
+            showToast('Restaurat', 'Dades restablertes correctament.');
           } else {
-            showToast('Fitxer no vàlid', 'El fitxer no té l\'estructura de SanyStock.', 'error');
+            showToast('Error', 'Fitxer no vàlid.', 'error');
           }
         } catch (err) {
-          showToast('Error de lectura', 'No s\'ha pogut llegir el fitxer JSON.', 'error');
+          showToast('Error', 'No s\'ha pogut llegir el JSON.', 'error');
         }
       };
       reader.readAsText(file);
     }
 
-    // ----------------------------------------------------
-    // 4. GESTOR DOCUMENTAL DE PDFs (INDEXEDDB)
-    // ----------------------------------------------------
     let pdfDb = null;
-
     function initPdfDatabase() {
       const request = indexedDB.open('SanyStock_PDF_DB', 1);
       request.onupgradeneeded = (e) => {
         const db = e.target.result;
-        if (!db.objectStoreNames.contains('pdfs')) {
-          db.createObjectStore('pdfs', { keyPath: 'id' });
-        }
+        if (!db.objectStoreNames.contains('pdfs')) db.createObjectStore('pdfs', { keyPath: 'id' });
       };
       request.onsuccess = (e) => {
         pdfDb = e.target.result;
@@ -1554,33 +1581,21 @@
       e.preventDefault();
       const titol = document.getElementById('pdf-titol').value.trim();
       const categoria = document.getElementById('pdf-categoria').value;
-      const fileInput = document.getElementById('pdf-file');
-      const file = fileInput.files[0];
-
-      if (!file || file.type !== 'application/pdf') {
-        showToast('Format incorrecte', 'Selecciona un fitxer en format PDF.', 'error');
-        return;
-      }
-
+      const file = document.getElementById('pdf-file').files[0];
+      if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         const docRecord = {
-          id: 'PDF_' + Date.now(),
-          data: new Date().toISOString().split('T')[0],
-          titol,
-          categoria,
-          fileName: file.name,
-          fileSize: (file.size / 1024).toFixed(1) + ' KB',
-          dataUrl: reader.result
+          id: 'PDF_' + Date.now(), data: new Date().toISOString().split('T')[0],
+          titol, categoria, fileName: file.name, fileSize: (file.size / 1024).toFixed(1) + ' KB', dataUrl: reader.result
         };
-
         const tx = pdfDb.transaction('pdfs', 'readwrite');
         tx.objectStore('pdfs').put(docRecord);
         tx.oncomplete = () => {
           document.getElementById('pdf-titol').value = '';
-          fileInput.value = '';
+          document.getElementById('pdf-file').value = '';
           renderPdfDocuments();
-          showToast('Document Guardat', `El PDF "${titol}" s'ha arxivat correctament.`);
+          showToast('PDF Guardat', 'Document arxivat correctament.');
         };
       };
       reader.readAsDataURL(file);
@@ -1590,29 +1605,24 @@
       if (!pdfDb) return;
       const tbody = document.getElementById('tbody-documents');
       tbody.innerHTML = '';
-
       const tx = pdfDb.transaction('pdfs', 'readonly');
-      const req = tx.objectStore('pdfs').getAll();
-
-      req.onsuccess = () => {
-        const docs = req.result || [];
+      tx.objectStore('pdfs').getAll().onsuccess = (e) => {
+        const docs = e.target.result || [];
         if (docs.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No hi ha documents PDF arxivats. Puja el teu manual d'usuari, comandes o albarans.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No hi ha documents PDF arxivats.</td></tr>`;
           return;
         }
-
         docs.slice().reverse().forEach(doc => {
           const tr = document.createElement('tr');
-          tr.className = "hover:bg-sky-50/40 transition";
           tr.innerHTML = `
-            <td class="p-3.5 text-xs text-slate-600">${formatDateDMY(doc.data)}</td>
-            <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800">${escapeHtml(doc.categoria)}</span></td>
-            <td class="p-3.5 font-bold text-slate-800">${escapeHtml(doc.titol)}</td>
-            <td class="p-3.5 text-xs font-mono text-slate-500">${escapeHtml(doc.fileName)}</td>
-            <td class="p-3.5 text-center text-xs text-slate-600">${doc.fileSize}</td>
+            <td class="p-3.5 text-xs">${formatDateDMY(doc.data)}</td>
+            <td class="p-3.5"><span class="px-2 py-0.5 rounded text-xs font-bold bg-sky-100 text-sky-800">${escapeHtml(doc.categoria)}</span></td>
+            <td class="p-3.5 font-bold">${escapeHtml(doc.titol)}</td>
+            <td class="p-3.5 text-xs font-mono">${escapeHtml(doc.fileName)}</td>
+            <td class="p-3.5 text-center text-xs">${doc.fileSize}</td>
             <td class="p-3.5 text-right space-x-2">
-              <button onclick="openPdfDocument('${doc.id}')" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1 rounded-lg text-xs font-semibold">Veure / Descarregar</button>
-              <button onclick="deletePdfDocument('${doc.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Esborrar</button>
+              <button onclick="openPdfDocument('${doc.id}')" class="bg-sky-600 text-white px-3 py-1 rounded text-xs">Veure</button>
+              <button onclick="deletePdfDocument('${doc.id}')" class="text-red-500 text-xs">Esborrar</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -1621,44 +1631,31 @@
     }
 
     function openPdfDocument(id) {
-      const tx = pdfDb.transaction('pdfs', 'readonly');
-      const req = tx.objectStore('pdfs').get(id);
-      req.onsuccess = () => {
-        const doc = req.result;
-        if (!doc) return;
-        const link = document.createElement('a');
-        link.href = doc.dataUrl;
-        link.download = doc.fileName;
-        link.target = '_blank';
-        link.click();
+      pdfDb.transaction('pdfs', 'readonly').objectStore('pdfs').get(id).onsuccess = (e) => {
+        const doc = e.target.result;
+        if (doc) {
+          const link = document.createElement('a');
+          link.href = doc.dataUrl;
+          link.download = doc.fileName;
+          link.target = '_blank';
+          link.click();
+        }
       };
     }
 
     function deletePdfDocument(id) {
       const tx = pdfDb.transaction('pdfs', 'readwrite');
       tx.objectStore('pdfs').delete(id);
-      tx.oncomplete = () => {
-        renderPdfDocuments();
-        showToast('PDF Eliminat', 'El document ha estat esborrat de l\'arxiu.');
-      };
+      tx.oncomplete = () => renderPdfDocuments();
     }
 
-    // ----------------------------------------------------
-    // 5. FORMULARI DE CONTACTE (LORENA BORRELL)
-    // ----------------------------------------------------
     function sendSupportEmail(e) {
       e.preventDefault();
       const tipus = document.getElementById('sup-tipus').value;
       const missatge = document.getElementById('sup-missatge').value.trim();
-      const subject = encodeURIComponent(`[SanyStock - ${tipus}] Consulta d'usuari`);
-      const body = encodeURIComponent(`Hola Lorena,\n\nTipus d'avís: ${tipus}\n\nDetall:\n${missatge}\n\nEnviat des de SanyStock.`);
-      window.location.href = `mailto:Lorena.borrell@outlook.es?subject=${subject}&body=${body}`;
-      showToast('Obrint Correu', 'S\'ha preparat el missatge per a Lorena Borrell.');
+      window.location.href = `mailto:Lorena.borrell@outlook.es?subject=${encodeURIComponent(`[SanyStock] ${tipus}`)}&body=${encodeURIComponent(missatge)}`;
     }
 
-    // ----------------------------------------------------
-    // 6. LECTOR QR I LÒGICA GENERAL DE L'APLICACIÓ
-    // ----------------------------------------------------
     function getMarcaByCodi(codi, fallbackMarca) {
       if (fallbackMarca) return fallbackMarca;
       const cat = AppState.cataleg.find(c => c.codi === codi);
@@ -1668,27 +1665,16 @@
     let html5QrCodeInstance = null;
     let currentQrTarget = null;
 
-    function startQRScanner(targetField) {
-      currentQrTarget = targetField;
+    function startQRScanner(target) {
+      currentQrTarget = target;
       document.getElementById('modal-qr-scanner').classList.remove('hidden');
       if (!html5QrCodeInstance) html5QrCodeInstance = new Html5Qrcode("qr-reader");
-
-      html5QrCodeInstance.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 150 } },
-        (decodedText) => handleQRCodeResult(decodedText.trim()),
-        () => {}
-      ).catch(() => {
-        showToast("Error de Càmera", "Revisa els permisos de càmera del navegador.", "error");
-        stopQRScanner();
-      });
+      html5QrCodeInstance.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 220, height: 150 } }, (text) => handleQRCodeResult(text.trim()), () => {});
     }
 
     function stopQRScanner() {
       if (html5QrCodeInstance && html5QrCodeInstance.isScanning) {
-        html5QrCodeInstance.stop().finally(() => {
-          document.getElementById('modal-qr-scanner').classList.add('hidden');
-        });
+        html5QrCodeInstance.stop().finally(() => document.getElementById('modal-qr-scanner').classList.add('hidden'));
       } else {
         document.getElementById('modal-qr-scanner').classList.add('hidden');
       }
@@ -1696,46 +1682,14 @@
 
     function handleQRCodeResult(code) {
       stopQRScanner();
-      const cleanCode = code.toUpperCase();
-
-      if (currentQrTarget === 'cat-codi') {
-        document.getElementById('cat-codi').value = cleanCode;
-        showToast('Codi Escanejat', cleanCode);
-      } else if (currentQrTarget === 'mov-lot') {
-        const foundInv = AppState.inventari.find(i => i.lot.toUpperCase() === cleanCode || i.codi.toUpperCase() === cleanCode);
-        if (foundInv) {
-          document.getElementById('mov-lot-select').value = foundInv.id;
-          onMovimentLotChange();
-          showToast('Vacuna Identificada', `${foundInv.vacuna} (${foundInv.lot})`);
-        } else {
-          showToast('No trobat', `El codi/lot "${cleanCode}" no consta a l'inventari.`, 'error');
-        }
-      } else if (currentQrTarget === 'mov-ini-vacuna') {
-        const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === cleanCode);
-        if (foundCat) {
-          document.getElementById('mov-ini-vacuna').value = foundCat.id;
-          showToast('Vacuna Seleccionada', foundCat.nom);
-        }
-      } else if (currentQrTarget === 'mov-ini-lot') {
-        document.getElementById('mov-ini-lot').value = cleanCode;
-      } else if (currentQrTarget === 'cmd-vacuna') {
-        const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === cleanCode);
-        if (foundCat) {
-          document.getElementById('cmd-vacuna-select').value = foundCat.id;
-          onComandaVacunaChange();
-        }
-      } else if (currentQrTarget === 'rec-codi') {
-        document.getElementById('rec-codi').value = cleanCode;
-      } else if (currentQrTarget === 'rec-lot') {
-        document.getElementById('rec-lot').value = cleanCode;
-      } else if (currentQrTarget === 'dev-lot') {
-        const foundInv = AppState.inventari.find(i => i.lot.toUpperCase() === cleanCode || i.codi.toUpperCase() === cleanCode);
-        if (foundInv) {
-          document.getElementById('dev-lot-select').value = foundInv.id;
-          onDevolucioLotChange();
-        }
-      } else if (currentQrTarget === 'inventari-search') {
-        document.getElementById('invSearchInput').value = cleanCode;
+      const clean = code.toUpperCase();
+      if (currentQrTarget === 'cat-codi') document.getElementById('cat-codi').value = clean;
+      else if (currentQrTarget === 'mov-lot') {
+        const inv = AppState.inventari.find(i => i.lot.toUpperCase() === clean || i.codi.toUpperCase() === clean);
+        if (inv) { document.getElementById('mov-lot-select').value = inv.id; onMovimentLotChange(); }
+      }
+      else if (currentQrTarget === 'inventari-search') {
+        document.getElementById('invSearchInput').value = clean;
         renderInventari();
       }
     }
@@ -1748,27 +1702,18 @@
       updateCloudBadge();
       populateDropdowns();
       renderAll();
-
       const todayISO = new Date().toISOString().split('T')[0];
       ['prov-data', 'mov-data', 'cmd-data', 'rec-data', 'dev-data'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = todayISO;
       });
-
-      // Sincronització automàtica en segon pla cada 15 segons si hi ha núvol actiu
-      setInterval(() => {
-        if (localStorage.getItem('SANYS_CLOUD_URL')) {
-          pullFromCloud(false);
-        }
-      }, 15000);
+      setInterval(() => { if (localStorage.getItem('SANYS_CLOUD_URL')) pullFromCloud(false); }, 15000);
     });
 
     function initDateBadge() {
       const now = new Date();
       const localeMap = { ca: 'ca-ES', es: 'es-ES', en: 'en-GB' };
-      const dateStr = now.toLocaleDateString(localeMap[currentLang] || 'ca-ES', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
+      const dateStr = now.toLocaleDateString(localeMap[currentLang] || 'ca-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       document.getElementById('currentDateBadge').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     }
 
@@ -1778,42 +1723,23 @@
         b.classList.remove('bg-sky-100', 'text-sky-900', 'font-bold');
         b.classList.add('text-slate-600');
       });
-
-      const sec = document.getElementById(`section-${tabId}`);
-      if (sec) sec.classList.remove('hidden');
-
-      const btn = document.getElementById(`tab-${tabId}`);
-      if (btn) {
-        btn.classList.remove('text-slate-600');
-        btn.classList.add('bg-sky-100', 'text-sky-900', 'font-bold');
-      }
-
+      document.getElementById(`section-${tabId}`).classList.remove('hidden');
+      document.getElementById(`tab-${tabId}`).classList.add('bg-sky-100', 'text-sky-900', 'font-bold');
       if (tabId === 'inventari') renderInventari();
       if (tabId === 'documents') renderPdfDocuments();
     }
 
     function renderAll() {
-      renderCataleg();
-      renderMagatzems();
-      renderProveidors();
-      renderMoviments();
-      renderComandes();
-      renderDevolucions();
-      renderInventari();
-      populateDropdowns();
+      renderCataleg(); renderMagatzems(); renderProveidors();
+      renderMoviments(); renderComandes(); renderDevolucions(); renderInventari(); populateDropdowns();
     }
 
     function renderCataleg() {
       const tbody = document.getElementById('tbody-cataleg');
       tbody.innerHTML = '';
-      if (AppState.cataleg.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha vacunes registrades.</td></tr>`;
-        return;
-      }
       AppState.cataleg.forEach(item => {
         const totalDisp = AppState.inventari.filter(i => i.codi === item.codi).reduce((s, i) => s + Number(i.disponible), 0);
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-sky-50/40 transition";
         tr.innerHTML = `
           <td class="p-3.5 font-bold text-sky-900">${escapeHtml(item.codi)}</td>
           <td class="p-3.5 font-medium">${escapeHtml(item.nom)}</td>
@@ -1823,10 +1749,7 @@
           <td class="p-3.5 text-center font-semibold">${item.minim} uts.</td>
           <td class="p-3.5 text-center">${item.inicial || 0} uts.</td>
           <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${totalDisp < item.minim ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${totalDisp} uts.</span></td>
-          <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editCataleg('${item.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
-          </td>
+          <td class="p-3.5 text-right space-x-2"><button onclick="editCataleg('${item.id}')" class="text-sky-600 text-xs">Editar</button><button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 text-xs">Esborrar</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -1836,17 +1759,7 @@
       const tbody = document.getElementById('tbody-magatzems');
       tbody.innerHTML = '';
       AppState.magatzems.forEach(m => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-3.5 font-bold font-mono">${escapeHtml(m.codi)}</td>
-          <td class="p-3.5 font-medium">${escapeHtml(m.nom)}</td>
-          <td class="p-3.5 text-slate-600">${escapeHtml(m.ubicacio || '-')}</td>
-          <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editMagatzem('${m.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr><td class="p-3.5 font-bold font-mono">${escapeHtml(m.codi)}</td><td class="p-3.5">${escapeHtml(m.nom)}</td><td class="p-3.5 text-slate-600">${escapeHtml(m.ubicacio || '-')}</td><td class="p-3.5 text-right"><button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 text-xs">Esborrar</button></td></tr>`;
       });
     }
 
@@ -1854,20 +1767,7 @@
       const tbody = document.getElementById('tbody-proveidors');
       tbody.innerHTML = '';
       AppState.proveidors.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-3.5 font-bold font-mono">${escapeHtml(p.codi)}</td>
-          <td class="p-3.5 font-medium">${escapeHtml(p.nom)}</td>
-          <td class="p-3.5 text-xs">${formatDateDMY(p.dataAlta)}</td>
-          <td class="p-3.5 font-mono text-xs">${escapeHtml(p.telefon || '-')}</td>
-          <td class="p-3.5">${escapeHtml(p.contacte || '-')}</td>
-          <td class="p-3.5 text-xs">${escapeHtml(p.ubicacio || '-')}</td>
-          <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editProveidor('${p.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr><td class="p-3.5 font-bold font-mono">${escapeHtml(p.codi)}</td><td class="p-3.5">${escapeHtml(p.nom)}</td><td class="p-3.5 text-xs">${formatDateDMY(p.dataAlta)}</td><td class="p-3.5 text-xs">${escapeHtml(p.telefon || '-')}</td><td class="p-3.5">${escapeHtml(p.contacte || '-')}</td><td class="p-3.5 text-right"><button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 text-xs">Esborrar</button></td></tr>`;
       });
     }
 
@@ -1875,22 +1775,7 @@
       const tbody = document.getElementById('tbody-moviments');
       tbody.innerHTML = '';
       AppState.moviments.slice().reverse().forEach(mov => {
-        const tr = document.createElement('tr');
-        const marcaText = getMarcaByCodi(mov.codi, mov.marca);
-        tr.innerHTML = `
-          <td class="p-3.5 text-xs">${formatDateDMY(mov.data)}</td>
-          <td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(mov.codi)}</td>
-          <td class="p-3.5 font-medium">${escapeHtml(mov.vacuna)}</td>
-          <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
-          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800">${escapeHtml(mov.tipus)}</span></td>
-          <td class="p-3.5 text-xs">${escapeHtml(mov.origen)}</td>
-          <td class="p-3.5 text-xs font-medium">${escapeHtml(mov.destinacio || '-')}</td>
-          <td class="p-3.5 font-mono text-xs font-semibold">${escapeHtml(mov.lot)}</td>
-          <td class="p-3.5 text-xs">${formatDateDMY(mov.caducitat)}</td>
-          <td class="p-3.5 text-center font-bold">${mov.unitats}</td>
-          <td class="p-3.5 text-right no-print"><button onclick="deleteItem('moviments', '${mov.id}')" class="text-red-500 font-semibold text-xs">Eliminar</button></td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr><td class="p-3.5 text-xs">${formatDateDMY(mov.data)}</td><td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(mov.codi)}</td><td class="p-3.5">${escapeHtml(mov.vacuna)}</td><td class="p-3.5 text-xs text-teal-700">${escapeHtml(getMarcaByCodi(mov.codi, mov.marca))}</td><td class="p-3.5"><span class="px-2 py-0.5 rounded text-xs bg-sky-100 text-sky-800">${escapeHtml(mov.tipus)}</span></td><td class="p-3.5 text-xs">${escapeHtml(mov.origen)}</td><td class="p-3.5 text-xs">${escapeHtml(mov.destinacio || '-')}</td><td class="p-3.5 font-mono text-xs">${escapeHtml(mov.lot)}</td><td class="p-3.5 text-xs">${formatDateDMY(mov.caducitat)}</td><td class="p-3.5 text-center font-bold">${mov.unitats}</td><td class="p-3.5 text-right"><button onclick="deleteItem('moviments', '${mov.id}')" class="text-red-500 text-xs">Eliminar</button></td></tr>`;
       });
     }
 
@@ -1898,22 +1783,7 @@
       const tbody = document.getElementById('tbody-comandes');
       tbody.innerHTML = '';
       AppState.comandes.slice().reverse().forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-3.5 text-xs">${formatDateDMY(c.data)}</td>
-          <td class="p-3.5 font-bold font-mono text-xs">${escapeHtml(c.comanda)}</td>
-          <td class="p-3.5">${escapeHtml(c.proveidor)}</td>
-          <td class="p-3.5 text-xs font-mono">${escapeHtml(c.codiVac)}</td>
-          <td class="p-3.5 font-medium">${escapeHtml(c.vacuna)}</td>
-          <td class="p-3.5 text-xs">${escapeHtml(c.codiProv || '-')}</td>
-          <td class="p-3.5 text-center font-bold">${c.unitats}</td>
-          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">${escapeHtml(c.estat)}</span></td>
-          <td class="p-3.5 text-right no-print space-x-2">
-            <button onclick="editComanda('${c.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
-            <button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr><td class="p-3.5 text-xs">${formatDateDMY(c.data)}</td><td class="p-3.5 font-bold font-mono text-xs">${escapeHtml(c.comanda)}</td><td class="p-3.5">${escapeHtml(c.proveidor)}</td><td class="p-3.5 text-xs font-mono">${escapeHtml(c.codiVac)}</td><td class="p-3.5">${escapeHtml(c.vacuna)}</td><td class="p-3.5 text-center font-bold">${c.unitats}</td><td class="p-3.5 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800">${escapeHtml(c.estat)}</span></td><td class="p-3.5 text-right"><button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 text-xs">Esborrar</button></td></tr>`;
       });
     }
 
@@ -1921,20 +1791,7 @@
       const tbody = document.getElementById('tbody-devolucions');
       tbody.innerHTML = '';
       AppState.devolucions.slice().reverse().forEach(d => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-3.5 text-xs">${formatDateDMY(d.data)}</td>
-          <td class="p-3.5 font-mono text-xs font-bold text-red-900">${escapeHtml(d.numBaixa)}</td>
-          <td class="p-3.5 text-xs">${escapeHtml(d.magatzem)}</td>
-          <td class="p-3.5 font-mono text-xs">${escapeHtml(d.codi)}</td>
-          <td class="p-3.5 font-medium">${escapeHtml(d.vacuna)}</td>
-          <td class="p-3.5 font-mono text-xs">${escapeHtml(d.lot)}</td>
-          <td class="p-3.5 text-xs text-red-700">${escapeHtml(d.motiu)}</td>
-          <td class="p-3.5 text-center font-bold text-red-600">-${d.unitats}</td>
-          <td class="p-3.5 text-xs">${escapeHtml(d.proveidor || '-')}</td>
-          <td class="p-3.5 text-right no-print"><button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 font-semibold text-xs">Eliminar</button></td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr><td class="p-3.5 text-xs">${formatDateDMY(d.data)}</td><td class="p-3.5 font-mono text-xs font-bold text-red-900">${escapeHtml(d.numBaixa)}</td><td class="p-3.5 text-xs">${escapeHtml(d.magatzem)}</td><td class="p-3.5 font-mono text-xs">${escapeHtml(d.codi)}</td><td class="p-3.5">${escapeHtml(d.vacuna)}</td><td class="p-3.5 font-mono text-xs">${escapeHtml(d.lot)}</td><td class="p-3.5 text-xs text-red-700">${escapeHtml(d.motiu)}</td><td class="p-3.5 text-center font-bold text-red-600">-${d.unitats}</td><td class="p-3.5 text-right"><button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 text-xs">Eliminar</button></td></tr>`;
       });
     }
 
@@ -1947,15 +1804,11 @@
       let items = AppState.inventari;
       if (selectedFilter !== 'TOTS') items = items.filter(i => i.magatzemId === selectedFilter);
       if (searchQuery) {
-        items = items.filter(i => {
-          const m = getMarcaByCodi(i.codi, i.marca).toUpperCase();
-          return i.codi.toUpperCase().includes(searchQuery) || i.vacuna.toUpperCase().includes(searchQuery) || m.includes(searchQuery) || i.lot.toUpperCase().includes(searchQuery);
-        });
+        items = items.filter(i => i.codi.toUpperCase().includes(searchQuery) || i.vacuna.toUpperCase().includes(searchQuery) || i.lot.toUpperCase().includes(searchQuery));
       }
 
       let totalDosis = 0, alertesEstoc = 0, caducitatsProperes = 0;
-      const in90Days = new Date();
-      in90Days.setDate(in90Days.getDate() + 90);
+      const in90Days = new Date(); in90Days.setDate(in90Days.getDate() + 90);
 
       AppState.inventari.forEach(i => {
         totalDosis += Number(i.disponible);
@@ -1969,26 +1822,7 @@
 
       items.forEach(inv => {
         const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-        const nomMag = mag ? mag.nom : inv.magatzemId;
-        const marcaText = getMarcaByCodi(inv.codi, inv.marca);
-        let estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Correcte</span>`;
-        if (Number(inv.disponible) <= 0) estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Esgotat</span>`;
-        else if (Number(inv.disponible) <= Number(inv.minim)) estatBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Baix Estoc</span>`;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-3.5 text-xs font-semibold">${escapeHtml(nomMag)}</td>
-          <td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(inv.codi)}</td>
-          <td class="p-3.5 font-medium">${escapeHtml(inv.vacuna)}</td>
-          <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
-          <td class="p-3.5 text-xs">${escapeHtml(inv.codiProv || '-')}</td>
-          <td class="p-3.5 font-mono text-xs font-bold text-teal-800">${escapeHtml(inv.lot)}</td>
-          <td class="p-3.5 text-xs">${formatDateDMY(inv.caducitat)}</td>
-          <td class="p-3.5 text-center text-xs">${inv.minim} uts.</td>
-          <td class="p-3.5 text-center font-black text-sm">${inv.disponible}</td>
-          <td class="p-3.5 text-center">${estatBadge}</td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr><td class="p-3.5 text-xs font-semibold">${escapeHtml(mag ? mag.nom : inv.magatzemId)}</td><td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(inv.codi)}</td><td class="p-3.5">${escapeHtml(inv.vacuna)}</td><td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(getMarcaByCodi(inv.codi, inv.marca))}</td><td class="p-3.5 text-xs">${escapeHtml(inv.codiProv || '-')}</td><td class="p-3.5 font-mono text-xs font-bold text-teal-800">${escapeHtml(inv.lot)}</td><td class="p-3.5 text-xs">${formatDateDMY(inv.caducitat)}</td><td class="p-3.5 text-center text-xs">${inv.minim} uts.</td><td class="p-3.5 text-center font-black text-sm">${inv.disponible}</td><td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${Number(inv.disponible) <= Number(inv.minim) ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${Number(inv.disponible) <= Number(inv.minim) ? 'Baix Estoc' : 'Correcte'}</span></td></tr>`;
       });
     }
 
@@ -1998,9 +1832,7 @@
         if (!s) return;
         const val = s.value;
         s.innerHTML = '<option value="">-- Selecciona Proveïdor --</option>';
-        AppState.proveidors.forEach(p => {
-          s.innerHTML += `<option value="${escapeHtml(p.nom)}">${escapeHtml(p.nom)} (${escapeHtml(p.codi)})</option>`;
-        });
+        AppState.proveidors.forEach(p => s.innerHTML += `<option value="${escapeHtml(p.nom)}">${escapeHtml(p.nom)}</option>`);
         if (val) s.value = val;
       });
 
@@ -2009,9 +1841,7 @@
         if (!s) return;
         const val = s.value;
         s.innerHTML = '<option value="">-- Selecciona Magatzem --</option>';
-        AppState.magatzems.forEach(m => {
-          s.innerHTML += `<option value="${m.id}">${escapeHtml(m.nom)}</option>`;
-        });
+        AppState.magatzems.forEach(m => s.innerHTML += `<option value="${m.id}">${escapeHtml(m.nom)}</option>`);
         if (val) s.value = val;
       });
 
@@ -2019,9 +1849,7 @@
       if (filterSelect) {
         const val = filterSelect.value || 'TOTS';
         filterSelect.innerHTML = '<option value="TOTS">Tots els Magatzems</option>';
-        AppState.magatzems.forEach(m => {
-          filterSelect.innerHTML += `<option value="${m.id}">${escapeHtml(m.nom)}</option>`;
-        });
+        AppState.magatzems.forEach(m => filterSelect.innerHTML += `<option value="${m.id}">${escapeHtml(m.nom)}</option>`);
         filterSelect.value = val;
       }
 
@@ -2030,43 +1858,29 @@
         if (!s) return;
         const val = s.value;
         s.innerHTML = '<option value="">-- Selecciona Vacuna --</option>';
-        AppState.cataleg.forEach(c => {
-          s.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom)} - ${escapeHtml(c.marca || '')} (${escapeHtml(c.codi)})</option>`;
-        });
+        AppState.cataleg.forEach(c => s.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom)} - ${escapeHtml(c.marca || '')}</option>`);
         if (val) s.value = val;
       });
 
       ['mov-lot-select', 'dev-lot-select'].forEach(id => {
         const s = document.getElementById(id);
         if (!s) return;
-        s.innerHTML = '<option value="">-- Selecciona un Lot existent --</option>';
+        s.innerHTML = '<option value="">-- Selecciona un Lot --</option>';
         AppState.inventari.forEach(inv => {
           const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-          const nomMag = mag ? mag.nom : inv.magatzemId;
-          s.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} | ${escapeHtml(nomMag)} (Disp: ${inv.disponible})</option>`;
+          s.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} (Disp: ${inv.disponible})</option>`;
         });
       });
 
       const recCmdSelect = document.getElementById('rec-comanda-select');
       if (recCmdSelect) {
         recCmdSelect.innerHTML = '<option value="">-- Comanda lliure --</option>';
-        AppState.comandes.forEach(c => {
-          recCmdSelect.innerHTML += `<option value="${c.id}">${escapeHtml(c.comanda)} - ${escapeHtml(c.vacuna)} (${c.unitats} uts.)</option>`;
-        });
+        AppState.comandes.forEach(c => recCmdSelect.innerHTML += `<option value="${c.id}">${escapeHtml(c.comanda)} - ${escapeHtml(c.vacuna)}</option>`);
       }
     }
 
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-      populateDropdowns();
-      if (id === 'modal-moviments') toggleMovimentFields();
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-      const form = document.querySelector(`#${id} form`);
-      if (form) form.reset();
-    }
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); populateDropdowns(); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
     function saveCataleg(e) {
       e.preventDefault();
@@ -2085,10 +1899,7 @@
       } else {
         AppState.cataleg.push({ id: 'CAT_' + Date.now(), codi, nom, marca, codiProv, proveidor, minim, inicial });
       }
-      saveState();
-      closeModal('modal-cataleg');
-      renderAll();
-      showToast('Catàleg guardat', 'Fitxa de vacuna desada.');
+      saveState(); closeModal('modal-cataleg'); renderAll();
     }
 
     function editCataleg(id) {
@@ -2107,62 +1918,20 @@
 
     function saveMagatzem(e) {
       e.preventDefault();
-      const id = document.getElementById('mag-id').value;
       const codi = document.getElementById('mag-codi').value.trim();
       const nom = document.getElementById('mag-nom').value.trim();
       const ubicacio = document.getElementById('mag-ubicacio').value.trim();
-      if (id) {
-        const m = AppState.magatzems.find(x => x.id === id);
-        if (m) Object.assign(m, { codi, nom, ubicacio });
-      } else {
-        AppState.magatzems.push({ id: 'MAG_' + Date.now(), codi, nom, ubicacio });
-      }
-      saveState();
-      closeModal('modal-magatzems');
-      renderAll();
-    }
-
-    function editMagatzem(id) {
-      const m = AppState.magatzems.find(x => x.id === id);
-      if (!m) return;
-      openModal('modal-magatzems');
-      document.getElementById('mag-id').value = m.id;
-      document.getElementById('mag-codi').value = m.codi;
-      document.getElementById('mag-nom').value = m.nom;
-      document.getElementById('mag-ubicacio').value = m.ubicacio || '';
+      AppState.magatzems.push({ id: 'MAG_' + Date.now(), codi, nom, ubicacio });
+      saveState(); closeModal('modal-magatzems'); renderAll();
     }
 
     function saveProveidor(e) {
       e.preventDefault();
-      const id = document.getElementById('prov-id').value;
       const codi = document.getElementById('prov-codi').value.trim();
       const dataAlta = document.getElementById('prov-data').value;
       const nom = document.getElementById('prov-nom').value.trim();
-      const telefon = document.getElementById('prov-telefon').value.trim();
-      const contacte = document.getElementById('prov-contacte').value.trim();
-      const ubicacio = document.getElementById('prov-ubicacio').value.trim();
-      if (id) {
-        const p = AppState.proveidors.find(x => x.id === id);
-        if (p) Object.assign(p, { codi, dataAlta, nom, telefon, contacte, ubicacio });
-      } else {
-        AppState.proveidors.push({ id: 'PRV_' + Date.now(), codi, dataAlta, nom, telefon, contacte, ubicacio });
-      }
-      saveState();
-      closeModal('modal-proveidors');
-      renderAll();
-    }
-
-    function editProveidor(id) {
-      const p = AppState.proveidors.find(x => x.id === id);
-      if (!p) return;
-      openModal('modal-proveidors');
-      document.getElementById('prov-id').value = p.id;
-      document.getElementById('prov-codi').value = p.codi;
-      document.getElementById('prov-data').value = p.dataAlta;
-      document.getElementById('prov-nom').value = p.nom;
-      document.getElementById('prov-telefon').value = p.telefon || '';
-      document.getElementById('prov-contacte').value = p.contacte || '';
-      document.getElementById('prov-ubicacio').value = p.ubicacio || '';
+      AppState.proveidors.push({ id: 'PRV_' + Date.now(), codi, dataAlta, nom });
+      saveState(); closeModal('modal-proveidors'); renderAll();
     }
 
     function toggleMovimentFields() {
@@ -2176,18 +1945,11 @@
     function onMovimentLotChange() {
       const inv = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
       if (!inv) return;
-      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
       document.getElementById('mov-prev-codi').textContent = inv.codi;
       document.getElementById('mov-prev-nom').textContent = inv.vacuna;
       document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(inv.codi, inv.marca);
       document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
-      document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
       document.getElementById('mov-prev-disponible').textContent = inv.disponible;
-    }
-
-    function updateConsumUnitsFromSUM() {
-      const pacs = document.getElementById('mov-sum').value.split(',').map(s => s.trim()).filter(Boolean);
-      if (pacs.length > 0) document.getElementById('mov-unitats').value = pacs.length;
     }
 
     function saveMoviment(e) {
@@ -2203,122 +1965,36 @@
         const destMagId = document.getElementById('mov-destinacio').value;
         if (!cat || !lot || !caducitat || !destMagId) return;
 
-        const magDest = AppState.magatzems.find(m => m.id === destMagId);
         const existent = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === lot && i.codi === cat.codi);
-        if (existent) existent.disponible = Number(existent.disponible) + unitats;
-        else {
-          AppState.inventari.push({
-            id: 'INV_' + Date.now(), magatzemId: destMagId, codi: cat.codi, vacuna: cat.nom,
-            marca: cat.marca || '', codiProv: cat.codiProv || '', lot, caducitat,
-            minim: Math.round((Number(cat.minim) || 10) / 2), disponible: unitats
-          });
-        }
+        if (existent) existent.disponible += unitats;
+        else AppState.inventari.push({ id: 'INV_' + Date.now(), magatzemId: destMagId, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '', lot, caducitat, minim: 10, disponible: unitats });
         cat.inicial = (Number(cat.inicial) || 0) + unitats;
-        AppState.moviments.push({
-          id: 'MOV_' + Date.now(), data, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '-',
-          tipus: 'Estoc Inicial', origen: 'Càrrega Inicial', destinacio: magDest ? magDest.nom : destMagId, lot, caducitat, unitats
-        });
-        saveState();
-        closeModal('modal-moviments');
-        renderAll();
-        return;
+        AppState.moviments.push({ id: 'MOV_' + Date.now(), data, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '-', tipus: 'Estoc Inicial', origen: 'Càrrega', destinacio: destMagId, lot, caducitat, unitats });
+        saveState(); closeModal('modal-moviments'); renderAll(); return;
       }
 
       const invOrigen = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
-      if (!invOrigen || unitats > Number(invOrigen.disponible)) {
-        showToast('Error', 'Verifica el lot i l\'estoc disponible.', 'error');
-        return;
-      }
-      const magOrigen = AppState.magatzems.find(m => m.id === invOrigen.magatzemId);
-      const nomOrigen = magOrigen ? magOrigen.nom : invOrigen.magatzemId;
-      const marcaOrigen = getMarcaByCodi(invOrigen.codi, invOrigen.marca);
+      if (!invOrigen || unitats > Number(invOrigen.disponible)) return;
 
-      if (tipus === 'Traspàs') {
-        const destMagId = document.getElementById('mov-destinacio').value;
-        if (!destMagId || destMagId === invOrigen.magatzemId) return;
-        const magDest = AppState.magatzems.find(m => m.id === destMagId);
-        invOrigen.disponible -= unitats;
-        const invDest = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === invOrigen.lot && i.codi === invOrigen.codi);
-        if (invDest) invDest.disponible = Number(invDest.disponible) + unitats;
-        else AppState.inventari.push({ ...invOrigen, id: 'INV_' + Date.now(), magatzemId: destMagId, disponible: unitats });
-
-        AppState.moviments.push({
-          id: 'MOV_' + Date.now(), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
-          tipus: 'Traspàs', origen: nomOrigen, destinacio: magDest ? magDest.nom : destMagId, lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats
-        });
-      } else {
-        const codiSUM = document.getElementById('mov-sum').value.trim() || 'Consum clínic';
-        invOrigen.disponible -= unitats;
-        AppState.moviments.push({
-          id: 'MOV_' + Date.now(), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
-          tipus: 'Consum', origen: nomOrigen, destinacio: codiSUM, lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats
-        });
-      }
-      saveState();
-      closeModal('modal-moviments');
-      renderAll();
-    }
-
-    function onComandaVacunaChange() {
-      const cat = AppState.cataleg.find(c => c.id === document.getElementById('cmd-vacuna-select').value);
-      if (cat) {
-        document.getElementById('cmd-codivac').value = cat.codi;
-        document.getElementById('cmd-codiprov').value = cat.codiProv || '';
-        document.getElementById('cmd-proveidor').value = cat.proveidor || '';
-      }
+      invOrigen.disponible -= unitats;
+      AppState.moviments.push({ id: 'MOV_' + Date.now(), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: getMarcaByCodi(invOrigen.codi, invOrigen.marca), tipus, origen: invOrigen.magatzemId, destinacio: document.getElementById('mov-sum')?.value || 'Destí', lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats });
+      saveState(); closeModal('modal-moviments'); renderAll();
     }
 
     function saveComanda(e) {
       e.preventDefault();
-      const id = document.getElementById('cmd-id').value;
       const data = document.getElementById('cmd-data').value;
       const comanda = document.getElementById('cmd-num').value.trim();
       const proveidor = document.getElementById('cmd-proveidor').value;
       const cat = AppState.cataleg.find(c => c.id === document.getElementById('cmd-vacuna-select').value);
       const vacuna = cat ? `${cat.nom} (${cat.marca || ''})` : 'Vacuna';
-      const codiVac = document.getElementById('cmd-codivac').value;
-      const codiProv = document.getElementById('cmd-codiprov').value;
       const unitats = Number(document.getElementById('cmd-unitats').value);
-      const estat = document.getElementById('cmd-estat').value;
-
-      if (id) {
-        const c = AppState.comandes.find(x => x.id === id);
-        if (c) Object.assign(c, { data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat });
-      } else {
-        AppState.comandes.push({ id: 'CMD_' + Date.now(), data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat });
-      }
-      saveState();
-      closeModal('modal-comandes');
-      renderAll();
-    }
-
-    function editComanda(id) {
-      const c = AppState.comandes.find(x => x.id === id);
-      if (!c) return;
-      openModal('modal-comandes');
-      document.getElementById('cmd-id').value = c.id;
-      document.getElementById('cmd-data').value = c.data;
-      document.getElementById('cmd-num').value = c.comanda;
-      document.getElementById('cmd-proveidor').value = c.proveidor;
-      document.getElementById('cmd-codivac').value = c.codiVac;
-      document.getElementById('cmd-codiprov').value = c.codiProv || '';
-      document.getElementById('cmd-unitats').value = c.unitats;
-      document.getElementById('cmd-estat').value = c.estat;
-    }
-
-    function onRecepcioComandaChange() {
-      const cmd = AppState.comandes.find(c => c.id === document.getElementById('rec-comanda-select').value);
-      if (cmd) {
-        document.getElementById('rec-proveidor').value = cmd.proveidor;
-        document.getElementById('rec-codi').value = cmd.codiVac;
-        document.getElementById('rec-vacuna').value = cmd.vacuna;
-        document.getElementById('rec-unitats').value = cmd.unitats;
-      }
+      AppState.comandes.push({ id: 'CMD_' + Date.now(), data, comanda, proveidor, codiVac: cat?.codi || '', vacuna, unitats, estat: 'Pendent' });
+      saveState(); closeModal('modal-comandes'); renderAll();
     }
 
     function saveRecepcio(e) {
       e.preventDefault();
-      const cmdId = document.getElementById('rec-comanda-select').value;
       const codi = document.getElementById('rec-codi').value.trim();
       const vacuna = document.getElementById('rec-vacuna').value.trim();
       const lot = document.getElementById('rec-lot').value.trim().toUpperCase();
@@ -2326,90 +2002,25 @@
       const magatzemId = document.getElementById('rec-magatzem').value;
       const unitats = Number(document.getElementById('rec-unitats').value);
 
-      if (cmdId) {
-        const cmd = AppState.comandes.find(c => c.id === cmdId);
-        if (cmd) cmd.estat = 'Recepcionat';
-      }
       const existent = AppState.inventari.find(i => i.magatzemId === magatzemId && i.lot === lot && i.codi === codi);
-      if (existent) existent.disponible = Number(existent.disponible) + unitats;
-      else {
-        const cat = AppState.cataleg.find(c => c.codi === codi);
-        AppState.inventari.push({
-          id: 'INV_' + Date.now(), magatzemId, codi, vacuna: cat ? cat.nom : vacuna,
-          marca: cat ? (cat.marca || '') : '', codiProv: cat ? cat.codiProv : '', lot, caducitat, minim: 10, disponible: unitats
-        });
-      }
-      saveState();
-      closeModal('modal-recepcio');
-      renderAll();
-    }
-
-    function onDevolucioLotChange() {
-      const inv = AppState.inventari.find(i => i.id === document.getElementById('dev-lot-select').value);
-      if (!inv) return;
-      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-      document.getElementById('dev-prev-nom').textContent = inv.vacuna;
-      document.getElementById('dev-prev-magatzem').textContent = mag ? mag.nom : inv.magatzemId;
-      document.getElementById('dev-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
-      document.getElementById('dev-prev-disponible').textContent = inv.disponible;
+      if (existent) existent.disponible += unitats;
+      else AppState.inventari.push({ id: 'INV_' + Date.now(), magatzemId, codi, vacuna, marca: '', lot, caducitat, minim: 10, disponible: unitats });
+      saveState(); closeModal('modal-recepcio'); renderAll();
     }
 
     function saveDevolucio(e) {
       e.preventDefault();
-      const data = document.getElementById('dev-data').value;
-      const numBaixa = document.getElementById('dev-num').value.trim();
       const inv = AppState.inventari.find(i => i.id === document.getElementById('dev-lot-select').value);
-      const motiu = document.getElementById('dev-motiu').value;
-      const proveidor = document.getElementById('dev-proveidor').value;
       const unitats = Number(document.getElementById('dev-unitats').value);
       if (!inv || unitats > Number(inv.disponible)) return;
-
-      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
       inv.disponible -= unitats;
-      AppState.devolucions.push({
-        id: 'DEV_' + Date.now(), data, numBaixa, magatzem: mag ? mag.nom : inv.magatzemId,
-        codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot, motiu, unitats, proveidor
-      });
-      saveState();
-      closeModal('modal-devolucions');
-      renderAll();
+      AppState.devolucions.push({ id: 'DEV_' + Date.now(), data: document.getElementById('dev-data').value, numBaixa: document.getElementById('dev-num').value, magatzem: inv.magatzemId, codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot, motiu: document.getElementById('dev-motiu').value, unitats });
+      saveState(); closeModal('modal-devolucions'); renderAll();
     }
 
-    function deleteItem(col, id) {
-      AppState[col] = AppState[col].filter(i => i.id !== id);
-      saveState();
-      renderAll();
-    }
-
-    function exportTableToCSV(tableKey, filename) {
-      const table = document.getElementById(`table-${tableKey}`);
-      if (!table) return;
-      let rows = [];
-      table.querySelectorAll('tr').forEach(tr => {
-        let rowData = [];
-        tr.querySelectorAll('th, td').forEach(col => {
-          if (!col.classList.contains('no-print')) rowData.push(`"${col.innerText.replace(/"/g, '""').trim()}"`);
-        });
-        if (rowData.length > 0) rows.push(rowData.join(';'));
-      });
-      const blob = new Blob(["\uFEFF" + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-    }
-
-    function formatDateDMY(iso) {
-      if (!iso) return '-';
-      const p = iso.split('-');
-      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
+    function deleteItem(col, id) { AppState[col] = AppState[col].filter(i => i.id !== id); saveState(); renderAll(); }
+    function formatDateDMY(iso) { if (!iso) return '-'; const p = iso.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso; }
+    function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function showToast(title, message, type = 'success') {
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastTitle').textContent = title;
@@ -2419,14 +2030,6 @@
       tIcon.textContent = type === 'error' ? '✕' : type === 'info' ? 'ℹ' : '✓';
       toast.classList.remove('translate-y-24', 'opacity-0');
       setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3500);
-    }
-  </script>
-  <!-- Registre del Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
-      });
     }
   </script>
 </body>
