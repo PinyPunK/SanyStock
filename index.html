@@ -878,14 +878,17 @@
     </div>
   </div>
 
-  <!-- MODAL 4: MOVIMENTS -->
+  <!-- MODAL 4: MOVIMENTS (AMB SUPORT PER A CREAR I EDITAR) -->
   <div id="modal-moviments" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
-        <h3 class="font-bold text-base">Nou Moviment de Vacunes</h3>
+        <h3 id="modal-moviments-title" class="font-bold text-base">Nou Moviment de Vacunes</h3>
         <button onclick="closeModal('modal-moviments')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
       </div>
       <form id="form-moviments" onsubmit="saveMoviment(event)" class="p-6 space-y-4">
+        <!-- Camp ocult per identificar si estem editant un moviment existent -->
+        <input type="hidden" id="mov-id">
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
@@ -960,7 +963,7 @@
 
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
           <button type="button" onclick="closeModal('modal-moviments')" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancel·lar</button>
-          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Executar Moviment</button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-xl">Guardar Moviment</button>
         </div>
       </form>
     </div>
@@ -1490,7 +1493,7 @@
     }
 
     // ----------------------------------------------------
-    // GESTIÓN INTEL·LIGENT D'INSTAL·LACIÓ I DESINSTAL·LACIÓ PWA
+    // GESTIÓ INTEL·LIGENT D'INSTAL·LACIÓ I DESINSTAL·LACIÓ PWA
     // ----------------------------------------------------
     let deferredPrompt = null;
 
@@ -1669,7 +1672,10 @@
       currentQrTarget = target;
       document.getElementById('modal-qr-scanner').classList.remove('hidden');
       if (!html5QrCodeInstance) html5QrCodeInstance = new Html5Qrcode("qr-reader");
-      html5QrCodeInstance.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 220, height: 150 } }, (text) => handleQRCodeResult(text.trim()), () => {});
+      html5QrCodeInstance.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 220, height: 150 } }, (text) => handleQRCodeResult(text.trim()), () => {}).catch(() => {
+        showToast("Error de Càmera", "Revisa els permisos de càmera del navegador.", "error");
+        stopQRScanner();
+      });
     }
 
     function stopQRScanner() {
@@ -1687,6 +1693,27 @@
       else if (currentQrTarget === 'mov-lot') {
         const inv = AppState.inventari.find(i => i.lot.toUpperCase() === clean || i.codi.toUpperCase() === clean);
         if (inv) { document.getElementById('mov-lot-select').value = inv.id; onMovimentLotChange(); }
+      }
+      else if (currentQrTarget === 'mov-ini-vacuna') {
+        const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === clean);
+        if (foundCat) document.getElementById('mov-ini-vacuna').value = foundCat.id;
+      }
+      else if (currentQrTarget === 'mov-ini-lot') {
+        document.getElementById('mov-ini-lot').value = clean;
+      }
+      else if (currentQrTarget === 'cmd-vacuna') {
+        const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === clean);
+        if (foundCat) { document.getElementById('cmd-vacuna-select').value = foundCat.id; onComandaVacunaChange(); }
+      }
+      else if (currentQrTarget === 'rec-codi') {
+        document.getElementById('rec-codi').value = clean;
+      }
+      else if (currentQrTarget === 'rec-lot') {
+        document.getElementById('rec-lot').value = clean;
+      }
+      else if (currentQrTarget === 'dev-lot') {
+        const inv = AppState.inventari.find(i => i.lot.toUpperCase() === clean || i.codi.toUpperCase() === clean);
+        if (inv) { document.getElementById('dev-lot-select').value = inv.id; onDevolucioLotChange(); }
       }
       else if (currentQrTarget === 'inventari-search') {
         document.getElementById('invSearchInput').value = clean;
@@ -1737,6 +1764,10 @@
     function renderCataleg() {
       const tbody = document.getElementById('tbody-cataleg');
       tbody.innerHTML = '';
+      if (AppState.cataleg.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No hi ha vacunes registrades.</td></tr>`;
+        return;
+      }
       AppState.cataleg.forEach(item => {
         const totalDisp = AppState.inventari.filter(i => i.codi === item.codi).reduce((s, i) => s + Number(i.disponible), 0);
         const tr = document.createElement('tr');
@@ -1749,7 +1780,10 @@
           <td class="p-3.5 text-center font-semibold">${item.minim} uts.</td>
           <td class="p-3.5 text-center">${item.inicial || 0} uts.</td>
           <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${totalDisp < item.minim ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${totalDisp} uts.</span></td>
-          <td class="p-3.5 text-right space-x-2"><button onclick="editCataleg('${item.id}')" class="text-sky-600 text-xs">Editar</button><button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 text-xs">Esborrar</button></td>
+          <td class="p-3.5 text-right no-print space-x-2">
+            <button onclick="editCataleg('${item.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+            <button onclick="deleteItem('cataleg', '${item.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -1759,7 +1793,16 @@
       const tbody = document.getElementById('tbody-magatzems');
       tbody.innerHTML = '';
       AppState.magatzems.forEach(m => {
-        tbody.innerHTML += `<tr><td class="p-3.5 font-bold font-mono">${escapeHtml(m.codi)}</td><td class="p-3.5">${escapeHtml(m.nom)}</td><td class="p-3.5 text-slate-600">${escapeHtml(m.ubicacio || '-')}</td><td class="p-3.5 text-right"><button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 text-xs">Esborrar</button></td></tr>`;
+        tbody.innerHTML += `
+          <tr>
+            <td class="p-3.5 font-bold font-mono">${escapeHtml(m.codi)}</td>
+            <td class="p-3.5 font-medium">${escapeHtml(m.nom)}</td>
+            <td class="p-3.5 text-slate-600">${escapeHtml(m.ubicacio || '-')}</td>
+            <td class="p-3.5 text-right no-print space-x-2">
+              <button onclick="editMagatzem('${m.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+              <button onclick="deleteItem('magatzems', '${m.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
+            </td>
+          </tr>`;
       });
     }
 
@@ -1767,15 +1810,54 @@
       const tbody = document.getElementById('tbody-proveidors');
       tbody.innerHTML = '';
       AppState.proveidors.forEach(p => {
-        tbody.innerHTML += `<tr><td class="p-3.5 font-bold font-mono">${escapeHtml(p.codi)}</td><td class="p-3.5">${escapeHtml(p.nom)}</td><td class="p-3.5 text-xs">${formatDateDMY(p.dataAlta)}</td><td class="p-3.5 text-xs">${escapeHtml(p.telefon || '-')}</td><td class="p-3.5">${escapeHtml(p.contacte || '-')}</td><td class="p-3.5 text-right"><button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 text-xs">Esborrar</button></td></tr>`;
+        tbody.innerHTML += `
+          <tr>
+            <td class="p-3.5 font-bold font-mono">${escapeHtml(p.codi)}</td>
+            <td class="p-3.5 font-medium">${escapeHtml(p.nom)}</td>
+            <td class="p-3.5 text-xs">${formatDateDMY(p.dataAlta)}</td>
+            <td class="p-3.5 text-xs font-mono">${escapeHtml(p.telefon || '-')}</td>
+            <td class="p-3.5">${escapeHtml(p.contacte || '-')}</td>
+            <td class="p-3.5 text-xs">${escapeHtml(p.ubicacio || '-')}</td>
+            <td class="p-3.5 text-right no-print space-x-2">
+              <button onclick="editProveidor('${p.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+              <button onclick="deleteItem('proveidors', '${p.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
+            </td>
+          </tr>`;
       });
     }
 
+    // TAULA DE MOVIMENTS AMB BOTÓ D'EDITAR I ESBORRAR AMB REVERSIÓ D'ESTOC
     function renderMoviments() {
       const tbody = document.getElementById('tbody-moviments');
       tbody.innerHTML = '';
+      if (AppState.moviments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">No s'ha registrat cap moviment de vacunes.</td></tr>`;
+        return;
+      }
       AppState.moviments.slice().reverse().forEach(mov => {
-        tbody.innerHTML += `<tr><td class="p-3.5 text-xs">${formatDateDMY(mov.data)}</td><td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(mov.codi)}</td><td class="p-3.5">${escapeHtml(mov.vacuna)}</td><td class="p-3.5 text-xs text-teal-700">${escapeHtml(getMarcaByCodi(mov.codi, mov.marca))}</td><td class="p-3.5"><span class="px-2 py-0.5 rounded text-xs bg-sky-100 text-sky-800">${escapeHtml(mov.tipus)}</span></td><td class="p-3.5 text-xs">${escapeHtml(mov.origen)}</td><td class="p-3.5 text-xs">${escapeHtml(mov.destinacio || '-')}</td><td class="p-3.5 font-mono text-xs">${escapeHtml(mov.lot)}</td><td class="p-3.5 text-xs">${formatDateDMY(mov.caducitat)}</td><td class="p-3.5 text-center font-bold">${mov.unitats}</td><td class="p-3.5 text-right"><button onclick="deleteItem('moviments', '${mov.id}')" class="text-red-500 text-xs">Eliminar</button></td></tr>`;
+        const tr = document.createElement('tr');
+        const marcaText = getMarcaByCodi(mov.codi, mov.marca);
+        let badgeStyle = 'bg-sky-100 text-sky-800';
+        if (mov.tipus === 'Consum') badgeStyle = 'bg-purple-100 text-purple-800';
+        if (mov.tipus === 'Estoc Inicial') badgeStyle = 'bg-emerald-100 text-emerald-800';
+
+        tr.innerHTML = `
+          <td class="p-3.5 text-xs">${formatDateDMY(mov.data)}</td>
+          <td class="p-3.5 font-mono text-xs font-bold">${escapeHtml(mov.codi)}</td>
+          <td class="p-3.5 font-medium">${escapeHtml(mov.vacuna)}</td>
+          <td class="p-3.5 text-xs font-semibold text-teal-700">${escapeHtml(marcaText)}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-xs font-semibold ${badgeStyle}">${escapeHtml(mov.tipus)}</span></td>
+          <td class="p-3.5 text-xs">${escapeHtml(mov.origen)}</td>
+          <td class="p-3.5 text-xs font-medium">${escapeHtml(mov.destinacio || '-')}</td>
+          <td class="p-3.5 font-mono text-xs font-semibold">${escapeHtml(mov.lot)}</td>
+          <td class="p-3.5 text-xs">${formatDateDMY(mov.caducitat)}</td>
+          <td class="p-3.5 text-center font-bold">${mov.unitats}</td>
+          <td class="p-3.5 text-right no-print space-x-2">
+            <button onclick="editMoviment('${mov.id}')" class="text-sky-600 hover:text-sky-800 font-semibold text-xs">Editar</button>
+            <button onclick="deleteMovimentWithRollback('${mov.id}')" class="text-red-500 hover:text-red-700 font-semibold text-xs">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
     }
 
@@ -1783,7 +1865,21 @@
       const tbody = document.getElementById('tbody-comandes');
       tbody.innerHTML = '';
       AppState.comandes.slice().reverse().forEach(c => {
-        tbody.innerHTML += `<tr><td class="p-3.5 text-xs">${formatDateDMY(c.data)}</td><td class="p-3.5 font-bold font-mono text-xs">${escapeHtml(c.comanda)}</td><td class="p-3.5">${escapeHtml(c.proveidor)}</td><td class="p-3.5 text-xs font-mono">${escapeHtml(c.codiVac)}</td><td class="p-3.5">${escapeHtml(c.vacuna)}</td><td class="p-3.5 text-center font-bold">${c.unitats}</td><td class="p-3.5 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800">${escapeHtml(c.estat)}</span></td><td class="p-3.5 text-right"><button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 text-xs">Esborrar</button></td></tr>`;
+        tbody.innerHTML += `
+          <tr>
+            <td class="p-3.5 text-xs">${formatDateDMY(c.data)}</td>
+            <td class="p-3.5 font-bold font-mono text-xs">${escapeHtml(c.comanda)}</td>
+            <td class="p-3.5">${escapeHtml(c.proveidor)}</td>
+            <td class="p-3.5 text-xs font-mono">${escapeHtml(c.codiVac)}</td>
+            <td class="p-3.5 font-medium">${escapeHtml(c.vacuna)}</td>
+            <td class="p-3.5 text-xs">${escapeHtml(c.codiProv || '-')}</td>
+            <td class="p-3.5 text-center font-bold">${c.unitats}</td>
+            <td class="p-3.5 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">${escapeHtml(c.estat)}</span></td>
+            <td class="p-3.5 text-right no-print space-x-2">
+              <button onclick="editComanda('${c.id}')" class="text-sky-600 font-semibold text-xs">Editar</button>
+              <button onclick="deleteItem('comandes', '${c.id}')" class="text-red-500 font-semibold text-xs">Esborrar</button>
+            </td>
+          </tr>`;
       });
     }
 
@@ -1791,7 +1887,19 @@
       const tbody = document.getElementById('tbody-devolucions');
       tbody.innerHTML = '';
       AppState.devolucions.slice().reverse().forEach(d => {
-        tbody.innerHTML += `<tr><td class="p-3.5 text-xs">${formatDateDMY(d.data)}</td><td class="p-3.5 font-mono text-xs font-bold text-red-900">${escapeHtml(d.numBaixa)}</td><td class="p-3.5 text-xs">${escapeHtml(d.magatzem)}</td><td class="p-3.5 font-mono text-xs">${escapeHtml(d.codi)}</td><td class="p-3.5">${escapeHtml(d.vacuna)}</td><td class="p-3.5 font-mono text-xs">${escapeHtml(d.lot)}</td><td class="p-3.5 text-xs text-red-700">${escapeHtml(d.motiu)}</td><td class="p-3.5 text-center font-bold text-red-600">-${d.unitats}</td><td class="p-3.5 text-right"><button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 text-xs">Eliminar</button></td></tr>`;
+        tbody.innerHTML += `
+          <tr>
+            <td class="p-3.5 text-xs">${formatDateDMY(d.data)}</td>
+            <td class="p-3.5 font-mono text-xs font-bold text-red-900">${escapeHtml(d.numBaixa)}</td>
+            <td class="p-3.5 text-xs">${escapeHtml(d.magatzem)}</td>
+            <td class="p-3.5 font-mono text-xs">${escapeHtml(d.codi)}</td>
+            <td class="p-3.5 font-medium">${escapeHtml(d.vacuna)}</td>
+            <td class="p-3.5 font-mono text-xs">${escapeHtml(d.lot)}</td>
+            <td class="p-3.5 text-xs text-red-700">${escapeHtml(d.motiu)}</td>
+            <td class="p-3.5 text-center font-bold text-red-600">-${d.unitats}</td>
+            <td class="p-3.5 text-xs">${escapeHtml(d.proveidor || '-')}</td>
+            <td class="p-3.5 text-right no-print"><button onclick="deleteItem('devolucions', '${d.id}')" class="text-red-500 font-semibold text-xs">Eliminar</button></td>
+          </tr>`;
       });
     }
 
@@ -1804,7 +1912,10 @@
       let items = AppState.inventari;
       if (selectedFilter !== 'TOTS') items = items.filter(i => i.magatzemId === selectedFilter);
       if (searchQuery) {
-        items = items.filter(i => i.codi.toUpperCase().includes(searchQuery) || i.vacuna.toUpperCase().includes(searchQuery) || i.lot.toUpperCase().includes(searchQuery));
+        items = items.filter(i => {
+          const m = getMarcaByCodi(i.codi, i.marca).toUpperCase();
+          return i.codi.toUpperCase().includes(searchQuery) || i.vacuna.toUpperCase().includes(searchQuery) || m.includes(searchQuery) || i.lot.toUpperCase().includes(searchQuery);
+        });
       }
 
       let totalDosis = 0, alertesEstoc = 0, caducitatsProperes = 0;
@@ -1868,7 +1979,8 @@
         s.innerHTML = '<option value="">-- Selecciona un Lot --</option>';
         AppState.inventari.forEach(inv => {
           const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-          s.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} (Disp: ${inv.disponible})</option>`;
+          const nomMag = mag ? mag.nom : inv.magatzemId;
+          s.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} | ${escapeHtml(nomMag)} (Disp: ${inv.disponible})</option>`;
         });
       });
 
@@ -1879,8 +1991,22 @@
       }
     }
 
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); populateDropdowns(); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      populateDropdowns();
+      if (id === 'modal-moviments') {
+        document.getElementById('modal-moviments-title').textContent = 'Nou Moviment de Vacunes';
+        toggleMovimentFields();
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+      const form = document.querySelector(`#${id} form`);
+      if (form) form.reset();
+      const hiddenId = form ? form.querySelector('input[type="hidden"]') : null;
+      if (hiddenId) hiddenId.value = '';
+    }
 
     function saveCataleg(e) {
       e.preventDefault();
@@ -1900,6 +2026,7 @@
         AppState.cataleg.push({ id: 'CAT_' + Date.now(), codi, nom, marca, codiProv, proveidor, minim, inicial });
       }
       saveState(); closeModal('modal-cataleg'); renderAll();
+      showToast('Catàleg guardat', 'Fitxa de vacuna desada.');
     }
 
     function editCataleg(id) {
@@ -1918,22 +2045,63 @@
 
     function saveMagatzem(e) {
       e.preventDefault();
+      const id = document.getElementById('mag-id').value;
       const codi = document.getElementById('mag-codi').value.trim();
       const nom = document.getElementById('mag-nom').value.trim();
       const ubicacio = document.getElementById('mag-ubicacio').value.trim();
-      AppState.magatzems.push({ id: 'MAG_' + Date.now(), codi, nom, ubicacio });
+      if (id) {
+        const m = AppState.magatzems.find(x => x.id === id);
+        if (m) Object.assign(m, { codi, nom, ubicacio });
+      } else {
+        AppState.magatzems.push({ id: 'MAG_' + Date.now(), codi, nom, ubicacio });
+      }
       saveState(); closeModal('modal-magatzems'); renderAll();
+    }
+
+    function editMagatzem(id) {
+      const m = AppState.magatzems.find(x => x.id === id);
+      if (!m) return;
+      openModal('modal-magatzems');
+      document.getElementById('mag-id').value = m.id;
+      document.getElementById('mag-codi').value = m.codi;
+      document.getElementById('mag-nom').value = m.nom;
+      document.getElementById('mag-ubicacio').value = m.ubicacio || '';
     }
 
     function saveProveidor(e) {
       e.preventDefault();
+      const id = document.getElementById('prov-id').value;
       const codi = document.getElementById('prov-codi').value.trim();
       const dataAlta = document.getElementById('prov-data').value;
       const nom = document.getElementById('prov-nom').value.trim();
-      AppState.proveidors.push({ id: 'PRV_' + Date.now(), codi, dataAlta, nom });
+      const telefon = document.getElementById('prov-telefon').value.trim();
+      const contacte = document.getElementById('prov-contacte').value.trim();
+      const ubicacio = document.getElementById('prov-ubicacio').value.trim();
+      if (id) {
+        const p = AppState.proveidors.find(x => x.id === id);
+        if (p) Object.assign(p, { codi, dataAlta, nom, telefon, contacte, ubicacio });
+      } else {
+        AppState.proveidors.push({ id: 'PRV_' + Date.now(), codi, dataAlta, nom, telefon, contacte, ubicacio });
+      }
       saveState(); closeModal('modal-proveidors'); renderAll();
     }
 
+    function editProveidor(id) {
+      const p = AppState.proveidors.find(x => x.id === id);
+      if (!p) return;
+      openModal('modal-proveidors');
+      document.getElementById('prov-id').value = p.id;
+      document.getElementById('prov-codi').value = p.codi;
+      document.getElementById('prov-data').value = p.dataAlta;
+      document.getElementById('prov-nom').value = p.nom;
+      document.getElementById('prov-telefon').value = p.telefon || '';
+      document.getElementById('prov-contacte').value = p.contacte || '';
+      document.getElementById('prov-ubicacio').value = p.ubicacio || '';
+    }
+
+    // ----------------------------------------------------
+    // MOVIMENTS: CREACIÓ, EDICIÓ I REVERSIÓ D'ESTOC (ROLLBACK)
+    // ----------------------------------------------------
     function toggleMovimentFields() {
       const tipus = document.getElementById('mov-tipus').value;
       document.getElementById('block-mov-existent').classList.toggle('hidden', tipus === 'Estoc Inicial');
@@ -1945,56 +2113,264 @@
     function onMovimentLotChange() {
       const inv = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
       if (!inv) return;
+      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
       document.getElementById('mov-prev-codi').textContent = inv.codi;
       document.getElementById('mov-prev-nom').textContent = inv.vacuna;
       document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(inv.codi, inv.marca);
       document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
+      document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
       document.getElementById('mov-prev-disponible').textContent = inv.disponible;
+    }
+
+    function updateConsumUnitsFromSUM() {
+      const pacs = document.getElementById('mov-sum').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (pacs.length > 0) document.getElementById('mov-unitats').value = pacs.length;
+    }
+
+    // Obre el modal carregant les dades del moviment a editar
+    function editMoviment(id) {
+      const mov = AppState.moviments.find(m => m.id === id);
+      if (!mov) return;
+      openModal('modal-moviments');
+      document.getElementById('modal-moviments-title').textContent = 'Editar Moviment de Vacunes';
+      document.getElementById('mov-id').value = mov.id;
+      document.getElementById('mov-data').value = mov.data;
+      document.getElementById('mov-tipus').value = mov.tipus;
+      document.getElementById('mov-unitats').value = mov.unitats;
+      toggleMovimentFields();
+
+      if (mov.tipus === 'Estoc Inicial') {
+        const cat = AppState.cataleg.find(c => c.codi === mov.codi);
+        if (cat) document.getElementById('mov-ini-vacuna').value = cat.id;
+        document.getElementById('mov-ini-lot').value = mov.lot;
+        document.getElementById('mov-ini-caducitat').value = mov.caducitat;
+        const magDest = AppState.magatzems.find(m => m.nom === mov.destinacio || m.id === mov.destinacio);
+        if (magDest) document.getElementById('mov-destinacio').value = magDest.id;
+      } else {
+        const magOrigen = AppState.magatzems.find(m => m.nom === mov.origen || m.id === mov.origen);
+        const inv = AppState.inventari.find(i => i.lot === mov.lot && i.codi === mov.codi && (!magOrigen || i.magatzemId === magOrigen.id));
+        if (inv) {
+          document.getElementById('mov-lot-select').value = inv.id;
+          onMovimentLotChange();
+        }
+        if (mov.tipus === 'Traspàs') {
+          const magDest = AppState.magatzems.find(m => m.nom === mov.destinacio || m.id === mov.destinacio);
+          if (magDest) document.getElementById('mov-destinacio').value = magDest.id;
+        } else if (mov.tipus === 'Consum') {
+          document.getElementById('mov-sum').value = mov.destinacio || '';
+        }
+      }
+    }
+
+    // Reverteix l'efecte matemàtic d'un moviment sobre l'inventari abans d'editar-lo o esborrar-lo
+    function rollbackMoviment(mov) {
+      const u = Number(mov.unitats) || 0;
+      if (mov.tipus === 'Estoc Inicial') {
+        const magDest = AppState.magatzems.find(m => m.nom === mov.destinacio || m.id === mov.destinacio);
+        const inv = AppState.inventari.find(i => i.lot === mov.lot && i.codi === mov.codi && (!magDest || i.magatzemId === magDest.id));
+        if (inv) inv.disponible = Math.max(0, Number(inv.disponible) - u);
+        const cat = AppState.cataleg.find(c => c.codi === mov.codi);
+        if (cat) cat.inicial = Math.max(0, (Number(cat.inicial) || 0) - u);
+      } else if (mov.tipus === 'Consum') {
+        const magOrigen = AppState.magatzems.find(m => m.nom === mov.origen || m.id === mov.origen);
+        const inv = AppState.inventari.find(i => i.lot === mov.lot && i.codi === mov.codi && (!magOrigen || i.magatzemId === magOrigen.id));
+        if (inv) inv.disponible = Number(inv.disponible) + u;
+      } else if (mov.tipus === 'Traspàs') {
+        const magOrigen = AppState.magatzems.find(m => m.nom === mov.origen || m.id === mov.origen);
+        const magDest = AppState.magatzems.find(m => m.nom === mov.destinacio || m.id === mov.destinacio);
+        if (magOrigen) {
+          const invOrig = AppState.inventari.find(i => i.magatzemId === magOrigen.id && i.lot === mov.lot && i.codi === mov.codi);
+          if (invOrig) invOrig.disponible = Number(invOrig.disponible) + u;
+        }
+        if (magDest) {
+          const invDest = AppState.inventari.find(i => i.magatzemId === magDest.id && i.lot === mov.lot && i.codi === mov.codi);
+          if (invDest) invDest.disponible = Math.max(0, Number(invDest.disponible) - u);
+        }
+      }
+    }
+
+    function deleteMovimentWithRollback(id) {
+      const mov = AppState.moviments.find(m => m.id === id);
+      if (!mov) return;
+      rollbackMoviment(mov);
+      AppState.moviments = AppState.moviments.filter(m => m.id !== id);
+      saveState();
+      renderAll();
+      showToast('Moviment Eliminat', 'S\'ha revertit l\'estoc a l\'inventari.');
     }
 
     function saveMoviment(e) {
       e.preventDefault();
+      const id = document.getElementById('mov-id').value;
       const data = document.getElementById('mov-data').value;
       const tipus = document.getElementById('mov-tipus').value;
       const unitats = Number(document.getElementById('mov-unitats').value);
+
+      // Si estem editant un moviment existent, fem rollback primer
+      let oldMovBackup = null;
+      if (id) {
+        oldMovBackup = AppState.moviments.find(m => m.id === id);
+        if (oldMovBackup) {
+          rollbackMoviment(oldMovBackup);
+        }
+      }
 
       if (tipus === 'Estoc Inicial') {
         const cat = AppState.cataleg.find(c => c.id === document.getElementById('mov-ini-vacuna').value);
         const lot = document.getElementById('mov-ini-lot').value.trim().toUpperCase();
         const caducitat = document.getElementById('mov-ini-caducitat').value;
         const destMagId = document.getElementById('mov-destinacio').value;
-        if (!cat || !lot || !caducitat || !destMagId) return;
+        if (!cat || !lot || !caducitat || !destMagId) {
+          showToast('Error', 'Completa tots els camps d\'Estoc Inicial.', 'error');
+          return;
+        }
+
+        const magDest = AppState.magatzems.find(m => m.id === destMagId);
+        const nomDest = magDest ? magDest.nom : destMagId;
 
         const existent = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === lot && i.codi === cat.codi);
-        if (existent) existent.disponible += unitats;
-        else AppState.inventari.push({ id: 'INV_' + Date.now(), magatzemId: destMagId, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '', lot, caducitat, minim: 10, disponible: unitats });
+        if (existent) existent.disponible = Number(existent.disponible) + unitats;
+        else {
+          AppState.inventari.push({
+            id: 'INV_' + Date.now(), magatzemId: destMagId, codi: cat.codi, vacuna: cat.nom,
+            marca: cat.marca || '', codiProv: cat.codiProv || '', lot, caducitat,
+            minim: Math.round((Number(cat.minim) || 10) / 2), disponible: unitats
+          });
+        }
         cat.inicial = (Number(cat.inicial) || 0) + unitats;
-        AppState.moviments.push({ id: 'MOV_' + Date.now(), data, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '-', tipus: 'Estoc Inicial', origen: 'Càrrega', destinacio: destMagId, lot, caducitat, unitats });
-        saveState(); closeModal('modal-moviments'); renderAll(); return;
+
+        const newRecord = {
+          id: id || ('MOV_' + Date.now()), data, codi: cat.codi, vacuna: cat.nom, marca: cat.marca || '-',
+          tipus: 'Estoc Inicial', origen: 'Càrrega Inicial', destinacio: nomDest, lot, caducitat, unitats
+        };
+
+        if (id) {
+          const idx = AppState.moviments.findIndex(m => m.id === id);
+          if (idx !== -1) AppState.moviments[idx] = newRecord;
+        } else {
+          AppState.moviments.push(newRecord);
+        }
+
+        saveState(); closeModal('modal-moviments'); renderAll();
+        showToast('Moviment Guardat', 'Estoc inicial registrat correctament.');
+        return;
       }
 
       const invOrigen = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
-      if (!invOrigen || unitats > Number(invOrigen.disponible)) return;
+      if (!invOrigen || unitats > Number(invOrigen.disponible)) {
+        showToast('Error', 'Verifica el lot i que hi hagi estoc suficient.', 'error');
+        return;
+      }
+      const magOrigen = AppState.magatzems.find(m => m.id === invOrigen.magatzemId);
+      const nomOrigen = magOrigen ? magOrigen.nom : invOrigen.magatzemId;
+      const marcaOrigen = getMarcaByCodi(invOrigen.codi, invOrigen.marca);
 
-      invOrigen.disponible -= unitats;
-      AppState.moviments.push({ id: 'MOV_' + Date.now(), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: getMarcaByCodi(invOrigen.codi, invOrigen.marca), tipus, origen: invOrigen.magatzemId, destinacio: document.getElementById('mov-sum')?.value || 'Destí', lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats });
+      if (tipus === 'Traspàs') {
+        const destMagId = document.getElementById('mov-destinacio').value;
+        if (!destMagId || destMagId === invOrigen.magatzemId) {
+          showToast('Avís', 'Selecciona un magatzem de destinació diferent a l\'origen.', 'error');
+          return;
+        }
+        const magDest = AppState.magatzems.find(m => m.id === destMagId);
+        const nomDest = magDest ? magDest.nom : destMagId;
+
+        invOrigen.disponible = Number(invOrigen.disponible) - unitats;
+        const invDest = AppState.inventari.find(i => i.magatzemId === destMagId && i.lot === invOrigen.lot && i.codi === invOrigen.codi);
+        if (invDest) invDest.disponible = Number(invDest.disponible) + unitats;
+        else AppState.inventari.push({ ...invOrigen, id: 'INV_' + Date.now(), magatzemId: destMagId, disponible: unitats });
+
+        const newRecord = {
+          id: id || ('MOV_' + Date.now()), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
+          tipus: 'Traspàs', origen: nomOrigen, destinacio: nomDest, lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats
+        };
+
+        if (id) {
+          const idx = AppState.moviments.findIndex(m => m.id === id);
+          if (idx !== -1) AppState.moviments[idx] = newRecord;
+        } else {
+          AppState.moviments.push(newRecord);
+        }
+      } else {
+        const codiSUM = document.getElementById('mov-sum').value.trim() || 'Consum clínic';
+        invOrigen.disponible = Number(invOrigen.disponible) - unitats;
+
+        const newRecord = {
+          id: id || ('MOV_' + Date.now()), data, codi: invOrigen.codi, vacuna: invOrigen.vacuna, marca: marcaOrigen,
+          tipus: 'Consum', origen: nomOrigen, destinacio: codiSUM, lot: invOrigen.lot, caducitat: invOrigen.caducitat, unitats
+        };
+
+        if (id) {
+          const idx = AppState.moviments.findIndex(m => m.id === id);
+          if (idx !== -1) AppState.moviments[idx] = newRecord;
+        } else {
+          AppState.moviments.push(newRecord);
+        }
+      }
+
       saveState(); closeModal('modal-moviments'); renderAll();
+      showToast('Moviment Guardat', id ? 'El moviment s\'ha modificat correctament.' : 'Moviment executat.');
+    }
+
+    function onComandaVacunaChange() {
+      const cat = AppState.cataleg.find(c => c.id === document.getElementById('cmd-vacuna-select').value);
+      if (cat) {
+        document.getElementById('cmd-codivac').value = cat.codi;
+        document.getElementById('cmd-codiprov').value = cat.codiProv || '';
+        document.getElementById('cmd-proveidor').value = cat.proveidor || '';
+      }
     }
 
     function saveComanda(e) {
       e.preventDefault();
+      const id = document.getElementById('cmd-id').value;
       const data = document.getElementById('cmd-data').value;
       const comanda = document.getElementById('cmd-num').value.trim();
       const proveidor = document.getElementById('cmd-proveidor').value;
       const cat = AppState.cataleg.find(c => c.id === document.getElementById('cmd-vacuna-select').value);
       const vacuna = cat ? `${cat.nom} (${cat.marca || ''})` : 'Vacuna';
+      const codiVac = document.getElementById('cmd-codivac').value;
+      const codiProv = document.getElementById('cmd-codiprov').value;
       const unitats = Number(document.getElementById('cmd-unitats').value);
-      AppState.comandes.push({ id: 'CMD_' + Date.now(), data, comanda, proveidor, codiVac: cat?.codi || '', vacuna, unitats, estat: 'Pendent' });
+      const estat = document.getElementById('cmd-estat').value;
+
+      if (id) {
+        const c = AppState.comandes.find(x => x.id === id);
+        if (c) Object.assign(c, { data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat });
+      } else {
+        AppState.comandes.push({ id: 'CMD_' + Date.now(), data, comanda, proveidor, codiVac, vacuna, codiProv, unitats, estat });
+      }
       saveState(); closeModal('modal-comandes'); renderAll();
+    }
+
+    function editComanda(id) {
+      const c = AppState.comandes.find(x => x.id === id);
+      if (!c) return;
+      openModal('modal-comandes');
+      document.getElementById('cmd-id').value = c.id;
+      document.getElementById('cmd-data').value = c.data;
+      document.getElementById('cmd-num').value = c.comanda;
+      document.getElementById('cmd-proveidor').value = c.proveidor;
+      const cat = AppState.cataleg.find(x => x.codi === c.codiVac);
+      if (cat) document.getElementById('cmd-vacuna-select').value = cat.id;
+      document.getElementById('cmd-codivac').value = c.codiVac;
+      document.getElementById('cmd-codiprov').value = c.codiProv || '';
+      document.getElementById('cmd-unitats').value = c.unitats;
+      document.getElementById('cmd-estat').value = c.estat;
+    }
+
+    function onRecepcioComandaChange() {
+      const cmd = AppState.comandes.find(c => c.id === document.getElementById('rec-comanda-select').value);
+      if (cmd) {
+        document.getElementById('rec-proveidor').value = cmd.proveidor;
+        document.getElementById('rec-codi').value = cmd.codiVac;
+        document.getElementById('rec-vacuna').value = cmd.vacuna;
+        document.getElementById('rec-unitats').value = cmd.unitats;
+      }
     }
 
     function saveRecepcio(e) {
       e.preventDefault();
+      const cmdId = document.getElementById('rec-comanda-select').value;
       const codi = document.getElementById('rec-codi').value.trim();
       const vacuna = document.getElementById('rec-vacuna').value.trim();
       const lot = document.getElementById('rec-lot').value.trim().toUpperCase();
@@ -2002,10 +2378,30 @@
       const magatzemId = document.getElementById('rec-magatzem').value;
       const unitats = Number(document.getElementById('rec-unitats').value);
 
+      if (cmdId) {
+        const cmd = AppState.comandes.find(c => c.id === cmdId);
+        if (cmd) cmd.estat = 'Recepcionat';
+      }
       const existent = AppState.inventari.find(i => i.magatzemId === magatzemId && i.lot === lot && i.codi === codi);
-      if (existent) existent.disponible += unitats;
-      else AppState.inventari.push({ id: 'INV_' + Date.now(), magatzemId, codi, vacuna, marca: '', lot, caducitat, minim: 10, disponible: unitats });
+      if (existent) existent.disponible = Number(existent.disponible) + unitats;
+      else {
+        const cat = AppState.cataleg.find(c => c.codi === codi);
+        AppState.inventari.push({
+          id: 'INV_' + Date.now(), magatzemId, codi, vacuna: cat ? cat.nom : vacuna,
+          marca: cat ? (cat.marca || '') : '', codiProv: cat ? cat.codiProv : '', lot, caducitat, minim: 10, disponible: unitats
+        });
+      }
       saveState(); closeModal('modal-recepcio'); renderAll();
+    }
+
+    function onDevolucioLotChange() {
+      const inv = AppState.inventari.find(i => i.id === document.getElementById('dev-lot-select').value);
+      if (!inv) return;
+      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+      document.getElementById('dev-prev-nom').textContent = inv.vacuna;
+      document.getElementById('dev-prev-magatzem').textContent = mag ? mag.nom : inv.magatzemId;
+      document.getElementById('dev-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
+      document.getElementById('dev-prev-disponible').textContent = inv.disponible;
     }
 
     function saveDevolucio(e) {
@@ -2013,12 +2409,37 @@
       const inv = AppState.inventari.find(i => i.id === document.getElementById('dev-lot-select').value);
       const unitats = Number(document.getElementById('dev-unitats').value);
       if (!inv || unitats > Number(inv.disponible)) return;
+      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
       inv.disponible -= unitats;
-      AppState.devolucions.push({ id: 'DEV_' + Date.now(), data: document.getElementById('dev-data').value, numBaixa: document.getElementById('dev-num').value, magatzem: inv.magatzemId, codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot, motiu: document.getElementById('dev-motiu').value, unitats });
+      AppState.devolucions.push({
+        id: 'DEV_' + Date.now(), data: document.getElementById('dev-data').value,
+        numBaixa: document.getElementById('dev-num').value, magatzem: mag ? mag.nom : inv.magatzemId,
+        codi: inv.codi, vacuna: inv.vacuna, lot: inv.lot, motiu: document.getElementById('dev-motiu').value,
+        unitats, proveidor: document.getElementById('dev-proveidor').value
+      });
       saveState(); closeModal('modal-devolucions'); renderAll();
     }
 
     function deleteItem(col, id) { AppState[col] = AppState[col].filter(i => i.id !== id); saveState(); renderAll(); }
+
+    function exportTableToCSV(tableKey, filename) {
+      const table = document.getElementById(`table-${tableKey}`);
+      if (!table) return;
+      let rows = [];
+      table.querySelectorAll('tr').forEach(tr => {
+        let rowData = [];
+        tr.querySelectorAll('th, td').forEach(col => {
+          if (!col.classList.contains('no-print')) rowData.push(`"${col.innerText.replace(/"/g, '""').trim()}"`);
+        });
+        if (rowData.length > 0) rows.push(rowData.join(';'));
+      });
+      const blob = new Blob(["\uFEFF" + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
     function formatDateDMY(iso) { if (!iso) return '-'; const p = iso.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso; }
     function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function showToast(title, message, type = 'success') {
@@ -2030,6 +2451,14 @@
       tIcon.textContent = type === 'error' ? '✕' : type === 'info' ? 'ℹ' : '✓';
       toast.classList.remove('translate-y-24', 'opacity-0');
       setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3500);
+    }
+  </script>
+  <!-- Registre del Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
     }
   </script>
 </body>
