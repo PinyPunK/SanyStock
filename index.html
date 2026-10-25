@@ -10,6 +10,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Llibreria Html5-QRCode per a lectura òptica de QR i codis de barres -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <!-- Llibreria Chart.js per als gràfics estadístics d'Inici -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -136,9 +138,13 @@
 
       </div>
 
-      <!-- Menú de pestanyes principal -->
+      <!-- Menú de pestanyes principal (Amb el nou botó INICI abans de Catàleg) -->
       <nav class="flex space-x-1 sm:space-x-1.5 mt-3 overflow-x-auto pb-1 no-print border-t border-slate-100 pt-2 text-xs sm:text-sm font-medium">
-        <button onclick="switchTab('cataleg')" id="tab-cataleg" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap bg-sky-100 text-sky-900 font-bold">
+        <button onclick="switchTab('inici')" id="tab-inici" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap bg-sky-100 text-sky-900 font-bold">
+          <svg class="w-4 h-4 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+          <span data-i18n="nav_inici">Inici</span>
+        </button>
+        <button onclick="switchTab('cataleg')" id="tab-cataleg" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
           <span data-i18n="nav_cataleg">Catàleg</span>
         </button>
         <button onclick="switchTab('magatzems')" id="tab-magatzems" class="tab-btn px-3 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap text-slate-600 hover:bg-sky-50">
@@ -180,8 +186,98 @@
   <!-- ========================================== -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
 
+    <!-- ========================================== -->
+    <!-- NOVA PESTANYA 0: INICI (DASHBOARD GRÀFICS) -->
+    <!-- ========================================== -->
+    <section id="section-inici" class="tab-content">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div>
+            <h2 data-i18n="title_inici" class="text-xl font-bold text-sky-900">Panell d'Inici: Estadístiques de Vacunació</h2>
+            <p class="text-xs text-slate-500">Percentatge de vacunes subministrades a pacients (Consum clínic) desglossat per mes i per any.</p>
+          </div>
+          <!-- Selectors de Període (Mes i Any) -->
+          <div class="flex flex-wrap items-center gap-3 bg-sky-50/70 p-2.5 rounded-xl border border-sky-100">
+            <div class="flex items-center gap-1.5">
+              <label for="chartMonthSelect" class="text-xs font-bold text-sky-900">Mes:</label>
+              <select id="chartMonthSelect" onchange="renderCharts()" class="bg-white border border-slate-300 text-xs font-semibold text-slate-700 rounded-lg px-2.5 py-1.5">
+                <option value="01">Gener</option>
+                <option value="02">Febrer</option>
+                <option value="03">Març</option>
+                <option value="04">Abril</option>
+                <option value="05">Maig</option>
+                <option value="06">Juny</option>
+                <option value="07">Juliol</option>
+                <option value="08">Agost</option>
+                <option value="09">Setembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Novembre</option>
+                <option value="12">Desembre</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <label for="chartYearSelect" class="text-xs font-bold text-sky-900">Any:</label>
+              <select id="chartYearSelect" onchange="renderCharts()" class="bg-white border border-slate-300 text-xs font-semibold text-slate-700 rounded-lg px-2.5 py-1.5">
+                <!-- Es genera dinàmicament -->
+              </select>
+            </div>
+            <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
+              🖨️ <span data-i18n="btn_print">Imprimir</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Graella amb els 2 Gràfics Estadístics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- GRÀFIC 1: PERCENTATGE MENSUAL -->
+          <div class="bg-slate-50/60 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-bold text-sky-900 uppercase tracking-wider">📊 Vacunes Subministrades per Mes (%)</h3>
+                <span id="monthlyTotalBadge" class="bg-sky-100 text-sky-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0 dosis</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-4">Distribució percentual per nom de vacuna en el mes seleccionat.</p>
+            </div>
+
+            <div class="relative w-full h-64 flex items-center justify-center">
+              <canvas id="monthlyVaccineChart"></canvas>
+              <div id="monthlyChartEmpty" class="hidden text-center text-slate-400 text-xs p-6">
+                No hi ha registres de consum de pacients en aquest mes.<br>
+                <span class="text-[11px]">Registra una sortida de tipus "Consum" a la pestanya Moviments per veure el gràfic.</span>
+              </div>
+            </div>
+
+            <div id="monthlyLegendList" class="mt-4 pt-3 border-t border-slate-200 space-y-1.5 text-xs"></div>
+          </div>
+
+          <!-- GRÀFIC 2: PERCENTATGE ANUAL -->
+          <div class="bg-slate-50/60 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-bold text-teal-900 uppercase tracking-wider">📈 Vacunes Subministrades per Any (%)</h3>
+                <span id="yearlyTotalBadge" class="bg-teal-100 text-teal-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0 dosis</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-4">Distribució percentual acumulada per nom de vacuna durant tot l'any.</p>
+            </div>
+
+            <div class="relative w-full h-64 flex items-center justify-center">
+              <canvas id="yearlyVaccineChart"></canvas>
+              <div id="yearlyChartEmpty" class="hidden text-center text-slate-400 text-xs p-6">
+                No hi ha registres de consum de pacients en aquest any.<br>
+                <span class="text-[11px]">Registra una sortida de tipus "Consum" a la pestanya Moviments per veure el gràfic.</span>
+              </div>
+            </div>
+
+            <div id="yearlyLegendList" class="mt-4 pt-3 border-t border-slate-200 space-y-1.5 text-xs"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- PESTANYA 1: CATÀLEG -->
-    <section id="section-cataleg" class="tab-content">
+    <section id="section-cataleg" class="tab-content hidden">
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
@@ -651,7 +747,6 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <!-- Botó d'Instal·lació Intel·ligent -->
             <div class="bg-sky-50/60 border border-sky-200 p-4 rounded-xl flex items-center justify-between">
               <div>
                 <div class="text-sm font-bold text-sky-950">Instal·lar SanyStock</div>
@@ -662,7 +757,6 @@
               </button>
             </div>
 
-            <!-- Botó de Desinstal·lació de Cache -->
             <div class="bg-rose-50/60 border border-rose-200 p-4 rounded-xl flex items-center justify-between">
               <div>
                 <div class="text-sm font-bold text-rose-950">Desinstal·lar App</div>
@@ -763,7 +857,7 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Codi Vacuna *</label>
             <div class="flex gap-1.5">
-              <input type="text" id="cat-codi" required placeholder="Ex. VAC001" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+              <input type="text" id="cat-codi" required placeholder="Ex. VAC005" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
               <button type="button" onclick="startQRScanner('cat-codi')" class="bg-sky-100 hover:bg-sky-200 text-sky-800 px-3 rounded-xl border border-sky-300 flex items-center justify-center">📷</button>
             </div>
           </div>
@@ -775,11 +869,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Vacuna *</label>
-            <input type="text" id="cat-nom" required placeholder="Ex. Hexavalent" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            <input type="text" id="cat-nom" required placeholder="Ex. Meningococ B" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Nom comercial / Marca *</label>
-            <input type="text" id="cat-marca" required placeholder="Ex. Infanrix Hexa" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
+            <input type="text" id="cat-marca" required placeholder="Ex. Bexsero" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm">
           </div>
         </div>
         <div>
@@ -878,7 +972,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: MOVIMENTS (AMB SUPORT PER A CREAR I EDITAR) -->
+  <!-- MODAL 4: MOVIMENTS (CREAR I EDITAR) -->
   <div id="modal-moviments" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
@@ -886,7 +980,6 @@
         <button onclick="closeModal('modal-moviments')" class="text-white hover:text-sky-200 text-lg font-bold">&times;</button>
       </div>
       <form id="form-moviments" onsubmit="saveMoviment(event)" class="p-6 space-y-4">
-        <!-- Camp ocult per identificar si estem editant un moviment existent -->
         <input type="hidden" id="mov-id">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1185,7 +1278,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- JAVASCRIPT: LÒGICA, CLOUD, PDF, I18N       -->
+  <!-- JAVASCRIPT: LÒGICA, GRÀFICS, CLOUD, PDF    -->
   <!-- ========================================== -->
   <script>
     const translations = {
@@ -1195,6 +1288,7 @@
         today_date: "Data d'Avui",
         status_local: "Mode Local",
         status_cloud: "Núvol Actiu",
+        nav_inici: "Inici",
         nav_cataleg: "Catàleg",
         nav_magatzems: "Magatzems",
         nav_proveidors: "Proveïdors",
@@ -1205,6 +1299,7 @@
         nav_documents: "Documents PDF",
         nav_ajustes: "Ajustes",
         nav_contacte: "Contacte",
+        title_inici: "Panell d'Inici: Estadístiques de Vacunació",
         title_cataleg: "Catàleg General de Vacunes",
         title_magatzems: "Configuració de Magatzems i Neveres",
         title_proveidors: "Directori de Proveïdors i Laboratoris",
@@ -1228,6 +1323,7 @@
         today_date: "Fecha de Hoy",
         status_local: "Modo Local",
         status_cloud: "Nube Activa",
+        nav_inici: "Inicio",
         nav_cataleg: "Catálogo",
         nav_magatzems: "Almacenes",
         nav_proveidors: "Proveedores",
@@ -1238,6 +1334,7 @@
         nav_documents: "Documentos PDF",
         nav_ajustes: "Ajustes",
         nav_contacte: "Contacto",
+        title_inici: "Panel de Inicio: Estadísticas de Vacunación",
         title_cataleg: "Catálogo General de Vacunas",
         title_magatzems: "Configuración de Almacenes y Neveras",
         title_proveidors: "Directorio de Proveedores y Laboratorios",
@@ -1261,6 +1358,7 @@
         today_date: "Today's Date",
         status_local: "Local Mode",
         status_cloud: "Cloud Active",
+        nav_inici: "Home",
         nav_cataleg: "Catalog",
         nav_magatzems: "Warehouses",
         nav_proveidors: "Suppliers",
@@ -1271,6 +1369,7 @@
         nav_documents: "PDF Documents",
         nav_ajustes: "Settings",
         nav_contacte: "Contact",
+        title_inici: "Home Dashboard: Vaccination Statistics",
         title_cataleg: "General Vaccine Catalog",
         title_magatzems: "Warehouses & Fridges Setup",
         title_proveidors: "Suppliers & Laboratories Directory",
@@ -1316,6 +1415,7 @@
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle('dark-mode');
       localStorage.setItem('SANYS_DARK', isDark ? '1' : '0');
+      renderCharts();
       showToast('Aparença Actualitzada', isDark ? 'Mode Fosc activat.' : 'Mode Clar activat.', 'info');
     }
 
@@ -1325,6 +1425,7 @@
       }
     }
 
+    // Dades per defecte (SENSE les vacunes de prova VAC001, VAC003 ni VAC004)
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -1336,12 +1437,10 @@
         { id: 'PRV3', codi: 'PFZ-03', nom: 'Pfizer Salut', dataAlta: '2025-03-01', telefon: '915 900 800', contacte: 'Clara Pons', ubicacio: 'Alcobendas, Madrid' }
       ],
       cataleg: [
-        { id: 'CAT1', codi: 'VAC001', nom: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', proveidor: 'GlaxoSmithKline (GSK)', minim: 30, inicial: 100 },
         { id: 'CAT2', codi: 'VAC002', nom: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 }
       ],
       inventari: [
-        { id: 'INV1', magatzemId: 'MAG1', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 20, disponible: 45 },
-        { id: 'INV2', magatzemId: 'MAG2', codi: 'VAC001', vacuna: 'Hexavalent', marca: 'Infanrix Hexa', codiProv: 'GSK-INF6', lot: '23K88B', caducitat: '2027-04-30', minim: 10, disponible: 15 }
+        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 }
       ],
       moviments: [],
       comandes: [],
@@ -1351,6 +1450,22 @@
 
     let AppState = {};
 
+    // Funció que elimina automàticament les vacunes de prova VAC001, VAC003 i VAC004 de l'inventari general
+    function purgeTestVaccines() {
+      const testCodes = ['VAC001', 'VAC003', 'VAC004'];
+      let modified = false;
+
+      if (Array.isArray(AppState.inventari)) {
+        const prevLen = AppState.inventari.length;
+        AppState.inventari = AppState.inventari.filter(inv => !testCodes.includes((inv.codi || '').toUpperCase()));
+        if (AppState.inventari.length !== prevLen) modified = true;
+      }
+
+      if (modified) {
+        localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
+      }
+    }
+
     function loadState() {
       try {
         const stored = localStorage.getItem('SANYS_DATA_v1');
@@ -1358,6 +1473,7 @@
       } catch (e) {
         AppState = JSON.parse(JSON.stringify(defaultData));
       }
+      purgeTestVaccines();
     }
 
     function saveState() {
@@ -1373,6 +1489,176 @@
       }
     });
 
+    // ----------------------------------------------------
+    // SISTEMA DE GRÀFICS ESTADÍSTICS D'INICI (CHART.JS)
+    // ----------------------------------------------------
+    let monthlyChartInstance = null;
+    let yearlyChartInstance = null;
+
+    const chartPalette = [
+      '#0284c7', '#0d9488', '#6366f1', '#f59e0b', '#ec4899',
+      '#10b981', '#8b5cf6', '#ef4444', '#06b6d4', '#84cc16'
+    ];
+
+    function initChartSelectors() {
+      const now = new Date();
+      const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+      const currentYear = String(now.getFullYear());
+
+      const monthSelect = document.getElementById('chartMonthSelect');
+      if (monthSelect) monthSelect.value = currentMonth;
+
+      const yearSelect = document.getElementById('chartYearSelect');
+      if (yearSelect) {
+        const years = new Set([currentYear, '2025', '2026', '2027']);
+        (AppState.moviments || []).forEach(m => {
+          if (m.data && m.data.length >= 4) years.add(m.data.substring(0, 4));
+        });
+        const sortedYears = Array.from(years).sort().reverse();
+        yearSelect.innerHTML = sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+        yearSelect.value = currentYear;
+      }
+    }
+
+    function renderCharts() {
+      const selectedMonth = document.getElementById('chartMonthSelect')?.value || '10';
+      const selectedYear = document.getElementById('chartYearSelect')?.value || '2026';
+
+      // Filtrem únicament els moviments que són subministraments a pacients (Consum)
+      const consumMovements = (AppState.moviments || []).filter(m => m.tipus === 'Consum' && m.data);
+
+      // 1. Dades Mensuals (Any + Mes seleccionat)
+      const monthPrefix = `${selectedYear}-${selectedMonth}`;
+      const monthlyCounts = {};
+      let monthlyTotal = 0;
+
+      consumMovements.forEach(m => {
+        if (m.data.startsWith(monthPrefix)) {
+          const vacName = m.vacuna || m.codi || 'Vacuna';
+          const units = Number(m.unitats) || 0;
+          monthlyCounts[vacName] = (monthlyCounts[vacName] || 0) + units;
+          monthlyTotal += units;
+        }
+      });
+
+      // 2. Dades Anuals (Tot l'any seleccionat)
+      const yearlyCounts = {};
+      let yearlyTotal = 0;
+
+      consumMovements.forEach(m => {
+        if (m.data.startsWith(selectedYear)) {
+          const vacName = m.vacuna || m.codi || 'Vacuna';
+          const units = Number(m.unitats) || 0;
+          yearlyCounts[vacName] = (yearlyCounts[vacName] || 0) + units;
+          yearlyTotal += units;
+        }
+      });
+
+      document.getElementById('monthlyTotalBadge').textContent = `${monthlyTotal} dosis`;
+      document.getElementById('yearlyTotalBadge').textContent = `${yearlyTotal} dosis`;
+
+      drawSingleDonutChart(
+        'monthlyVaccineChart',
+        'monthlyChartEmpty',
+        'monthlyLegendList',
+        monthlyCounts,
+        monthlyTotal,
+        true
+      );
+
+      drawSingleDonutChart(
+        'yearlyVaccineChart',
+        'yearlyChartEmpty',
+        'yearlyLegendList',
+        yearlyCounts,
+        yearlyTotal,
+        false
+      );
+    }
+
+    function drawSingleDonutChart(canvasId, emptyId, legendId, countsObj, totalUnits, isMonthly) {
+      const canvas = document.getElementById(canvasId);
+      const emptyBox = document.getElementById(emptyId);
+      const legendBox = document.getElementById(legendId);
+      if (!canvas || !emptyBox || !legendBox) return;
+
+      const labels = Object.keys(countsObj);
+      if (labels.length === 0 || totalUnits === 0) {
+        canvas.classList.add('hidden');
+        emptyBox.classList.remove('hidden');
+        legendBox.innerHTML = '';
+        if (isMonthly && monthlyChartInstance) { monthlyChartInstance.destroy(); monthlyChartInstance = null; }
+        if (!isMonthly && yearlyChartInstance) { yearlyChartInstance.destroy(); yearlyChartInstance = null; }
+        return;
+      }
+
+      canvas.classList.remove('hidden');
+      emptyBox.classList.add('hidden');
+
+      const percentages = labels.map(label => Number(((countsObj[label] / totalUnits) * 100).toFixed(1)));
+      const bgColors = labels.map((_, i) => chartPalette[i % chartPalette.length]);
+
+      if (isMonthly && monthlyChartInstance) monthlyChartInstance.destroy();
+      if (!isMonthly && yearlyChartInstance) yearlyChartInstance.destroy();
+
+      const isDark = document.body.classList.contains('dark-mode');
+      const textColor = isDark ? '#f1f5f9' : '#334155';
+
+      const newChart = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: percentages,
+            backgroundColor: bgColors,
+            borderWidth: 2,
+            borderColor: isDark ? '#1e293b' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: textColor, font: { size: 11, weight: 'bold' } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const vacName = ctx.label;
+                  const pct = ctx.parsed;
+                  const rawUnits = countsObj[vacName];
+                  return ` ${vacName}: ${pct}% (${rawUnits} dosis)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (isMonthly) monthlyChartInstance = newChart;
+      else yearlyChartInstance = newChart;
+
+      // Llista resum amb percentatge exacte i unitats a sota del gràfic
+      legendBox.innerHTML = labels.map((name, idx) => {
+        const pct = ((countsObj[name] / totalUnits) * 100).toFixed(1);
+        const color = bgColors[idx];
+        return `
+          <div class="flex items-center justify-between py-1 px-2 rounded-lg bg-white border border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full inline-block" style="background-color: ${color}"></span>
+              <span class="font-semibold text-slate-700">${escapeHtml(name)}</span>
+            </div>
+            <div class="font-bold text-sky-900">${pct}% <span class="text-slate-400 font-normal">(${countsObj[name]} uts.)</span></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ----------------------------------------------------
+    // CONECTOR CLOUD MULTI-DISPOSITIU
+    // ----------------------------------------------------
     function formatCloudUrl(rawInput) {
       let clean = (rawInput || '').trim();
       if (!clean) return '';
@@ -1478,6 +1764,7 @@
         const remoteState = data.record || data;
         if (remoteState && Array.isArray(remoteState.cataleg)) {
           AppState = remoteState;
+          purgeTestVaccines();
           localStorage.setItem('SANYS_DATA_v1', JSON.stringify(AppState));
           updateCloudBadge();
           renderAll();
@@ -1554,6 +1841,7 @@
           const imported = JSON.parse(e.target.result);
           if (imported && imported.cataleg) {
             AppState = imported;
+            purgeTestVaccines();
             saveState();
             renderAll();
             showToast('Restaurat', 'Dades restablertes correctament.');
@@ -1725,6 +2013,7 @@
       initTheme();
       loadState();
       initPdfDatabase();
+      initChartSelectors();
       changeLanguage(currentLang);
       updateCloudBadge();
       populateDropdowns();
@@ -1752,13 +2041,21 @@
       });
       document.getElementById(`section-${tabId}`).classList.remove('hidden');
       document.getElementById(`tab-${tabId}`).classList.add('bg-sky-100', 'text-sky-900', 'font-bold');
+      if (tabId === 'inici') renderCharts();
       if (tabId === 'inventari') renderInventari();
       if (tabId === 'documents') renderPdfDocuments();
     }
 
     function renderAll() {
-      renderCataleg(); renderMagatzems(); renderProveidors();
-      renderMoviments(); renderComandes(); renderDevolucions(); renderInventari(); populateDropdowns();
+      renderCharts();
+      renderCataleg();
+      renderMagatzems();
+      renderProveidors();
+      renderMoviments();
+      renderComandes();
+      renderDevolucions();
+      renderInventari();
+      populateDropdowns();
     }
 
     function renderCataleg() {
@@ -1826,7 +2123,6 @@
       });
     }
 
-    // TAULA DE MOVIMENTS AMB BOTÓ D'EDITAR I ESBORRAR AMB REVERSIÓ D'ESTOC
     function renderMoviments() {
       const tbody = document.getElementById('tbody-moviments');
       tbody.innerHTML = '';
@@ -2099,9 +2395,6 @@
       document.getElementById('prov-ubicacio').value = p.ubicacio || '';
     }
 
-    // ----------------------------------------------------
-    // MOVIMENTS: CREACIÓ, EDICIÓ I REVERSIÓ D'ESTOC (ROLLBACK)
-    // ----------------------------------------------------
     function toggleMovimentFields() {
       const tipus = document.getElementById('mov-tipus').value;
       document.getElementById('block-mov-existent').classList.toggle('hidden', tipus === 'Estoc Inicial');
@@ -2127,7 +2420,6 @@
       if (pacs.length > 0) document.getElementById('mov-unitats').value = pacs.length;
     }
 
-    // Obre el modal carregant les dades del moviment a editar
     function editMoviment(id) {
       const mov = AppState.moviments.find(m => m.id === id);
       if (!mov) return;
@@ -2162,7 +2454,6 @@
       }
     }
 
-    // Reverteix l'efecte matemàtic d'un moviment sobre l'inventari abans d'editar-lo o esborrar-lo
     function rollbackMoviment(mov) {
       const u = Number(mov.unitats) || 0;
       if (mov.tipus === 'Estoc Inicial') {
@@ -2206,13 +2497,9 @@
       const tipus = document.getElementById('mov-tipus').value;
       const unitats = Number(document.getElementById('mov-unitats').value);
 
-      // Si estem editant un moviment existent, fem rollback primer
-      let oldMovBackup = null;
       if (id) {
-        oldMovBackup = AppState.moviments.find(m => m.id === id);
-        if (oldMovBackup) {
-          rollbackMoviment(oldMovBackup);
-        }
+        const oldMovBackup = AppState.moviments.find(m => m.id === id);
+        if (oldMovBackup) rollbackMoviment(oldMovBackup);
       }
 
       if (tipus === 'Estoc Inicial') {
@@ -2251,7 +2538,7 @@
           AppState.moviments.push(newRecord);
         }
 
-        saveState(); closeModal('modal-moviments'); renderAll();
+        saveState(); initChartSelectors(); closeModal('modal-moviments'); renderAll();
         showToast('Moviment Guardat', 'Estoc inicial registrat correctament.');
         return;
       }
@@ -2307,7 +2594,7 @@
         }
       }
 
-      saveState(); closeModal('modal-moviments'); renderAll();
+      saveState(); initChartSelectors(); closeModal('modal-moviments'); renderAll();
       showToast('Moviment Guardat', id ? 'El moviment s\'ha modificat correctament.' : 'Moviment executat.');
     }
 
