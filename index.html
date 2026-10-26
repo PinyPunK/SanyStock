@@ -59,7 +59,6 @@
         border-bottom: 2px solid #0284c7 !important;
         margin-bottom: 10px !important;
       }
-      /* Desbloqueja el contenidor perquè cap columna quedi oculta */
       .table-container {
         overflow: visible !important;
         border: none !important;
@@ -1475,6 +1474,7 @@
       }
     }
 
+    // Dades per defecte (SENSE cap vacuna demo: ni VAC001, ni VAC002, ni VAC003, ni VAC004)
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -1485,12 +1485,8 @@
         { id: 'PRV2', codi: 'SNF-02', nom: 'Sanofi Pasteur', dataAlta: '2025-02-10', telefon: '938 222 333', contacte: 'Jordi Riera', ubicacio: 'Carrer Josep Pla, Barcelona' },
         { id: 'PRV3', codi: 'PFZ-03', nom: 'Pfizer Salut', dataAlta: '2025-03-01', telefon: '915 900 800', contacte: 'Clara Pons', ubicacio: 'Alcobendas, Madrid' }
       ],
-      cataleg: [
-        { id: 'CAT2', codi: 'VAC002', nom: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', proveidor: 'Pfizer Salut', minim: 25, inicial: 80 }
-      ],
-      inventari: [
-        { id: 'INV3', magatzemId: 'MAG1', codi: 'VAC002', vacuna: 'Pneumococ Conjugada', marca: 'Prevenar 20', codiProv: 'PFZ-P20', lot: 'PF9021', caducitat: '2026-12-15', minim: 15, disponible: 8 }
-      ],
+      cataleg: [],
+      inventari: [],
       moviments: [],
       comandes: [],
       devolucions: [],
@@ -1499,14 +1495,21 @@
 
     let AppState = {};
 
+    // Funció de neteja automàtica que elimina VAC001, VAC002, VAC003 i VAC004 d'Inventari i Catàleg
     function purgeTestVaccines() {
-      const testCodes = ['VAC001', 'VAC003', 'VAC004'];
+      const testCodes = ['VAC001', 'VAC002', 'VAC003', 'VAC004'];
       let modified = false;
 
       if (Array.isArray(AppState.inventari)) {
         const prevLen = AppState.inventari.length;
         AppState.inventari = AppState.inventari.filter(inv => !testCodes.includes((inv.codi || '').toUpperCase()));
         if (AppState.inventari.length !== prevLen) modified = true;
+      }
+
+      if (Array.isArray(AppState.cataleg)) {
+        const prevCatLen = AppState.cataleg.length;
+        AppState.cataleg = AppState.cataleg.filter(cat => !testCodes.includes((cat.codi || '').toUpperCase()));
+        if (AppState.cataleg.length !== prevCatLen) modified = true;
       }
 
       if (modified) {
@@ -2270,6 +2273,11 @@
       document.getElementById('kpi-total-unitats').textContent = totalDosis;
       document.getElementById('kpi-alerta-estoc').textContent = alertesEstoc;
       document.getElementById('kpi-caducitat-propera').textContent = caducitatsProperes;
+
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No hi ha estoc registrat per al filtre seleccionat.</td></tr>`;
+        return;
+      }
 
       items.forEach(inv => {
         const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
