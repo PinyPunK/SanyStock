@@ -1021,7 +1021,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: MOVIMENTS (CREAR I EDITAR) -->
+  <!-- MODAL 4: MOVIMENTS (AMB CAMP MANUAL/QR DE LOT I SELECTOR DE MAGATZEM D'ORIGEN) -->
   <div id="modal-moviments" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-sky-100 overflow-hidden">
       <div class="bg-sky-700 px-6 py-4 flex items-center justify-between text-white">
@@ -1030,6 +1030,8 @@
       </div>
       <form id="form-moviments" onsubmit="saveMoviment(event)" class="p-6 space-y-4">
         <input type="hidden" id="mov-id">
+        <!-- Guarda internament l'ID del registre d'inventari reconegut pel lot -->
+        <input type="hidden" id="mov-selected-inv-id">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -1046,16 +1048,36 @@
           </div>
         </div>
 
+        <!-- BLOC PER A TRASPÀS I CONSUM: Magatzem Origen + Escriptura/QR de Lot amb Autocompletat -->
         <div id="block-mov-existent" class="space-y-4">
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-semibold text-slate-700">Seleccionar Lot disponible en Inventari *</label>
-              <button type="button" onclick="startQRScanner('mov-lot')" class="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 py-1 rounded-lg border border-sky-300">📷 Escanejar QR</button>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Magatzem / Nevera d'Origen *</label>
+              <select id="mov-origen-magatzem" onchange="onMovimentOrigenMagatzemChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-white">
+                <!-- Es carrega dinàmicament -->
+              </select>
             </div>
-            <select id="mov-lot-select" onchange="onMovimentLotChange()" class="w-full rounded-xl border-slate-300 border p-2.5 text-sm bg-sky-50/50"></select>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Escriure Lot o Escanejar QR *</label>
+              <div class="flex gap-1.5">
+                <input 
+                  type="text" 
+                  id="mov-lot-input" 
+                  list="datalist-lots" 
+                  oninput="onMovimentLotInput()" 
+                  placeholder="Escriu el lot..." 
+                  autocomplete="off"
+                  class="w-full rounded-xl border-slate-300 border p-2.5 text-sm font-semibold uppercase bg-sky-50/40 focus:bg-white"
+                >
+                <datalist id="datalist-lots"></datalist>
+                <button type="button" onclick="startQRScanner('mov-lot')" title="Escanejar QR del Lot" class="bg-sky-100 hover:bg-sky-200 text-sky-800 px-3 rounded-xl border border-sky-300 flex items-center justify-center transition">
+                  📷
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl text-xs border border-slate-200/80">
             <div><span class="text-slate-500 block">Codi:</span><span id="mov-prev-codi" class="font-semibold">-</span></div>
             <div><span class="text-slate-500 block">Vacuna:</span><span id="mov-prev-nom" class="font-semibold">-</span></div>
             <div><span class="text-slate-500 block">Marca:</span><span id="mov-prev-marca" class="font-semibold text-teal-700">-</span></div>
@@ -1065,6 +1087,7 @@
           </div>
         </div>
 
+        <!-- BLOC PER A ESTOC INICIAL -->
         <div id="block-mov-inicial" class="hidden space-y-4 bg-teal-50/40 p-3.5 rounded-xl border border-teal-100">
           <div>
             <div class="flex items-center justify-between mb-1">
@@ -1474,7 +1497,6 @@
       }
     }
 
-    // Dades per defecte (SENSE cap vacuna demo: ni VAC001, ni VAC002, ni VAC003, ni VAC004)
     const defaultData = {
       magatzems: [
         { id: 'MAG1', codi: 'MAG01', nom: 'Magatzem 1 - Nevera Principal Farmàcia', ubicacio: 'Edifici Central - Planta 0' },
@@ -1495,7 +1517,6 @@
 
     let AppState = {};
 
-    // Funció de neteja automàtica que elimina VAC001, VAC002, VAC003 i VAC004 d'Inventari i Catàleg
     function purgeTestVaccines() {
       const testCodes = ['VAC001', 'VAC002', 'VAC003', 'VAC004'];
       let modified = false;
@@ -2026,8 +2047,8 @@
       const clean = code.toUpperCase();
       if (currentQrTarget === 'cat-codi') document.getElementById('cat-codi').value = clean;
       else if (currentQrTarget === 'mov-lot') {
-        const inv = AppState.inventari.find(i => i.lot.toUpperCase() === clean || i.codi.toUpperCase() === clean);
-        if (inv) { document.getElementById('mov-lot-select').value = inv.id; onMovimentLotChange(); }
+        document.getElementById('mov-lot-input').value = clean;
+        onMovimentLotInput();
       }
       else if (currentQrTarget === 'mov-ini-vacuna') {
         const foundCat = AppState.cataleg.find(c => c.codi.toUpperCase() === clean);
@@ -2295,7 +2316,7 @@
         if (val) s.value = val;
       });
 
-      ['mov-destinacio', 'rec-magatzem'].forEach(id => {
+      ['mov-origen-magatzem', 'mov-destinacio', 'rec-magatzem'].forEach(id => {
         const s = document.getElementById(id);
         if (!s) return;
         const val = s.value;
@@ -2321,16 +2342,18 @@
         if (val) s.value = val;
       });
 
-      ['mov-lot-select', 'dev-lot-select'].forEach(id => {
-        const s = document.getElementById(id);
-        if (!s) return;
-        s.innerHTML = '<option value="">-- Selecciona un Lot --</option>';
+      // Llista de suggeriments d'autocompletat per al camp de text de Lot a Moviments
+      updateMovimentLotsDatalist();
+
+      const devLotSelect = document.getElementById('dev-lot-select');
+      if (devLotSelect) {
+        devLotSelect.innerHTML = '<option value="">-- Selecciona un Lot --</option>';
         AppState.inventari.forEach(inv => {
           const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
           const nomMag = mag ? mag.nom : inv.magatzemId;
-          s.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} | ${escapeHtml(nomMag)} (Disp: ${inv.disponible})</option>`;
+          devLotSelect.innerHTML += `<option value="${inv.id}">Lot: ${escapeHtml(inv.lot)} | ${escapeHtml(inv.vacuna)} | ${escapeHtml(nomMag)} (Disp: ${inv.disponible})</option>`;
         });
-      });
+      }
 
       const recCmdSelect = document.getElementById('rec-comanda-select');
       if (recCmdSelect) {
@@ -2339,11 +2362,34 @@
       }
     }
 
+    // Actualitza els suggeriments d'autocompletat (<datalist>) segons el magatzem d'origen triat
+    function updateMovimentLotsDatalist() {
+      const datalist = document.getElementById('datalist-lots');
+      if (!datalist) return;
+      const selectedMagId = document.getElementById('mov-origen-magatzem')?.value || '';
+      datalist.innerHTML = '';
+
+      let list = AppState.inventari;
+      if (selectedMagId) {
+        list = list.filter(i => i.magatzemId === selectedMagId);
+      }
+
+      list.forEach(inv => {
+        const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
+        const nomMag = mag ? mag.nom : inv.magatzemId;
+        const opt = document.createElement('option');
+        opt.value = inv.lot;
+        opt.label = `${inv.vacuna} (${getMarcaByCodi(inv.codi, inv.marca)}) - ${nomMag} [Disp: ${inv.disponible}]`;
+        datalist.appendChild(opt);
+      });
+    }
+
     function openModal(id) {
       document.getElementById(id).classList.remove('hidden');
       populateDropdowns();
       if (id === 'modal-moviments') {
         document.getElementById('modal-moviments-title').textContent = 'Nou Moviment de Vacunes';
+        clearMovimentPreview();
         toggleMovimentFields();
       }
     }
@@ -2354,6 +2400,10 @@
       if (form) form.reset();
       const hiddenId = form ? form.querySelector('input[type="hidden"]') : null;
       if (hiddenId) hiddenId.value = '';
+      if (id === 'modal-moviments') {
+        document.getElementById('mov-selected-inv-id').value = '';
+        clearMovimentPreview();
+      }
     }
 
     function saveCataleg(e) {
@@ -2447,6 +2497,9 @@
       document.getElementById('prov-ubicacio').value = p.ubicacio || '';
     }
 
+    // ----------------------------------------------------
+    // MOVIMENTS: AUTOCOMPLETAT PER LOT MANUAL / QR I MAGATZEM
+    // ----------------------------------------------------
     function toggleMovimentFields() {
       const tipus = document.getElementById('mov-tipus').value;
       document.getElementById('block-mov-existent').classList.toggle('hidden', tipus === 'Estoc Inicial');
@@ -2455,16 +2508,64 @@
       document.getElementById('field-mov-consum').classList.toggle('hidden', tipus !== 'Consum');
     }
 
-    function onMovimentLotChange() {
-      const inv = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
-      if (!inv) return;
-      const mag = AppState.magatzems.find(m => m.id === inv.magatzemId);
-      document.getElementById('mov-prev-codi').textContent = inv.codi;
-      document.getElementById('mov-prev-nom').textContent = inv.vacuna;
-      document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(inv.codi, inv.marca);
-      document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(inv.caducitat);
-      document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : inv.magatzemId;
-      document.getElementById('mov-prev-disponible').textContent = inv.disponible;
+    function clearMovimentPreview() {
+      document.getElementById('mov-selected-inv-id').value = '';
+      document.getElementById('mov-prev-codi').textContent = '-';
+      document.getElementById('mov-prev-nom').textContent = '-';
+      document.getElementById('mov-prev-marca').textContent = '-';
+      document.getElementById('mov-prev-caducitat').textContent = '-';
+      document.getElementById('mov-prev-origen').textContent = '-';
+      document.getElementById('mov-prev-disponible').textContent = '0';
+    }
+
+    // Quan l'usuari canvia el magatzem d'origen, actualitzem els suggeriments i revalidem el lot escrit
+    function onMovimentOrigenMagatzemChange() {
+      updateMovimentLotsDatalist();
+      onMovimentLotInput();
+    }
+
+    // Quan l'usuari escriu el lot manualment o l'escaneja amb el QR, autocompleta les dades
+    function onMovimentLotInput() {
+      const rawLot = (document.getElementById('mov-lot-input')?.value || '').trim().toUpperCase();
+      const selectedMagId = document.getElementById('mov-origen-magatzem')?.value || '';
+
+      if (!rawLot) {
+        clearMovimentPreview();
+        return;
+      }
+
+      // 1. Busquem coincidència exacta de Lot (o Codi) filtrant pel magatzem d'origen si ja s'ha triat
+      let foundInv = AppState.inventari.find(i =>
+        (i.lot.toUpperCase() === rawLot || i.codi.toUpperCase() === rawLot) &&
+        (!selectedMagId || i.magatzemId === selectedMagId)
+      );
+
+      // 2. Si l'usuari tenia un altre magatzem seleccionat però aquest lot és d'una altra nevera, el busquem globalment
+      if (!foundInv) {
+        foundInv = AppState.inventari.find(i =>
+          i.lot.toUpperCase() === rawLot || i.codi.toUpperCase() === rawLot
+        );
+      }
+
+      if (foundInv) {
+        document.getElementById('mov-selected-inv-id').value = foundInv.id;
+        // Seleccionem automàticament el magatzem d'origen corresponent a aquest lot
+        const magSelect = document.getElementById('mov-origen-magatzem');
+        if (magSelect && magSelect.value !== foundInv.magatzemId) {
+          magSelect.value = foundInv.magatzemId;
+          updateMovimentLotsDatalist();
+        }
+
+        const mag = AppState.magatzems.find(m => m.id === foundInv.magatzemId);
+        document.getElementById('mov-prev-codi').textContent = foundInv.codi;
+        document.getElementById('mov-prev-nom').textContent = foundInv.vacuna;
+        document.getElementById('mov-prev-marca').textContent = getMarcaByCodi(foundInv.codi, foundInv.marca);
+        document.getElementById('mov-prev-caducitat').textContent = formatDateDMY(foundInv.caducitat);
+        document.getElementById('mov-prev-origen').textContent = mag ? mag.nom : foundInv.magatzemId;
+        document.getElementById('mov-prev-disponible').textContent = foundInv.disponible;
+      } else {
+        clearMovimentPreview();
+      }
     }
 
     function updateConsumUnitsFromSUM() {
@@ -2492,11 +2593,13 @@
         if (magDest) document.getElementById('mov-destinacio').value = magDest.id;
       } else {
         const magOrigen = AppState.magatzems.find(m => m.nom === mov.origen || m.id === mov.origen);
-        const inv = AppState.inventari.find(i => i.lot === mov.lot && i.codi === mov.codi && (!magOrigen || i.magatzemId === magOrigen.id));
-        if (inv) {
-          document.getElementById('mov-lot-select').value = inv.id;
-          onMovimentLotChange();
+        if (magOrigen) {
+          document.getElementById('mov-origen-magatzem').value = magOrigen.id;
+          updateMovimentLotsDatalist();
         }
+        document.getElementById('mov-lot-input').value = mov.lot;
+        onMovimentLotInput();
+
         if (mov.tipus === 'Traspàs') {
           const magDest = AppState.magatzems.find(m => m.nom === mov.destinacio || m.id === mov.destinacio);
           if (magDest) document.getElementById('mov-destinacio').value = magDest.id;
@@ -2595,11 +2698,21 @@
         return;
       }
 
-      const invOrigen = AppState.inventari.find(i => i.id === document.getElementById('mov-lot-select').value);
-      if (!invOrigen || unitats > Number(invOrigen.disponible)) {
-        showToast('Error', 'Verifica el lot i que hi hagi estoc suficient.', 'error');
+      // Assegurem que el lot escrit s'hagi validat abans de desar
+      onMovimentLotInput();
+      const selectedInvId = document.getElementById('mov-selected-inv-id').value;
+      const invOrigen = AppState.inventari.find(i => i.id === selectedInvId);
+
+      if (!invOrigen) {
+        showToast('Lot no reconegut', 'Escriu o escaneja un número de lot vàlid que existeixi a l\'inventari.', 'error');
         return;
       }
+
+      if (unitats > Number(invOrigen.disponible)) {
+        showToast('Estoc Insuficient', `Només hi ha ${invOrigen.disponible} unitats disponibles en aquest lot.`, 'error');
+        return;
+      }
+
       const magOrigen = AppState.magatzems.find(m => m.id === invOrigen.magatzemId);
       const nomOrigen = magOrigen ? magOrigen.nom : invOrigen.magatzemId;
       const marcaOrigen = getMarcaByCodi(invOrigen.codi, invOrigen.marca);
